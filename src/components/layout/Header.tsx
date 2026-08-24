@@ -191,10 +191,28 @@ function HeaderContent() {
               </span>
             </button>
 
+            {/* RFQ Portal */}
+            <Link
+              href="/dashboard/quotes"
+              className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold uppercase tracking-wider transition-colors"
+              title="My Wholesale Quote Requests"
+            >
+              <span>RFQs</span>
+            </Link>
+
+            {/* Admin Portal */}
+            <Link
+              href="/admin/products"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold uppercase tracking-wider transition-colors shadow-xs"
+              title="Admin Dashboard"
+            >
+              <span>Admin</span>
+            </Link>
+
             {/* Cart */}
             <button 
               type="button"
-              className="relative flex items-center justify-center h-10 w-10 rounded-full border border-white/20 hover:bg-white/10 transition-colors press-feedback focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none" 
+              className="relative flex items-center justify-center h-10 w-10 rounded-full border border-white/20 hover:bg-white/10 transition-colors press-feedback focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none cursor-pointer" 
               aria-label="Shopping Cart"
               onClick={() => setIsCartOpen(true)}
             >
@@ -209,7 +227,7 @@ function HeaderContent() {
             {/* Account */}
             <button 
               type="button"
-              className="flex items-center justify-center h-10 w-10 rounded-full border border-white/20 hover:bg-white/10 transition-colors press-feedback focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none" 
+              className="flex items-center justify-center h-10 w-10 rounded-full border border-white/20 hover:bg-white/10 transition-colors press-feedback focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none cursor-pointer" 
               aria-label="Account / Sign In"
               onClick={openSignIn}
             >
@@ -335,8 +353,35 @@ function HeaderContent() {
 
           {/* Mobile Utilities */}
           <div className="mt-8 flex flex-col gap-5 pt-4">
-            <h3 className="text-xs text-white/50 uppercase tracking-widest font-bold mb-2">Settings & Account</h3>
-            
+            <Link
+              href="/admin/products"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30"
+            >
+              <div className="flex items-center gap-3">
+                <span className="font-bold text-sm">B2B Admin Dashboard</span>
+              </div>
+              <span className="text-[10px] uppercase font-bold tracking-wider bg-amber-500 text-slate-950 px-2 py-0.5 rounded">Admin</span>
+            </Link>
+
+            <Link
+              href="/rfq"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center justify-between py-2 text-white/90 hover:text-white"
+            >
+              <span className="font-semibold text-sm">Request Wholesale Quote (RFQ)</span>
+              <span className="text-xs text-white/50 uppercase font-bold tracking-wider">New</span>
+            </Link>
+
+            <Link
+              href="/dashboard/quotes"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center justify-between py-2 text-white/90 hover:text-white"
+            >
+              <span className="font-semibold text-sm">My Quote Requests</span>
+              <span className="text-xs text-white/50 uppercase font-bold tracking-wider">Track</span>
+            </Link>
+
             <button 
               type="button"
               className="flex items-center justify-between py-2 text-white/90"

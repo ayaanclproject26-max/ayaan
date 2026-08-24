@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CartProvider } from "@/lib/CartContext";
+import { RfqProvider } from "@/lib/RfqContext";
 import { ProductModalProvider } from "@/lib/ProductModalContext";
 import { PreferencesProvider } from "@/lib/PreferencesContext";
 import Header from "@/components/layout/Header";
@@ -31,13 +32,15 @@ export default function RootLayout({
       <body className="bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground">
         <PreferencesProvider>
           <CartProvider>
-            <ProductModalProvider>
-              <Header />
-              <MiniCart />
-              <ProductQuickAddModal />
-              <main className="min-h-screen pb-safe">{children}</main>
-              <Footer />
-            </ProductModalProvider>
+            <RfqProvider>
+              <ProductModalProvider>
+                <Header />
+                <MiniCart />
+                <ProductQuickAddModal />
+                <main className="min-h-screen pb-safe">{children}</main>
+                <Footer />
+              </ProductModalProvider>
+            </RfqProvider>
           </CartProvider>
         </PreferencesProvider>
       </body>
