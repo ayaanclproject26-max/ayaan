@@ -33,14 +33,17 @@ export default function CategoryHighlights() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedAudiences, setSelectedAudiences] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(["ALL"]);
-  const [hasInteracted, setHasInteracted] = useState(false);
 
   const collectionSectionRef = useRef<HTMLDivElement>(null);
   const allProducts = productsData as Product[];
 
+  // Collection is open ONLY when an audience or specific category is selected
+  const isCollectionOpen =
+    selectedAudiences.length > 0 ||
+    (!selectedCategories.includes("ALL") && selectedCategories.length > 0);
+
   // Toggle audience tile (multi-select)
   const handleAudienceToggle = (audienceName: string) => {
-    setHasInteracted(true);
     const upper = audienceName.toUpperCase();
     setSelectedAudiences((prev) => {
       if (prev.includes(upper)) {
@@ -50,16 +53,16 @@ export default function CategoryHighlights() {
       }
     });
 
-    // Smooth scroll to the audience collection showcase
+    // Smooth scroll to the audience collection showcase if opening
     setTimeout(() => {
       collectionSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }, 150);
   };
 
-  // Handle detailed product category click
+  // Handle detailed product category click (from ALL CATEGORIES accordion or collection filter row)
   const handleCategoryClick = (catName: string) => {
-    setHasInteracted(true);
     if (catName.toUpperCase() === "ALL") {
+      // "ALL" resets category filters within the current active collection
       setSelectedCategories(["ALL"]);
       return;
     }
@@ -86,10 +89,16 @@ export default function CategoryHighlights() {
     }, 150);
   };
 
-  // Reset all audience & category filters
+  // "Clear All": Exits/collapses collection entirely and returns to normal homepage
   const handleClearAll = () => {
     setSelectedAudiences([]);
     setSelectedCategories(["ALL"]);
+    
+    // Smoothly ensure the user view remains comfortably at Shop by Category / Hot Sales
+    const catSection = document.getElementById("categories");
+    if (catSection) {
+      catSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
   // Dynamic Collection Title
@@ -98,25 +107,20 @@ export default function CategoryHighlights() {
       if (!selectedCategories.includes("ALL") && selectedCategories.length > 0) {
         return `${selectedCategories.join(" + ")} Collection`;
       }
-      return "All Audiences Collection";
+      return "";
     }
     return `${selectedAudiences.join(" + ")} COLLECTION`;
   }, [selectedAudiences, selectedCategories]);
 
   // Combined Multi-Filter Execution: (Audience 1 OR Audience 2) AND (Category 1 OR Category 2)
   const filteredProducts = useMemo(() => {
+    if (!isCollectionOpen) return [];
     return filterProducts({
       products: allProducts,
       audienceIds: selectedAudiences,
       categoryNames: selectedCategories,
     });
-  }, [allProducts, selectedAudiences, selectedCategories]);
-
-  const hasActiveFilters =
-    selectedAudiences.length > 0 ||
-    (!selectedCategories.includes("ALL") && selectedCategories.length > 0);
-
-  const shouldShowCollection = hasInteracted || selectedAudiences.length > 0 || !selectedCategories.includes("ALL");
+  }, [allProducts, selectedAudiences, selectedCategories, isCollectionOpen]);
 
   return (
     <section id="categories" className="py-10 sm:py-12 bg-background">
@@ -130,13 +134,13 @@ export default function CategoryHighlights() {
               Select one or multiple departments to explore tailored collections
             </p>
           </div>
-          {hasActiveFilters && (
+          {isCollectionOpen && (
             <button
               onClick={handleClearAll}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors self-center sm:self-auto"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors self-center sm:self-auto cursor-pointer"
             >
               <RotateCcw size={13} />
-              Reset Filters
+              Exit Collection
             </button>
           )}
         </div>
@@ -161,7 +165,7 @@ export default function CategoryHighlights() {
         <div className="mt-6 sm:mt-8 flex justify-center">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="px-6 py-2.5 sm:px-8 sm:py-3 border border-foreground text-foreground text-sm font-semibold uppercase tracking-wider rounded-full hover:bg-foreground hover:text-background transition-colors duration-300 active:scale-95"
+            className="px-6 py-2.5 sm:px-8 sm:py-3 border border-foreground text-foreground text-sm font-semibold uppercase tracking-wider rounded-full hover:bg-foreground hover:text-background transition-colors duration-300 active:scale-95 cursor-pointer"
           >
             {isExpanded ? "SHOW LESS" : "ALL CATEGORIES"}
           </button>
@@ -199,16 +203,11 @@ export default function CategoryHighlights() {
 
         {/* 
           AUDIENCE COLLECTION SHOWCASE & PRODUCT CATEGORY FILTERS
-          Hierarchy:
-          COLLECTION TITLE & COUNT
-          ↓
-          PRODUCT CATEGORY FILTERS (NO duplicate audience row!)
-          ↓
-          ACTIVE FILTER SUMMARY / CLEAR ALL
-          ↓
-          PRODUCTS GRID
+          Visible ONLY when an audience or specific category is selected.
+          When user clicks "Clear All", this section completely collapses,
+          returning to the normal homepage with HOT SALES visible.
         */}
-        {shouldShowCollection && (
+        {isCollectionOpen && (
           <div
             ref={collectionSectionRef}
             className="mt-12 pt-8 border-t border-border/70 animate-in fade-in duration-300"
@@ -225,19 +224,27 @@ export default function CategoryHighlights() {
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {selectedAudiences.length > 0
                     ? `Curated styles crafted for ${selectedAudiences.join(" + ")}`
-                    : "Exploring all category collections"}
+                    : "Exploring category collection"}
                 </p>
               </div>
 
-              {/* Product Count Indicator */}
-              <div className="flex items-center gap-2 self-start sm:self-auto">
+              {/* Product Count Indicator & Close Trigger */}
+              <div className="flex items-center gap-3 self-start sm:self-auto">
                 <span className="px-3.5 py-1.5 rounded-full bg-secondary text-foreground text-xs font-bold uppercase tracking-wider border border-border">
                   {filteredProducts.length} Product{filteredProducts.length !== 1 ? "s" : ""}
                 </span>
+                <button
+                  type="button"
+                  onClick={handleClearAll}
+                  className="p-1.5 rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                  title="Close Collection"
+                >
+                  <X size={16} />
+                </button>
               </div>
             </div>
 
-            {/* PRODUCT CATEGORY FILTERS CONTAINER (Pills only - Audience is selected above) */}
+            {/* PRODUCT CATEGORY FILTERS CONTAINER */}
             <div className="bg-secondary/40 border border-border/60 rounded-2xl p-4 sm:p-5 mb-8 space-y-3 shadow-sm">
               <div className="flex flex-col gap-2">
                 <span className="text-[0.6875rem] font-bold uppercase tracking-wider text-muted-foreground">
@@ -273,57 +280,56 @@ export default function CategoryHighlights() {
                 </div>
               </div>
 
-              {/* Active Filter Badges & Reset Trigger */}
-              {hasActiveFilters && (
-                <div className="pt-3 border-t border-border/50 flex flex-wrap items-center gap-2 text-xs">
-                  <span className="text-muted-foreground font-medium mr-1">Active filters:</span>
+              {/* Active Filter Badges & Clear All (Collection Exit) */}
+              <div className="pt-3 border-t border-border/50 flex flex-wrap items-center gap-2 text-xs">
+                <span className="text-muted-foreground font-medium mr-1">Active filters:</span>
 
-                  {/* Audience Badges */}
-                  {selectedAudiences.map((aud) => (
+                {/* Audience Badges */}
+                {selectedAudiences.map((aud) => (
+                  <span
+                    key={`badge-aud-${aud}`}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-card border border-border text-foreground font-semibold"
+                  >
+                    <span>{aud}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleAudienceToggle(aud)}
+                      className="hover:text-destructive transition-colors ml-0.5 p-0.5 cursor-pointer"
+                      title={`Remove ${aud}`}
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+
+                {/* Category Badges */}
+                {!selectedCategories.includes("ALL") &&
+                  selectedCategories.map((cat) => (
                     <span
-                      key={`badge-aud-${aud}`}
+                      key={`badge-cat-${cat}`}
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-card border border-border text-foreground font-semibold"
                     >
-                      <span>{aud}</span>
+                      <span>{cat}</span>
                       <button
                         type="button"
-                        onClick={() => handleAudienceToggle(aud)}
-                        className="hover:text-destructive transition-colors ml-0.5 p-0.5"
-                        title={`Remove ${aud}`}
+                        onClick={() => handleCategoryClick(cat)}
+                        className="hover:text-destructive transition-colors ml-0.5 p-0.5 cursor-pointer"
+                        title={`Remove ${cat}`}
                       >
                         <X size={12} />
                       </button>
                     </span>
                   ))}
 
-                  {/* Category Badges */}
-                  {!selectedCategories.includes("ALL") &&
-                    selectedCategories.map((cat) => (
-                      <span
-                        key={`badge-cat-${cat}`}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-card border border-border text-foreground font-semibold"
-                      >
-                        <span>{cat}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleCategoryClick(cat)}
-                          className="hover:text-destructive transition-colors ml-0.5 p-0.5"
-                          title={`Remove ${cat}`}
-                        >
-                          <X size={12} />
-                        </button>
-                      </span>
-                    ))}
-
-                  <button
-                    type="button"
-                    onClick={handleClearAll}
-                    className="text-xs font-bold text-destructive hover:underline ml-2 cursor-pointer"
-                  >
-                    Clear All
-                  </button>
-                </div>
-              )}
+                {/* Clear All: Exits/Collapses Collection */}
+                <button
+                  type="button"
+                  onClick={handleClearAll}
+                  className="text-xs font-bold text-destructive hover:underline ml-2 cursor-pointer"
+                >
+                  Clear All
+                </button>
+              </div>
             </div>
 
             {/* PRODUCT GRID / EMPTY STATE */}
@@ -349,7 +355,7 @@ export default function CategoryHighlights() {
                   onClick={handleClearAll}
                   className="px-6 py-2.5 bg-foreground text-background text-xs font-semibold uppercase tracking-wider rounded-full hover:opacity-90 transition-opacity cursor-pointer"
                 >
-                  Clear All Filters
+                  Exit Collection
                 </button>
               </div>
             )}
