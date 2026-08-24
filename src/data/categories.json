@@ -1,0 +1,30 @@
+[
+  {
+    "id": "c_men",
+    "name": "Men",
+    "slug": "men",
+    "image": "https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&q=80&w=800",
+    "description": "Modern essentials and statement pieces for men."
+  },
+  {
+    "id": "c_women",
+    "name": "Women",
+    "slug": "women",
+    "image": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=800",
+    "description": "Elegant and contemporary fashion for women."
+  },
+  {
+    "id": "c_kids",
+    "name": "Kids",
+    "slug": "kids",
+    "image": "https://images.unsplash.com/photo-1514090458221-65bb69cf63e6?auto=format&fit=crop&q=80&w=800",
+    "description": "Fun and stylish fashion for children."
+  },
+  {
+    "id": "c_unisex",
+    "name": "Unisex",
+    "slug": "unisex",
+    "image": "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800",
+    "description": "Gender-neutral fashion for everyone."
+  }
+]

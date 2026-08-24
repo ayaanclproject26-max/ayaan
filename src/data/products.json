@@ -1,0 +1,2877 @@
+[
+  {
+    "id": "prd0001",
+    "name": "Essential Cotton T-Shirt",
+    "slug": "essential-cotton-t-shirt",
+    "price": 10.0,
+    "oldPrice": 24.99,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/7658459/pexels-photo-7658459.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/3662357/pexels-photo-3662357.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/3290886/pexels-photo-3290886.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "M"
+    ],
+    "sku": "LEVIS-TSH-M-BLK-M-PRD0001",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 1500,
+    "brand": "Levi's",
+    "colours": 1
+  },
+  {
+    "id": "prd0002",
+    "name": "Classic Denim Jacket",
+    "slug": "classic-denim-jacket",
+    "price": 40.0,
+    "oldPrice": 89.99,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/19490409/pexels-photo-19490409.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19583674/pexels-photo-19583674.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/30526284/pexels-photo-30526284.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "S"
+    ],
+    "sku": "ZARA-JKT-W-BLU-S-PRD0002",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 350,
+    "brand": "Zara",
+    "colours": 1
+  },
+  {
+    "id": "prd0003",
+    "name": "Performance Running Shorts",
+    "slug": "performance-running-shorts",
+    "price": 16.0,
+    "oldPrice": 35.0,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/35145462/pexels-photo-35145462.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19034296/pexels-photo-19034296.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/10503470/pexels-photo-10503470.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "L"
+    ],
+    "sku": "NIKE-SHO-U-NVY-L-PRD0003",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 800,
+    "brand": "Nike",
+    "colours": 1
+  },
+  {
+    "id": "prd0004",
+    "name": "Cozy Fleece Hoodie",
+    "slug": "cozy-fleece-hoodie",
+    "price": 22.0,
+    "oldPrice": 45.0,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/37451174/pexels-photo-37451174.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7236171/pexels-photo-7236171.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/3933882/pexels-photo-3933882.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "S"
+    ],
+    "sku": "GAP-HD-K-GRY-S-PRD0004",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 1200,
+    "brand": "Gap",
+    "colours": 1
+  },
+  {
+    "id": "prd005",
+    "name": "Slim Fit Chino Trousers",
+    "slug": "slim-fit-chino-trousers",
+    "price": 25.0,
+    "oldPrice": 55.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/9464625/pexels-photo-9464625.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7256412/pexels-photo-7256412.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/28521110/pexels-photo-28521110.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "32"
+    ],
+    "sku": "HM-TRS-M-BEG-32-PRD0005",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 600,
+    "brand": "H&M",
+    "colours": 1
+  },
+  {
+    "id": "prd0006",
+    "name": "Floral Summer Dress",
+    "slug": "floral-summer-dress",
+    "price": 32.0,
+    "oldPrice": 69.99,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/12228462/pexels-photo-12228462.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/1164481/pexels-photo-1164481.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/32244688/pexels-photo-32244688.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "M"
+    ],
+    "sku": "ZARA-DRS-W-RED-M-PRD0006",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 400,
+    "brand": "Zara",
+    "colours": 1
+  },
+  {
+    "id": "prd0007",
+    "name": "Graphic Print Sweatshirt",
+    "slug": "graphic-print-sweatshirt",
+    "price": 28.0,
+    "oldPrice": 60.0,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/8217415/pexels-photo-8217415.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8217544/pexels-photo-8217544.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8217308/pexels-photo-8217308.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "XL"
+    ],
+    "sku": "ADIDAS-SWT-U-WHT-XL-PRD0007",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 950,
+    "brand": "Adidas",
+    "colours": 1
+  },
+  {
+    "id": "prd0008",
+    "name": "High-Waisted Skinny Jeans",
+    "slug": "high-waisted-skinny-jeans",
+    "price": 35.0,
+    "oldPrice": 79.5,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/1158623/pexels-photo-1158623.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19269886/pexels-photo-19269886.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/32864595/pexels-photo-32864595.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "28"
+    ],
+    "sku": "LEVIS-JNS-W-BLK-28-PRD0008",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 750,
+    "brand": "Levi's",
+    "colours": 1
+  },
+  {
+    "id": "prd0009",
+    "name": "Moisture-Wicking Polo",
+    "slug": "moisture-wicking-polo",
+    "price": 20.0,
+    "oldPrice": 45.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/17987934/pexels-photo-17987934.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/17987935/pexels-photo-17987935.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7037634/pexels-photo-7037634.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "L"
+    ],
+    "sku": "UA-POL-M-BLU-L-PRD0009",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 2000,
+    "brand": "Under Armour",
+    "colours": 1
+  },
+  {
+    "id": "prd0010",
+    "name": "Waterproof Rain Jacket",
+    "slug": "waterproof-rain-jacket",
+    "price": 65.0,
+    "oldPrice": 130.0,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/15694151/pexels-photo-15694151.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/29098808/pexels-photo-29098808.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/35580733/pexels-photo-35580733.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "NF-JKT-U-GRN-M-PRD0010",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 300,
+    "brand": "North Face",
+    "colours": 1
+  },
+  {
+    "id": "prd0011",
+    "name": "Kids' Graphic T-Shirt",
+    "slug": "kids'-graphic-t-shirt",
+    "price": 8.0,
+    "oldPrice": 18.0,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/15304383/pexels-photo-15304383.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19364719/pexels-photo-19364719.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/29247734/pexels-photo-29247734.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "XS"
+    ],
+    "sku": "PUMA-TSH-K-RED-XS-PRD0011",
+    "moq": 100,
+    "quantityStep": 100,
+    "availableStock": 3000,
+    "brand": "Puma",
+    "colours": 1
+  },
+  {
+    "id": "prd0012",
+    "name": "Relaxed Fit Linen Shirt",
+    "slug": "relaxed-fit-linen-shirt",
+    "price": 28.0,
+    "oldPrice": 59.9,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/9775889/pexels-photo-9775889.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/29333057/pexels-photo-29333057.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/15870282/pexels-photo-15870282.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "L"
+    ],
+    "sku": "ZARA-SHT-M-WHT-L-PRD0012",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 500,
+    "brand": "Zara",
+    "colours": 1
+  },
+  {
+    "id": "prd0013",
+    "name": "Seamless Yoga Leggings",
+    "slug": "seamless-yoga-leggings",
+    "price": 26.0,
+    "oldPrice": 65.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/34698553/pexels-photo-34698553.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/14979424/pexels-photo-14979424.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/34883593/pexels-photo-34883593.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "S"
+    ],
+    "sku": "PAT-TRS-W-GRY-S-PRD0013",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 1100,
+    "brand": "Patagonia",
+    "colours": 1
+  },
+  {
+    "id": "prd0014",
+    "name": "Heavyweight Winter Parka",
+    "slug": "heavyweight-winter-parka",
+    "price": 120.0,
+    "oldPrice": 250.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/31696292/pexels-photo-31696292.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7654046/pexels-photo-7654046.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/1833077/pexels-photo-1833077.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "XL"
+    ],
+    "sku": "NF-JKT-M-BLK-XL-PRD0014",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 200,
+    "brand": "North Face",
+    "colours": 1
+  },
+  {
+    "id": "prd0015",
+    "name": "Striped Polo Shirt",
+    "slug": "striped-polo-shirt",
+    "price": 12.0,
+    "oldPrice": 25.0,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/2732366/pexels-photo-2732366.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/16022099/pexels-photo-16022099.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19418966/pexels-photo-19418966.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "GAP-POL-K-BLU-M-PRD0015",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 800,
+    "brand": "Gap",
+    "colours": 1
+  },
+  {
+    "id": "prd0016",
+    "name": "Distressed Straight Jeans",
+    "slug": "distressed-straight-jeans",
+    "price": 38.0,
+    "oldPrice": 85.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/16069736/pexels-photo-16069736.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/10004179/pexels-photo-10004179.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31988321/pexels-photo-31988321.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "34"
+    ],
+    "sku": "LEVIS-JNS-M-BLU-34-PRD0016",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 600,
+    "brand": "Levi's",
+    "colours": 1
+  },
+  {
+    "id": "prd0017",
+    "name": "Oversized Pullover Hoodie",
+    "slug": "oversized-pullover-hoodie",
+    "price": 24.0,
+    "oldPrice": 49.99,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/7480318/pexels-photo-7480318.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/32286461/pexels-photo-32286461.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/5839965/pexels-photo-5839965.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "HM-HD-W-BEG-M-PRD0017",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 1000,
+    "brand": "H&M",
+    "colours": 1
+  },
+  {
+    "id": "prd0018",
+    "name": "Lightweight Windbreaker",
+    "slug": "lightweight-windbreaker",
+    "price": 42.0,
+    "oldPrice": 90.0,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/38558343/pexels-photo-38558343.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/28321438/pexels-photo-28321438.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/10075005/pexels-photo-10075005.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "L"
+    ],
+    "sku": "ADIDAS-JKT-U-WHT-L-PRD0018",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 450,
+    "brand": "Adidas",
+    "colours": 1
+  },
+  {
+    "id": "prd0019",
+    "name": "Ribbed Knit Midi Dress",
+    "slug": "ribbed-knit-midi-dress",
+    "price": 35.0,
+    "oldPrice": 75.9,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/27288811/pexels-photo-27288811.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/29850173/pexels-photo-29850173.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19895958/pexels-photo-19895958.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "S"
+    ],
+    "sku": "ZARA-DRS-W-BLK-S-PRD0019",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 350,
+    "brand": "Zara",
+    "colours": 1
+  },
+  {
+    "id": "prd0020",
+    "name": "Cargo Shorts",
+    "slug": "cargo-shorts",
+    "price": 20.0,
+    "oldPrice": 45.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/12803209/pexels-photo-12803209.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/30752836/pexels-photo-30752836.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/29088336/pexels-photo-29088336.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "32"
+    ],
+    "sku": "GAP-SHO-M-GRN-32-PRD0020",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 900,
+    "brand": "Gap",
+    "colours": 1
+  },
+  {
+    "id": "prd0021",
+    "name": "Zip-Up Track Jacket",
+    "slug": "zip-up-track-jacket",
+    "price": 30.0,
+    "oldPrice": 65.0,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/19120664/pexels-photo-19120664.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/37124617/pexels-photo-37124617.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19204945/pexels-photo-19204945.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "M"
+    ],
+    "sku": "PUMA-JKT-U-RED-M-PRD0021",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 700,
+    "brand": "Puma",
+    "colours": 1
+  },
+  {
+    "id": "prd0022",
+    "name": "V-Neck Cashmere Sweater",
+    "slug": "v-neck-cashmere-sweater",
+    "price": 80.0,
+    "oldPrice": 180.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/25384252/pexels-photo-25384252.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/32998805/pexels-photo-32998805.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/11940629/pexels-photo-11940629.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "L"
+    ],
+    "sku": "PAT-SWT-W-GRY-L-PRD0022",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 150,
+    "brand": "Patagonia",
+    "colours": 1
+  },
+  {
+    "id": "prd0023",
+    "name": "Denim Overalls",
+    "slug": "denim-overalls",
+    "price": 28.0,
+    "oldPrice": 55.0,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/12158341/pexels-photo-12158341.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/38990868/pexels-photo-38990868.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/13594630/pexels-photo-13594630.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "S"
+    ],
+    "sku": "LEVIS-JNS-K-BLU-S-PRD0023",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 400,
+    "brand": "Levi's",
+    "colours": 1
+  },
+  {
+    "id": "prd0024",
+    "name": "Plaid Flannel Shirt",
+    "slug": "plaid-flannel-shirt",
+    "price": 22.0,
+    "oldPrice": 49.99,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/7276048/pexels-photo-7276048.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/38107793/pexels-photo-38107793.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/24981296/pexels-photo-24981296.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "XL"
+    ],
+    "sku": "HM-SHT-M-RED-XL-PRD0024",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 850,
+    "brand": "H&M",
+    "colours": 1
+  },
+  {
+    "id": "prd0025",
+    "name": "High-Rise Wide Leg Trousers",
+    "slug": "high-rise-wide-leg-trousers",
+    "price": 32.0,
+    "oldPrice": 69.9,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/10324419/pexels-photo-10324419.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/17135748/pexels-photo-17135748.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31444321/pexels-photo-31444321.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "ZARA-TRS-W-BEG-M-PRD0025",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 550,
+    "brand": "Zara",
+    "colours": 1
+  },
+  {
+    "id": "prd0026",
+    "name": "Quick-Dry Training T-Shirt",
+    "slug": "quick-dry-training-t-shirt",
+    "price": 18.0,
+    "oldPrice": 35.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/7658459/pexels-photo-7658459.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/3662357/pexels-photo-3662357.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/3290886/pexels-photo-3290886.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "L"
+    ],
+    "sku": "UA-TSH-M-BLK-L-PRD0026",
+    "moq": 100,
+    "quantityStep": 100,
+    "availableStock": 2500,
+    "brand": "Under Armour",
+    "colours": 1
+  },
+  {
+    "id": "prd0027",
+    "name": "Puffer Vest",
+    "slug": "puffer-vest",
+    "price": 50.0,
+    "oldPrice": 110.0,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/20100622/pexels-photo-20100622.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19461586/pexels-photo-19461586.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/10005237/pexels-photo-10005237.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "NF-JKT-U-NVY-M-PRD0027",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 300,
+    "brand": "North Face",
+    "colours": 1
+  },
+  {
+    "id": "prd0028",
+    "name": "A-Line Denim Skirt",
+    "slug": "a-line-denim-skirt",
+    "price": 26.0,
+    "oldPrice": 59.5,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/8733397/pexels-photo-8733397.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/38581935/pexels-photo-38581935.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/33798086/pexels-photo-33798086.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "28"
+    ],
+    "sku": "LEVIS-SHO-W-BLU-28-PRD0028",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 450,
+    "brand": "Levi's",
+    "colours": 1
+  },
+  {
+    "id": "prd0029",
+    "name": "French Terry Sweatpants",
+    "slug": "french-terry-sweatpants",
+    "price": 25.0,
+    "oldPrice": 55.0,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/6220655/pexels-photo-6220655.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/34698553/pexels-photo-34698553.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/10924117/pexels-photo-10924117.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "L"
+    ],
+    "sku": "ADIDAS-TRS-U-GRY-L-PRD0029",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 1200,
+    "brand": "Adidas",
+    "colours": 1
+  },
+  {
+    "id": "prd0030",
+    "name": "Sequin Party Dress",
+    "slug": "sequin-party-dress",
+    "price": 48.0,
+    "oldPrice": 99.9,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/27288811/pexels-photo-27288811.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/29850173/pexels-photo-29850173.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19895958/pexels-photo-19895958.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "S"
+    ],
+    "sku": "ZARA-DRS-W-BLK-S-PRD0030",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 250,
+    "brand": "Zara",
+    "colours": 1
+  },
+  {
+    "id": "prd0031",
+    "name": "Classic Trench Coat",
+    "slug": "classic-trench-coat",
+    "price": 250.0,
+    "oldPrice": 500.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/19989009/pexels-photo-19989009.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/24839164/pexels-photo-24839164.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/34138654/pexels-photo-34138654.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "M"
+    ],
+    "sku": "BURB-JKT-W-BEG-M-PRD0031",
+    "moq": 10,
+    "quantityStep": 10,
+    "availableStock": 100,
+    "brand": "Burberry",
+    "colours": 1
+  },
+  {
+    "id": "prd0032",
+    "name": "Athletic Crew Socks 3-Pack",
+    "slug": "athletic-crew-socks-3-pack",
+    "price": 8.0,
+    "oldPrice": 15.0,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/11212879/pexels-photo-11212879.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/27542903/pexels-photo-27542903.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/33406896/pexels-photo-33406896.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "L"
+    ],
+    "sku": "NIKE-SCK-U-WHT-L-PRD0032",
+    "moq": 100,
+    "quantityStep": 100,
+    "availableStock": 5000,
+    "brand": "Nike",
+    "colours": 1
+  },
+  {
+    "id": "prd0033",
+    "name": "Fleece Jogger Pants",
+    "slug": "fleece-jogger-pants",
+    "price": 22.0,
+    "oldPrice": 45.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/35561249/pexels-photo-35561249.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/9464625/pexels-photo-9464625.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/2897539/pexels-photo-2897539.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "CHMP-TRS-M-GRY-M-PRD0033",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 800,
+    "brand": "Champion",
+    "colours": 1
+  },
+  {
+    "id": "prd0034",
+    "name": "Floral Chiffon Blouse",
+    "slug": "floral-chiffon-blouse",
+    "price": 16.0,
+    "oldPrice": 34.99,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/7760807/pexels-photo-7760807.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/9931571/pexels-photo-9931571.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8411030/pexels-photo-8411030.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "S"
+    ],
+    "sku": "HM-SHT-W-PNK-S-PRD0034",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 600,
+    "brand": "H&M",
+    "colours": 1
+  },
+  {
+    "id": "prd0035",
+    "name": "Kids' Denim Jacket",
+    "slug": "kids'-denim-jacket",
+    "price": 25.0,
+    "oldPrice": 49.95,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/12158341/pexels-photo-12158341.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/4260379/pexels-photo-4260379.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19092051/pexels-photo-19092051.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "GAP-JKT-K-BLU-M-PRD0035",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 450,
+    "brand": "Gap",
+    "colours": 1
+  },
+  {
+    "id": "prd0036",
+    "name": "V-Neck Basic T-Shirt",
+    "slug": "v-neck-basic-t-shirt",
+    "price": 8.0,
+    "oldPrice": 14.9,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/7658459/pexels-photo-7658459.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/3662357/pexels-photo-3662357.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/3290886/pexels-photo-3290886.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "L"
+    ],
+    "sku": "UNIQ-TSH-M-BLK-L-PRD0036",
+    "moq": 100,
+    "quantityStep": 100,
+    "availableStock": 2000,
+    "brand": "Uniqlo",
+    "colours": 1
+  },
+  {
+    "id": "prd0037",
+    "name": "High-Waisted Bike Shorts",
+    "slug": "high-waisted-bike-shorts",
+    "price": 32.0,
+    "oldPrice": 58.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/11311403/pexels-photo-11311403.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31414275/pexels-photo-31414275.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "S"
+    ],
+    "sku": "LULU-SHO-W-BLK-S-PRD0037",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 900,
+    "brand": "Lululemon",
+    "colours": 1
+  },
+  {
+    "id": "prd0038",
+    "name": "Corduroy Button-Up Shirt",
+    "slug": "corduroy-button-up-shirt",
+    "price": 34.0,
+    "oldPrice": 69.5,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/19395490/pexels-photo-19395490.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/30725120/pexels-photo-30725120.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/15059446/pexels-photo-15059446.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "XL"
+    ],
+    "sku": "LEVIS-SHT-M-BRN-XL-PRD0038",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 400,
+    "brand": "Levi's",
+    "colours": 1
+  },
+  {
+    "id": "prd0039",
+    "name": "Knit Beanie",
+    "slug": "knit-beanie",
+    "price": 10.0,
+    "oldPrice": 19.99,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/29684258/pexels-photo-29684258.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/29704256/pexels-photo-29704256.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/35886450/pexels-photo-35886450.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "CARH-HAT-U-ORG-OS-PRD0039",
+    "moq": 100,
+    "quantityStep": 100,
+    "availableStock": 1500,
+    "brand": "Carhartt",
+    "colours": 1
+  },
+  {
+    "id": "prd0040",
+    "name": "Maxi Wrap Dress",
+    "slug": "maxi-wrap-dress",
+    "price": 40.0,
+    "oldPrice": 89.9,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/26857851/pexels-photo-26857851.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/13355218/pexels-photo-13355218.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/30873752/pexels-photo-30873752.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "ZARA-DRS-W-GRN-M-PRD0040",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 300,
+    "brand": "Zara",
+    "colours": 1
+  },
+  {
+    "id": "prd0041",
+    "name": "Toddler Graphic Onesie",
+    "slug": "toddler-graphic-onesie",
+    "price": 6.0,
+    "oldPrice": 12.0,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/3771682/pexels-photo-3771682.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/3771676/pexels-photo-3771676.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/14568134/pexels-photo-14568134.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "12M"
+    ],
+    "sku": "CART-SHT-K-YLW-12M-PRD0041",
+    "moq": 100,
+    "quantityStep": 100,
+    "availableStock": 1200,
+    "brand": "Carter's",
+    "colours": 1
+  },
+  {
+    "id": "prd0042",
+    "name": "Slim Fit Dress Shirt",
+    "slug": "slim-fit-dress-shirt",
+    "price": 30.0,
+    "oldPrice": 65.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/9775889/pexels-photo-9775889.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/29333057/pexels-photo-29333057.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/15870282/pexels-photo-15870282.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "15.5"
+    ],
+    "sku": "CK-SHT-M-WHT-155-PRD0042",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 600,
+    "brand": "Calvin Klein",
+    "colours": 1
+  },
+  {
+    "id": "prd0043",
+    "name": "Cropped Puffer Jacket",
+    "slug": "cropped-puffer-jacket",
+    "price": 85.0,
+    "oldPrice": 180.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/18999070/pexels-photo-18999070.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19109132/pexels-photo-19109132.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/5177784/pexels-photo-5177784.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "S"
+    ],
+    "sku": "NF-JKT-W-PNK-S-PRD0043",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 250,
+    "brand": "North Face",
+    "colours": 1
+  },
+  {
+    "id": "prd0044",
+    "name": "Running Shoes",
+    "slug": "running-shoes",
+    "price": 75.0,
+    "oldPrice": 130.0,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/8473453/pexels-photo-8473453.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/26852035/pexels-photo-26852035.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/28488349/pexels-photo-28488349.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "9"
+    ],
+    "sku": "BRKS-SHO-U-GRY-9-PRD0044",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 400,
+    "brand": "Brooks",
+    "colours": 1
+  },
+  {
+    "id": "prd0045",
+    "name": "Canvas Tote Bag",
+    "slug": "canvas-tote-bag",
+    "price": 15.0,
+    "oldPrice": 35.0,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/6033793/pexels-photo-6033793.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/26894083/pexels-photo-26894083.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/29927342/pexels-photo-29927342.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "MADE-BAG-U-NAT-OS-PRD0045",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 800,
+    "brand": "Madewell",
+    "colours": 1
+  },
+  {
+    "id": "prd0046",
+    "name": "Pleated Midi Skirt",
+    "slug": "pleated-midi-skirt",
+    "price": 22.0,
+    "oldPrice": 45.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/7391128/pexels-photo-7391128.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19220719/pexels-photo-19220719.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/17565415/pexels-photo-17565415.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "M"
+    ],
+    "sku": "HM-SKT-W-BLK-M-PRD0046",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 500,
+    "brand": "H&M",
+    "colours": 1
+  },
+  {
+    "id": "prd0047",
+    "name": "Fleece Zip-Up Hoodie",
+    "slug": "fleece-zip-up-hoodie",
+    "price": 65.0,
+    "oldPrice": 139.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/19461565/pexels-photo-19461565.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/30095401/pexels-photo-30095401.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/11791451/pexels-photo-11791451.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "L"
+    ],
+    "sku": "PAT-HD-M-NVY-L-PRD0047",
+    "moq": 25,
+    "quantityStep": 25,
+    "availableStock": 350,
+    "brand": "Patagonia",
+    "colours": 1
+  },
+  {
+    "id": "prd0048",
+    "name": "Kids' Rain Boots",
+    "slug": "kids'-rain-boots",
+    "price": 35.0,
+    "oldPrice": 65.0,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/13822967/pexels-photo-13822967.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/35753260/pexels-photo-35753260.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/16951675/pexels-photo-16951675.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "11"
+    ],
+    "sku": "HUNT-SHO-K-YLW-11-PRD0048",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 400,
+    "brand": "Hunter",
+    "colours": 1
+  },
+  {
+    "id": "prd0049",
+    "name": "Silk Camisole",
+    "slug": "silk-camisole",
+    "price": 28.0,
+    "oldPrice": 60.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/5418894/pexels-photo-5418894.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/21591339/pexels-photo-21591339.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/30468654/pexels-photo-30468654.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "S"
+    ],
+    "sku": "EVER-SHT-W-IVO-S-PRD0049",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 300,
+    "brand": "Everlane",
+    "colours": 1
+  },
+  {
+    "id": "prd0050",
+    "name": "Straight Leg Chinos",
+    "slug": "straight-leg-chinos",
+    "price": 26.0,
+    "oldPrice": 55.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/20574052/pexels-photo-20574052.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/20440141/pexels-photo-20440141.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/9464625/pexels-photo-9464625.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "34"
+    ],
+    "sku": "DOCK-TRS-M-KHA-34-PRD0050",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 700,
+    "brand": "Dockers",
+    "colours": 1
+  },
+  {
+    "id": "prd0051",
+    "name": "Yoga Mat",
+    "slug": "yoga-mat",
+    "price": 45.0,
+    "oldPrice": 90.0,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/30289407/pexels-photo-30289407.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31065991/pexels-photo-31065991.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/13565023/pexels-photo-13565023.png?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "MAND-EQP-U-PUR-OS-PRD0051",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 200,
+    "brand": "Manduka",
+    "colours": 1
+  },
+  {
+    "id": "prd0052",
+    "name": "Oversized Denim Shirt",
+    "slug": "oversized-denim-shirt",
+    "price": 30.0,
+    "oldPrice": 59.9,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/28485013/pexels-photo-28485013.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8373917/pexels-photo-8373917.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8373870/pexels-photo-8373870.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "ZARA-SHT-W-LBLU-M-PRD0052",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 450,
+    "brand": "Zara",
+    "colours": 1
+  },
+  {
+    "id": "prd0053",
+    "name": "Performance Polo",
+    "slug": "performance-polo",
+    "price": 22.0,
+    "oldPrice": 45.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/8068701/pexels-photo-8068701.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7877538/pexels-photo-7877538.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8028056/pexels-photo-8028056.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "XL"
+    ],
+    "sku": "NIKE-POL-M-RED-XL-PRD0053",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 600,
+    "brand": "Nike",
+    "colours": 1
+  },
+  {
+    "id": "prd0054",
+    "name": "Kids' Sweatpants",
+    "slug": "kids'-sweatpants",
+    "price": 16.0,
+    "oldPrice": 30.0,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/38000175/pexels-photo-38000175.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8280260/pexels-photo-8280260.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/5560015/pexels-photo-5560015.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "S"
+    ],
+    "sku": "PUMA-TRS-K-GRY-S-PRD0054",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 500,
+    "brand": "Puma",
+    "colours": 1
+  },
+  {
+    "id": "prd0055",
+    "name": "Leather Belt",
+    "slug": "leather-belt",
+    "price": 18.0,
+    "oldPrice": 38.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/31959216/pexels-photo-31959216.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31959214/pexels-photo-31959214.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31367059/pexels-photo-31367059.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "36"
+    ],
+    "sku": "LEVIS-BLT-M-BRN-36-PRD0055",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 800,
+    "brand": "Levi's",
+    "colours": 1
+  },
+  {
+    "id": "prd0056",
+    "name": "Satin Slip Skirt",
+    "slug": "satin-slip-skirt",
+    "price": 38.0,
+    "oldPrice": 88.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/5848785/pexels-photo-5848785.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/5973286/pexels-photo-5973286.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/5973289/pexels-photo-5973289.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "S"
+    ],
+    "sku": "ARIT-SKT-W-CHA-S-PRD0056",
+    "moq": 25,
+    "quantityStep": 25,
+    "availableStock": 350,
+    "brand": "Aritzia",
+    "colours": 1
+  },
+  {
+    "id": "prd0057",
+    "name": "Graphic T-Shirt",
+    "slug": "graphic-t-shirt",
+    "price": 14.0,
+    "oldPrice": 28.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/7658459/pexels-photo-7658459.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/3662357/pexels-photo-3662357.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/3290886/pexels-photo-3290886.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "VANS-TSH-M-BLK-M-PRD0057",
+    "moq": 60,
+    "quantityStep": 60,
+    "availableStock": 1000,
+    "brand": "Vans",
+    "colours": 1
+  },
+  {
+    "id": "prd0058",
+    "name": "Waterproof Hiking Boots",
+    "slug": "waterproof-hiking-boots",
+    "price": 85.0,
+    "oldPrice": 160.0,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/3042712/pexels-photo-3042712.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/30313904/pexels-photo-30313904.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7926150/pexels-photo-7926150.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "10"
+    ],
+    "sku": "MERR-SHO-U-BRN-10-PRD0058",
+    "moq": 15,
+    "quantityStep": 15,
+    "availableStock": 200,
+    "brand": "Merrell",
+    "colours": 1
+  },
+  {
+    "id": "prd0059",
+    "name": "Knit Cardigan",
+    "slug": "knit-cardigan",
+    "price": 20.0,
+    "oldPrice": 39.99,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/16961312/pexels-photo-16961312.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/3894389/pexels-photo-3894389.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/17039171/pexels-photo-17039171.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "L"
+    ],
+    "sku": "HM-SWT-W-BEG-L-PRD0059",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 600,
+    "brand": "H&M",
+    "colours": 1
+  },
+  {
+    "id": "prd0060",
+    "name": "Swim Trunks",
+    "slug": "swim-trunks",
+    "price": 30.0,
+    "oldPrice": 65.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/19291411/pexels-photo-19291411.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/5409179/pexels-photo-5409179.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/30710029/pexels-photo-30710029.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "PAT-SHO-M-BLU-M-PRD0060",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 450,
+    "brand": "Patagonia",
+    "colours": 1
+  },
+  {
+    "id": "prd0061",
+    "name": "Ribbed Knit Turtleneck",
+    "slug": "ribbed-knit-turtleneck",
+    "price": 45.0,
+    "oldPrice": 89.9,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/31977050/pexels-photo-31977050.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/37037992/pexels-photo-37037992.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/12820471/pexels-photo-12820471.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "S"
+    ],
+    "sku": "UNIQ-SWT-W-BLK-S-PRD0061",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 400,
+    "brand": "Uniqlo",
+    "colours": 1
+  },
+  {
+    "id": "prd0062",
+    "name": "Cargo Joggers",
+    "slug": "cargo-joggers",
+    "price": 35.0,
+    "oldPrice": 70.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/9464625/pexels-photo-9464625.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/2897539/pexels-photo-2897539.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/20440141/pexels-photo-20440141.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "L"
+    ],
+    "sku": "NIKE-TRS-M-OLI-L-PRD0062",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 500,
+    "brand": "Nike",
+    "colours": 1
+  },
+  {
+    "id": "prd0063",
+    "name": "Baby Bodysuit 5-Pack",
+    "slug": "baby-bodysuit-5-pack",
+    "price": 15.0,
+    "oldPrice": 25.0,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/7322395/pexels-photo-7322395.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7322389/pexels-photo-7322389.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7988717/pexels-photo-7988717.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "6M"
+    ],
+    "sku": "GERB-SHT-K-MUL-6M-PRD0063",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 1500,
+    "brand": "Gerber",
+    "colours": 1
+  },
+  {
+    "id": "prd0064",
+    "name": "Faux Leather Moto Jacket",
+    "slug": "faux-leather-moto-jacket",
+    "price": 55.0,
+    "oldPrice": 119.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/9135983/pexels-photo-9135983.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19583674/pexels-photo-19583674.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19269886/pexels-photo-19269886.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "ZARA-JKT-W-BLK-M-PRD0064",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 300,
+    "brand": "Zara",
+    "colours": 1
+  },
+  {
+    "id": "prd0065",
+    "name": "Running Visor",
+    "slug": "running-visor",
+    "price": 10.0,
+    "oldPrice": 22.0,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/9775445/pexels-photo-9775445.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8346051/pexels-photo-8346051.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "UA-HAT-U-WHT-OS-PRD0065",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 600,
+    "brand": "Under Armour",
+    "colours": 1
+  },
+  {
+    "id": "prd0066",
+    "name": "Thermal Henley Shirt",
+    "slug": "thermal-henley-shirt",
+    "price": 26.0,
+    "oldPrice": 55.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/17315606/pexels-photo-17315606.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/33261948/pexels-photo-33261948.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/10962177/pexels-photo-10962177.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "XL"
+    ],
+    "sku": "LLB-SHT-M-NVY-XL-PRD0066",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 400,
+    "brand": "L.L.Bean",
+    "colours": 1
+  },
+  {
+    "id": "prd0067",
+    "name": "Wide Leg Linen Pants",
+    "slug": "wide-leg-linen-pants",
+    "price": 34.0,
+    "oldPrice": 79.99,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/9082613/pexels-photo-9082613.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/16998408/pexels-photo-16998408.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/13985706/pexels-photo-13985706.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "MANG-TRS-W-WHT-M-PRD0067",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 450,
+    "brand": "Mango",
+    "colours": 1
+  },
+  {
+    "id": "prd0068",
+    "name": "Kids' Puffer Vest",
+    "slug": "kids'-puffer-vest",
+    "price": 28.0,
+    "oldPrice": 55.0,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/15237057/pexels-photo-15237057.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/35484017/pexels-photo-35484017.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/15234285/pexels-photo-15234285.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "S"
+    ],
+    "sku": "COLU-JKT-K-RED-S-PRD0068",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 350,
+    "brand": "Columbia",
+    "colours": 1
+  },
+  {
+    "id": "prd0069",
+    "name": "Slip-On Sneakers",
+    "slug": "slip-on-sneakers",
+    "price": 38.0,
+    "oldPrice": 65.0,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/38172917/pexels-photo-38172917.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/12745109/pexels-photo-12745109.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/9721462/pexels-photo-9721462.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "8"
+    ],
+    "sku": "VANS-SHO-U-CHK-8-PRD0069",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 800,
+    "brand": "Vans",
+    "colours": 1
+  },
+  {
+    "id": "prd0070",
+    "name": "Silk Scarf",
+    "slug": "silk-scarf",
+    "price": 280.0,
+    "oldPrice": 450.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/17204123/pexels-photo-17204123.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/5561545/pexels-photo-5561545.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/30676581/pexels-photo-30676581.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "HERM-SCR-W-PRT-OS-PRD0070",
+    "moq": 10,
+    "quantityStep": 10,
+    "availableStock": 50,
+    "brand": "Hermes",
+    "colours": 1
+  },
+  {
+    "id": "prd0071",
+    "name": "Compression Tights",
+    "slug": "compression-tights",
+    "price": 65.0,
+    "oldPrice": 120.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/2897533/pexels-photo-2897533.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/9464625/pexels-photo-9464625.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/2897539/pexels-photo-2897539.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "L"
+    ],
+    "sku": "2XU-TRS-M-BLK-L-PRD0071",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 300,
+    "brand": "2XU",
+    "colours": 1
+  },
+  {
+    "id": "prd0072",
+    "name": "Chunky Knit Sweater",
+    "slug": "chunky-knit-sweater",
+    "price": 55.0,
+    "oldPrice": 128.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/16961312/pexels-photo-16961312.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31977054/pexels-photo-31977054.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31977050/pexels-photo-31977050.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "FREE-SWT-W-CRM-M-PRD0072",
+    "moq": 25,
+    "quantityStep": 25,
+    "availableStock": 400,
+    "brand": "Free People",
+    "colours": 1
+  },
+  {
+    "id": "prd0073",
+    "name": "Board Shorts",
+    "slug": "board-shorts",
+    "price": 28.0,
+    "oldPrice": 55.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/16351346/pexels-photo-16351346.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19471927/pexels-photo-19471927.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/30710156/pexels-photo-30710156.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "32"
+    ],
+    "sku": "QUIK-SHO-M-BLU-32-PRD0073",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 600,
+    "brand": "Quiksilver",
+    "colours": 1
+  },
+  {
+    "id": "prd0074",
+    "name": "Kids' Sun Hat",
+    "slug": "kids'-sun-hat",
+    "price": 18.0,
+    "oldPrice": 35.0,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/35076767/pexels-photo-35076767.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7788337/pexels-photo-7788337.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/17693659/pexels-photo-17693659.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "PAT-HAT-K-PNK-OS-PRD0074",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 700,
+    "brand": "Patagonia",
+    "colours": 1
+  },
+  {
+    "id": "prd0075",
+    "name": "Chelsea Boots",
+    "slug": "chelsea-boots",
+    "price": 140.0,
+    "oldPrice": 220.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/15059775/pexels-photo-15059775.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/9959491/pexels-photo-9959491.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7548029/pexels-photo-7548029.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "10"
+    ],
+    "sku": "BLUN-SHO-M-BRN-10-PRD0075",
+    "moq": 15,
+    "quantityStep": 15,
+    "availableStock": 250,
+    "brand": "Blundstone",
+    "colours": 1
+  },
+  {
+    "id": "prd0076",
+    "name": "Off-the-Shoulder Top",
+    "slug": "off-the-shoulder-top",
+    "price": 48.0,
+    "oldPrice": 98.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/20165098/pexels-photo-20165098.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/11791522/pexels-photo-11791522.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/13871906/pexels-photo-13871906.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "S"
+    ],
+    "sku": "REFO-SHT-W-RED-S-PRD0076",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 300,
+    "brand": "Reformation",
+    "colours": 1
+  },
+  {
+    "id": "prd0077",
+    "name": "Fleece Lined Leggings",
+    "slug": "fleece-lined-leggings",
+    "price": 50.0,
+    "oldPrice": 109.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/5878882/pexels-photo-5878882.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/9566233/pexels-photo-9566233.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7610406/pexels-photo-7610406.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "ATHL-TRS-W-BLK-M-PRD0077",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 500,
+    "brand": "Athleta",
+    "colours": 1
+  },
+  {
+    "id": "prd0078",
+    "name": "Graphic Skateboard Deck",
+    "slug": "graphic-skateboard-deck",
+    "price": 38.0,
+    "oldPrice": 70.0,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/8782537/pexels-photo-8782537.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/26852497/pexels-photo-26852497.png?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8782536/pexels-photo-8782536.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "8"
+    ],
+    "sku": "SANT-EQP-U-MUL-80-PRD0078",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 150,
+    "brand": "Santa Cruz",
+    "colours": 1
+  },
+  {
+    "id": "prd0079",
+    "name": "Lightweight Down Jacket",
+    "slug": "lightweight-down-jacket",
+    "price": 45.0,
+    "oldPrice": 79.9,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/6326243/pexels-photo-6326243.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/18414026/pexels-photo-18414026.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31739115/pexels-photo-31739115.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "L"
+    ],
+    "sku": "UNIQ-JKT-M-NVY-L-PRD0079",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 600,
+    "brand": "Uniqlo",
+    "colours": 1
+  },
+  {
+    "id": "prd0080",
+    "name": "Ruffle Swimsuit",
+    "slug": "ruffle-swimsuit",
+    "price": 12.0,
+    "oldPrice": 20.0,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/4271767/pexels-photo-4271767.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8370350/pexels-photo-8370350.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7359253/pexels-photo-7359253.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "4T"
+    ],
+    "sku": "TARG-SWM-K-MNT-4T-PRD0080",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 800,
+    "brand": "Target",
+    "colours": 1
+  },
+  {
+    "id": "prd0081",
+    "name": "Crossbody Bag",
+    "slug": "crossbody-bag",
+    "price": 110.0,
+    "oldPrice": 250.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/9327162/pexels-photo-9327162.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31450721/pexels-photo-31450721.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31450715/pexels-photo-31450715.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "COAC-BAG-W-BLK-OS-PRD0081",
+    "moq": 15,
+    "quantityStep": 15,
+    "availableStock": 200,
+    "brand": "Coach",
+    "colours": 1
+  },
+  {
+    "id": "prd0082",
+    "name": "Oxford Cloth Button-Down",
+    "slug": "oxford-cloth-button-down",
+    "price": 55.0,
+    "oldPrice": 110.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/17987935/pexels-photo-17987935.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19189138/pexels-photo-19189138.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31087044/pexels-photo-31087044.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "RALP-SHT-M-LBLU-M-PRD0082",
+    "moq": 25,
+    "quantityStep": 25,
+    "availableStock": 450,
+    "brand": "Ralph Lauren",
+    "colours": 1
+  },
+  {
+    "id": "prd0083",
+    "name": "Maternity Leggings",
+    "slug": "maternity-leggings",
+    "price": 40.0,
+    "oldPrice": 78.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/5878882/pexels-photo-5878882.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/9566233/pexels-photo-9566233.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7610406/pexels-photo-7610406.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "L"
+    ],
+    "sku": "BLAN-TRS-W-BLK-L-PRD0083",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 300,
+    "brand": "Blanqi",
+    "colours": 1
+  },
+  {
+    "id": "prd0084",
+    "name": "Snow Pants",
+    "slug": "snow-pants",
+    "price": 65.0,
+    "oldPrice": 130.0,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/31485052/pexels-photo-31485052.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/2732366/pexels-photo-2732366.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/38000175/pexels-photo-38000175.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "BURT-TRS-K-BLK-M-PRD0084",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 250,
+    "brand": "Burton",
+    "colours": 1
+  },
+  {
+    "id": "prd0085",
+    "name": "Platform Sneakers",
+    "slug": "platform-sneakers",
+    "price": 45.0,
+    "oldPrice": 85.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/20528267/pexels-photo-20528267.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/28651548/pexels-photo-28651548.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/14768509/pexels-photo-14768509.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "7"
+    ],
+    "sku": "CONV-SHO-W-WHT-7-PRD0085",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 500,
+    "brand": "Converse",
+    "colours": 1
+  },
+  {
+    "id": "prd0086",
+    "name": "Muscle Tank Top",
+    "slug": "muscle-tank-top",
+    "price": 18.0,
+    "oldPrice": 35.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/29138677/pexels-photo-29138677.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7855204/pexels-photo-7855204.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/12661581/pexels-photo-12661581.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "L"
+    ],
+    "sku": "GYMS-TSH-M-GRY-L-PRD0086",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 700,
+    "brand": "Gymshark",
+    "colours": 1
+  },
+  {
+    "id": "prd0087",
+    "name": "Denim Mini Skirt",
+    "slug": "denim-mini-skirt",
+    "price": 34.0,
+    "oldPrice": 69.5,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/30526284/pexels-photo-30526284.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/2584040/pexels-photo-2584040.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/3949941/pexels-photo-3949941.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "27"
+    ],
+    "sku": "LEVIS-SKT-W-LWA-27-PRD0087",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 400,
+    "brand": "Levi's",
+    "colours": 1
+  },
+  {
+    "id": "prd0088",
+    "name": "Kids' Backpack",
+    "slug": "kids'-backpack",
+    "price": 22.0,
+    "oldPrice": 45.0,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/35663917/pexels-photo-35663917.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/1620758/pexels-photo-1620758.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/34602309/pexels-photo-34602309.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "JANS-BAG-K-NVY-OS-PRD0088",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 600,
+    "brand": "JanSport",
+    "colours": 1
+  },
+  {
+    "id": "prd0089",
+    "name": "Cashmere Wrap",
+    "slug": "cashmere-wrap",
+    "price": 150.0,
+    "oldPrice": 335.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/4813610/pexels-photo-4813610.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/3152742/pexels-photo-3152742.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/14219031/pexels-photo-14219031.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "WHIT-SCR-W-CAM-OS-PRD0089",
+    "moq": 10,
+    "quantityStep": 10,
+    "availableStock": 100,
+    "brand": "White & Warren",
+    "colours": 1
+  },
+  {
+    "id": "prd0090",
+    "name": "Track Pants",
+    "slug": "track-pants",
+    "price": 28.0,
+    "oldPrice": 55.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/2897533/pexels-photo-2897533.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/9464625/pexels-photo-9464625.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/2897539/pexels-photo-2897539.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "ADID-TRS-M-BLK-M-PRD0090",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 600,
+    "brand": "Adidas",
+    "colours": 1
+  },
+  {
+    "id": "prd0091",
+    "name": "Velvet Blazer",
+    "slug": "velvet-blazer",
+    "price": 75.0,
+    "oldPrice": 149.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/4813853/pexels-photo-4813853.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/30455607/pexels-photo-30455607.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/10180960/pexels-photo-10180960.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "M"
+    ],
+    "sku": "ZARA-JKT-W-BUR-M-PRD0091",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 200,
+    "brand": "Zara",
+    "colours": 1
+  },
+  {
+    "id": "prd0092",
+    "name": "Crewneck Sweater",
+    "slug": "crewneck-sweater",
+    "price": 45.0,
+    "oldPrice": 89.5,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/30257616/pexels-photo-30257616.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/972855/pexels-photo-972855.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/35840987/pexels-photo-35840987.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "L"
+    ],
+    "sku": "JCRE-SWT-M-GRY-L-PRD0092",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 500,
+    "brand": "J.Crew",
+    "colours": 1
+  },
+  {
+    "id": "prd0093",
+    "name": "Kids' Snow Boots",
+    "slug": "kids'-snow-boots",
+    "price": 55.0,
+    "oldPrice": 110.0,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/29737094/pexels-photo-29737094.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/34043979/pexels-photo-34043979.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19448964/pexels-photo-19448964.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "12"
+    ],
+    "sku": "SORE-SHO-K-BLK-12-PRD0093",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 300,
+    "brand": "Sorel",
+    "colours": 1
+  },
+  {
+    "id": "prd0094",
+    "name": "Satin Camisole Dress",
+    "slug": "satin-camisole-dress",
+    "price": 50.0,
+    "oldPrice": 118.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/38579533/pexels-photo-38579533.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/38846426/pexels-photo-38846426.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/1000373/pexels-photo-1000373.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "S"
+    ],
+    "sku": "ARIT-DRS-W-NVY-S-PRD0094",
+    "moq": 25,
+    "quantityStep": 25,
+    "availableStock": 350,
+    "brand": "Aritzia",
+    "colours": 1
+  },
+  {
+    "id": "prd0095",
+    "name": "Golf Polo",
+    "slug": "golf-polo",
+    "price": 34.0,
+    "oldPrice": 65.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/7925636/pexels-photo-7925636.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7862032/pexels-photo-7862032.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/36701795/pexels-photo-36701795.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "XL"
+    ],
+    "sku": "UA-POL-M-WHT-XL-PRD0095",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 600,
+    "brand": "Under Armour",
+    "colours": 1
+  },
+  {
+    "id": "prd0096",
+    "name": "Linen Blend Shorts",
+    "slug": "linen-blend-shorts",
+    "price": 30.0,
+    "oldPrice": 59.5,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/30710153/pexels-photo-30710153.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/11311403/pexels-photo-11311403.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "28"
+    ],
+    "sku": "MADE-SHO-W-OLI-28-PRD0096",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 450,
+    "brand": "Madewell",
+    "colours": 1
+  },
+  {
+    "id": "prd0097",
+    "name": "Aviator Sunglasses",
+    "slug": "aviator-sunglasses",
+    "price": 120.0,
+    "oldPrice": 210.0,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/4226870/pexels-photo-4226870.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/1342502/pexels-photo-1342502.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/1313064/pexels-photo-1313064.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "RAYB-GLS-U-GLD-OS-PRD0097",
+    "moq": 15,
+    "quantityStep": 15,
+    "availableStock": 300,
+    "brand": "Ray-Ban",
+    "colours": 1
+  },
+  {
+    "id": "prd0098",
+    "name": "Kids' Pajama Set",
+    "slug": "kids'-pajama-set",
+    "price": 28.0,
+    "oldPrice": 48.0,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/13905939/pexels-photo-13905939.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8687727/pexels-photo-8687727.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7633947/pexels-photo-7633947.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "4T"
+    ],
+    "sku": "HANN-SHT-K-STR-4T-PRD0098",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 800,
+    "brand": "Hanna Andersson",
+    "colours": 1
+  },
+  {
+    "id": "prd0099",
+    "name": "Leather Loafers",
+    "slug": "leather-loafers",
+    "price": 90.0,
+    "oldPrice": 170.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/7747331/pexels-photo-7747331.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/6765524/pexels-photo-6765524.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8553594/pexels-photo-8553594.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "9.5"
+    ],
+    "sku": "COLE-SHO-M-BRN-95-PRD0099",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 350,
+    "brand": "Cole Haan",
+    "colours": 1
+  },
+  {
+    "id": "prd0100",
+    "name": "High-Neck Tank Top",
+    "slug": "high-neck-tank-top",
+    "price": 15.0,
+    "oldPrice": 30.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/21591339/pexels-photo-21591339.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19607292/pexels-photo-19607292.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/15758623/pexels-photo-15758623.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "EVER-SHT-W-WHT-M-PRD0100",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 700,
+    "brand": "Everlane",
+    "colours": 1
+  },
+  {
+    "id": "prd0101",
+    "name": "Fleece Pullover",
+    "slug": "fleece-pullover",
+    "price": 65.0,
+    "oldPrice": 129.0,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/9216703/pexels-photo-9216703.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/36478514/pexels-photo-36478514.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/11531396/pexels-photo-11531396.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "L"
+    ],
+    "sku": "PAT-SWT-U-TEA-L-PRD0101",
+    "moq": 25,
+    "quantityStep": 25,
+    "availableStock": 400,
+    "brand": "Patagonia",
+    "colours": 1
+  },
+  {
+    "id": "prd0102",
+    "name": "Maternity Jeans",
+    "slug": "maternity-jeans",
+    "price": 85.0,
+    "oldPrice": 198.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/7588398/pexels-photo-7588398.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/28698875/pexels-photo-28698875.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/6593777/pexels-photo-6593777.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "29"
+    ],
+    "sku": "MOTH-JNS-W-BLU-29-PRD0102",
+    "moq": 15,
+    "quantityStep": 15,
+    "availableStock": 250,
+    "brand": "Mother",
+    "colours": 1
+  },
+  {
+    "id": "prd0103",
+    "name": "Tennis Skirt",
+    "slug": "tennis-skirt",
+    "price": 34.0,
+    "oldPrice": 65.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/37332464/pexels-photo-37332464.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7391128/pexels-photo-7391128.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31879177/pexels-photo-31879177.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "S"
+    ],
+    "sku": "NIKE-SKT-W-WHT-S-PRD0103",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 500,
+    "brand": "Nike",
+    "colours": 1
+  },
+  {
+    "id": "prd0104",
+    "name": "Graphic Hoodie",
+    "slug": "graphic-hoodie",
+    "price": 40.0,
+    "oldPrice": 80.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/19461563/pexels-photo-19461563.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/14241847/pexels-photo-14241847.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/607961/pexels-photo-607961.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "XL"
+    ],
+    "sku": "OBEY-HD-M-BLK-XL-PRD0104",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 450,
+    "brand": "Obey",
+    "colours": 1
+  },
+  {
+    "id": "prd0105",
+    "name": "Kids' Denim Overalls",
+    "slug": "kids'-denim-overalls",
+    "price": 22.0,
+    "oldPrice": 40.0,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/12158341/pexels-photo-12158341.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/38990868/pexels-photo-38990868.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/13594630/pexels-photo-13594630.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "3T"
+    ],
+    "sku": "OSHK-JNS-K-BLU-3T-PRD0105",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 600,
+    "brand": "OshKosh B'gosh",
+    "colours": 1
+  },
+  {
+    "id": "prd0106",
+    "name": "Chelsea Rain Boots",
+    "slug": "chelsea-rain-boots",
+    "price": 65.0,
+    "oldPrice": 145.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/10827097/pexels-photo-10827097.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31450745/pexels-photo-31450745.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/2112753/pexels-photo-2112753.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "8"
+    ],
+    "sku": "HUNT-SHO-W-BLK-8-PRD0106",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 300,
+    "brand": "Hunter",
+    "colours": 1
+  },
+  {
+    "id": "prd0107",
+    "name": "Leather Wallet",
+    "slug": "leather-wallet",
+    "price": 28.0,
+    "oldPrice": 60.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/13195204/pexels-photo-13195204.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/13225343/pexels-photo-13225343.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/5828579/pexels-photo-5828579.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "FOSS-WAL-M-BRN-OS-PRD0107",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 800,
+    "brand": "Fossil",
+    "colours": 1
+  },
+  {
+    "id": "prd0108",
+    "name": "Silk Blouse",
+    "slug": "silk-blouse",
+    "price": 85.0,
+    "oldPrice": 295.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/31976850/pexels-photo-31976850.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/10881358/pexels-photo-10881358.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "VINC-SHT-W-BLK-M-PRD0108",
+    "moq": 15,
+    "quantityStep": 15,
+    "availableStock": 200,
+    "brand": "Vince",
+    "colours": 1
+  },
+  {
+    "id": "prd0109",
+    "name": "Cargo Pants",
+    "slug": "cargo-pants",
+    "price": 30.0,
+    "oldPrice": 59.99,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/20574052/pexels-photo-20574052.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/32418491/pexels-photo-32418491.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31380764/pexels-photo-31380764.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "32"
+    ],
+    "sku": "DICK-TRS-U-KHA-32-PRD0109",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 600,
+    "brand": "Dickies",
+    "colours": 1
+  },
+  {
+    "id": "prd0110",
+    "name": "Kids' Beanie",
+    "slug": "kids'-beanie",
+    "price": 15.0,
+    "oldPrice": 25.0,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/6809186/pexels-photo-6809186.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/13905951/pexels-photo-13905951.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/13905957/pexels-photo-13905957.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "NF-HAT-K-BLU-OS-PRD0110",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 700,
+    "brand": "North Face",
+    "colours": 1
+  },
+  {
+    "id": "prd0111",
+    "name": "Running Shorts",
+    "slug": "running-shorts",
+    "price": 26.0,
+    "oldPrice": 50.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/28038671/pexels-photo-28038671.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/12803209/pexels-photo-12803209.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19040502/pexels-photo-19040502.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "L"
+    ],
+    "sku": "BRKS-SHO-M-NVY-L-PRD0111",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 550,
+    "brand": "Brooks",
+    "colours": 1
+  },
+  {
+    "id": "prd0112",
+    "name": "Faux Fur Coat",
+    "slug": "faux-fur-coat",
+    "price": 75.0,
+    "oldPrice": 149.99,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/18913370/pexels-photo-18913370.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/30444089/pexels-photo-30444089.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19454628/pexels-photo-19454628.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "S"
+    ],
+    "sku": "MANG-JKT-W-BRN-S-PRD0112",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 250,
+    "brand": "Mango",
+    "colours": 1
+  },
+  {
+    "id": "prd0113",
+    "name": "Chukka Boots",
+    "slug": "chukka-boots",
+    "price": 75.0,
+    "oldPrice": 140.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/31935085/pexels-photo-31935085.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/22881932/pexels-photo-22881932.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8553594/pexels-photo-8553594.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "10.5"
+    ],
+    "sku": "CLAR-SHO-M-SAN-105-PRD0113",
+    "moq": 20,
+    "quantityStep": 20,
+    "availableStock": 300,
+    "brand": "Clarks",
+    "colours": 1
+  },
+  {
+    "id": "prd0114",
+    "name": "Wrap Skirt",
+    "slug": "wrap-skirt",
+    "price": 55.0,
+    "oldPrice": 148.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/25466385/pexels-photo-25466385.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/9848422/pexels-photo-9848422.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/5541980/pexels-photo-5541980.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "REFO-SKT-W-FLO-M-PRD0114",
+    "moq": 25,
+    "quantityStep": 25,
+    "availableStock": 350,
+    "brand": "Reformation",
+    "colours": 1
+  },
+  {
+    "id": "prd0115",
+    "name": "Kids' Graphic T-Shirt",
+    "slug": "kids'-graphic-t-shirt",
+    "price": 12.0,
+    "oldPrice": 20.0,
+    "categoryId": "c_kids",
+    "images": [
+      "https://images.pexels.com/photos/9266466/pexels-photo-9266466.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/18110567/pexels-photo-18110567.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/4720366/pexels-photo-4720366.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "L"
+    ],
+    "sku": "GAP-TSH-K-WHT-L-PRD0115",
+    "moq": 60,
+    "quantityStep": 60,
+    "availableStock": 900,
+    "brand": "Gap",
+    "colours": 1
+  },
+  {
+    "id": "prd0116",
+    "name": "Sports Bra",
+    "slug": "sports-bra",
+    "price": 38.0,
+    "oldPrice": 58.0,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/31976850/pexels-photo-31976850.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/10881358/pexels-photo-10881358.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "6"
+    ],
+    "sku": "LULU-SHT-W-BLK-6-PRD0116",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 600,
+    "brand": "Lululemon",
+    "colours": 1
+  },
+  {
+    "id": "prd0117",
+    "name": "Flannel Pajama Pants",
+    "slug": "flannel-pajama-pants",
+    "price": 28.0,
+    "oldPrice": 49.95,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/28521110/pexels-photo-28521110.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/2897533/pexels-photo-2897533.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/2897539/pexels-photo-2897539.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "L"
+    ],
+    "sku": "LLB-TRS-M-PLA-L-PRD0117",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 500,
+    "brand": "L.L.Bean",
+    "colours": 1
+  },
+  {
+    "id": "prd0118",
+    "name": "Canvas Backpack",
+    "slug": "canvas-backpack",
+    "price": 65.0,
+    "oldPrice": 90.0,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/7706542/pexels-photo-7706542.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/5869616/pexels-photo-5869616.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/5869619/pexels-photo-5869619.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "FJAL-BAG-U-YLW-OS-PRD0118",
+    "moq": 25,
+    "quantityStep": 25,
+    "availableStock": 400,
+    "brand": "Fjallraven",
+    "colours": 1
+  },
+  {
+    "id": "prd0119",
+    "name": "Peacoat",
+    "slug": "peacoat",
+    "price": 110.0,
+    "oldPrice": 298.0,
+    "categoryId": "c_men",
+    "images": [
+      "https://images.pexels.com/photos/6326243/pexels-photo-6326243.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/18414026/pexels-photo-18414026.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31739115/pexels-photo-31739115.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "M"
+    ],
+    "sku": "JCRE-JKT-M-NVY-M-PRD0119",
+    "moq": 15,
+    "quantityStep": 15,
+    "availableStock": 200,
+    "brand": "J.Crew",
+    "colours": 1
+  },
+  {
+    "id": "prd0120",
+    "name": "Slip Dress",
+    "slug": "slip-dress",
+    "price": 34.0,
+    "oldPrice": 69.9,
+    "categoryId": "c_women",
+    "images": [
+      "https://images.pexels.com/photos/228586/pexels-photo-228586.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/13364873/pexels-photo-13364873.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/5716593/pexels-photo-5716593.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "S"
+    ],
+    "sku": "ZARA-DRS-W-SIL-S-PRD0120",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 450,
+    "brand": "Zara",
+    "colours": 1
+  }
+]
