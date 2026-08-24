@@ -2,39 +2,59 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, ShoppingCart, User, Globe, Menu } from "lucide-react";
-import { useCart } from "@/lib/CartContext";
-import { usePreferences } from "@/lib/PreferencesContext";
-import SearchOverlay from "./SearchOverlay";
-import AuthModal, { AuthView } from "@/components/auth/AuthModal";
+import { 
+  Search, 
+  ShoppingCart, 
+  User, 
+  Globe, 
+  Menu
+} from "lucide-react";
 import LocationModal from "./LocationModal";
 import LanguageCurrencyModal from "./LanguageCurrencyModal";
+import AuthModal from "../auth/AuthModal";
+import SearchOverlay from "./SearchOverlay";
+import { useCart } from "@/lib/CartContext";
+import { usePreferences } from "@/lib/PreferencesContext";
 
 const NAV_LINKS = [
-  { label: "NEW ARRIVALS", href: "#new-arrivals" },
+  { label: "ALL", href: "#categories" },
+  { label: "SWEATERS", href: "#hot-sales" },
+  { label: "T-SHIRTS", href: "#categories" },
+  { label: "HOODIES", href: "#categories" },
+  { label: "TROUSERS", href: "#categories" },
+  { label: "PANTS", href: "#categories" },
+  { label: "SHORTS", href: "#categories" },
+  { label: "SHIRTS", href: "#categories" },
+  { label: "BEACHWEAR", href: "#categories" },
+  { label: "SOCKS", href: "#categories" },
+  { label: "BLOUSE", href: "#categories" },
+  { label: "TANK TOP", href: "#categories" },
+  { label: "TOPS", href: "#categories" },
+  { label: "SPORTS", href: "#categories" },
+  { label: "TOWELS", href: "#hot-sales" },
   { label: "HOT SALES", href: "#hot-sales", special: "hot" },
-  { label: "TESTIMONIALS", href: "#testimonials" },
-  { label: "BRAND TRUST", href: "#brand-trust" },
 ];
 
 export default function Header() {
-  const { totalItems, setIsCartOpen } = useCart();
-  const { preferences, isLoaded } = usePreferences();
-
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [isSearchExecuted, setIsSearchExecuted] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
   // Modals state
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalView, setAuthModalView] = useState<AuthView>("signin");
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalView, setAuthModalView] = useState<"signin" | "signup">("signin");
+
+  // Contexts
+  const { totalItems, setIsCartOpen } = useCart();
+  const { preferences } = usePreferences();
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 8);
+      setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -43,20 +63,39 @@ export default function Header() {
   const openSignIn = () => {
     setAuthModalView("signin");
     setIsAuthModalOpen(true);
-    setIsMobileMenuOpen(false);
   };
 
-  const openSignUp = () => {
-    setAuthModalView("signup");
-    setIsAuthModalOpen(true);
-    setIsMobileMenuOpen(false);
+  // Search execution handler
+  const handleExecuteSearch = (queryToSearch?: string) => {
+    const q = (queryToSearch !== undefined ? queryToSearch : searchQuery).trim();
+    if (q) {
+      setIsSearchOpen(true);
+      setIsSearchExecuted(true);
+
+      // Save to localStorage recent searches
+      try {
+        const saved = localStorage.getItem("ayaan_recent_searches");
+        const list: string[] = saved ? JSON.parse(saved) : ["Sweater", "T-Shirt", "Hoodie"];
+        const updated = [q, ...list.filter((item) => item.toLowerCase() !== q.toLowerCase())].slice(0, 6);
+        localStorage.setItem("ayaan_recent_searches", JSON.stringify(updated));
+      } catch {
+        // Ignore storage errors
+      }
+    }
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleExecuteSearch();
   };
 
   return (
     <>
       <header 
-        className={`sticky top-0 z-50 w-full backdrop-blur-md transition-all duration-200 border-b ${
-          isScrolled ? "bg-slate-900/95 border-slate-900 shadow-sm" : "bg-slate-900 border-white/10"
+        className={`sticky top-0 z-50 transition-all duration-300 w-full ${
+          isScrolled 
+            ? "bg-[#0b1329]/95 backdrop-blur-md shadow-md border-b border-white/10" 
+            : "bg-[#0b1329] border-b border-white/10"
         }`}
       >
         {/* DESKTOP HEADER */}
@@ -64,21 +103,42 @@ export default function Header() {
           
           {/* Logo */}
           <Link href="/" className="flex items-center shrink-0 press-feedback" aria-label="Ayaan Home">
-            <img src="/logo.png" alt="Ayaan Logo" className="h-8 sm:h-9 w-auto" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Ayaan Logo" className="h-8 sm:h-9 w-auto brightness-0 invert" />
           </Link>
 
-          {/* Search Bar */}
-          <div className={`flex w-full max-w-[45%] mx-auto items-center rounded-full px-4 h-10 border transition-all duration-200 cursor-text ${isSearchOpen ? 'bg-white/[0.15] border-white/40 shadow-lg ring-2 ring-white/20' : 'bg-white/[0.08] border-white/15 hover:bg-white/[0.12] hover:border-white/30 focus-within:border-white/40 focus-within:bg-white/[0.15]'}`}>
-            <Search size={18} className={`mr-3 shrink-0 transition-colors ${isSearchOpen ? 'text-white' : 'text-white/50'}`} />
+          {/* Search Bar with Right-Side Pill Button and Active Glow */}
+          <form 
+            onSubmit={handleSearchSubmit}
+            className={`flex w-full max-w-[45%] mx-auto items-center rounded-full pl-4 pr-1.5 h-10 border transition-all duration-200 cursor-text ${
+              isSearchOpen 
+                ? "bg-white/[0.15] border-white/40 shadow-lg ring-2 ring-white/20" 
+                : "bg-white/[0.08] border-white/15 hover:bg-white/[0.12] hover:border-white/30 focus-within:border-white/40 focus-within:bg-white/[0.15]"
+            }`}
+          >
             <input 
               type="text"
-              className="bg-transparent border-none outline-none w-full text-[0.875rem] focus:ring-0 text-white placeholder:text-white/50"
+              className="bg-transparent border-none outline-none w-full text-[0.875rem] focus:ring-0 text-white placeholder:text-white/50 pr-2"
               placeholder="Search products, brands, and more..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (!e.target.value.trim()) {
+                  setIsSearchExecuted(false);
+                }
+              }}
               onFocus={() => setIsSearchOpen(true)}
             />
-          </div>
+            {/* Right-Side Search Pill Button */}
+            <button 
+              type="submit"
+              className="shrink-0 h-7 px-3.5 rounded-full bg-white text-[#0b1329] hover:bg-white/90 active:scale-95 font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition-all duration-150 cursor-pointer"
+              aria-label="Search"
+              title="Search products"
+            >
+              <Search size={14} strokeWidth={2.5} />
+            </button>
+          </form>
 
           {/* Desktop Utilities */}
           <div className="flex items-center gap-6 xl:gap-8 shrink-0">
@@ -152,7 +212,8 @@ export default function Header() {
               <Menu size={22} strokeWidth={1.5} />
             </button>
             <Link href="/" className="flex items-center" aria-label="Ayaan Home">
-              <img src="/logo.png" alt="Ayaan Logo" className="h-7 sm:h-8 w-auto" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="Ayaan Logo" className="h-7 sm:h-8 w-auto brightness-0 invert" />
             </Link>
             <button 
               type="button"
@@ -168,30 +229,52 @@ export default function Header() {
               )}
             </button>
           </div>
-          {/* Mobile Search */}
-          <div className={`flex w-full items-center rounded-full px-4 h-10 border transition-all duration-200 cursor-text ${isSearchOpen ? 'bg-white/[0.15] border-white/40 shadow-lg ring-2 ring-white/20' : 'bg-white/[0.08] border-white/15 hover:bg-white/[0.12] hover:border-white/30 focus-within:border-white/40 focus-within:bg-white/[0.15]'}`}>
-             <Search size={16} className={`mr-3 shrink-0 transition-colors ${isSearchOpen ? 'text-white' : 'text-white/50'}`} />
-             <input 
-               type="text"
-               className="bg-transparent border-none outline-none w-full text-[0.8125rem] focus:ring-0 text-white placeholder:text-white/50"
-               placeholder="Search products, brands..."
-               value={searchQuery}
-               onChange={(e) => setSearchQuery(e.target.value)}
-               onFocus={() => setIsSearchOpen(true)}
-             />
-          </div>
+          
+          {/* Mobile Search Bar with Right-Side Search Pill Button */}
+          <form 
+            onSubmit={handleSearchSubmit}
+            className={`flex w-full items-center rounded-full pl-4 pr-1.5 h-10 border transition-all duration-200 cursor-text ${
+              isSearchOpen 
+                ? "bg-white/[0.15] border-white/40 shadow-lg ring-2 ring-white/20" 
+                : "bg-white/[0.08] border-white/15 hover:bg-white/[0.12] hover:border-white/30 focus-within:border-white/40 focus-within:bg-white/[0.15]"
+            }`}
+          >
+            <input 
+              type="text"
+              className="bg-transparent border-none outline-none w-full text-[0.8125rem] focus:ring-0 text-white placeholder:text-white/50 pr-2"
+              placeholder="Search products, brands, and more..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (!e.target.value.trim()) {
+                  setIsSearchExecuted(false);
+                }
+              }}
+              onFocus={() => setIsSearchOpen(true)}
+            />
+            {/* Right-Side Search Pill Button */}
+            <button 
+              type="submit"
+              className="shrink-0 h-7 px-3.5 rounded-full bg-white text-[#0b1329] hover:bg-white/90 active:scale-95 font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition-all duration-150 cursor-pointer"
+              aria-label="Search"
+              title="Search products"
+            >
+              <Search size={14} strokeWidth={2.5} />
+            </button>
+          </form>
         </div>
 
       </header>
 
       {/* Mobile Menu Overlay */}
       <div 
-        className={`fixed inset-0 bg-slate-900 text-white z-[100] transition-transform duration-300 ease-in-out lg:hidden ${
-          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed inset-0 bg-[#0b1329] text-white z-[100] transition-transform duration-300 ease-in-out lg:hidden ${
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex items-center justify-between p-4 border-b border-white/10">
           <Link href="/" className="flex items-center" onClick={() => setIsMobileMenuOpen(false)}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Ayaan Logo" className="h-8 w-auto brightness-0 invert" />
           </Link>
           <button 
@@ -229,47 +312,47 @@ export default function Header() {
             
             <button 
               type="button"
-              className="flex items-center gap-3 text-white/85 hover:text-white transition-colors text-left" 
+              className="flex items-center justify-between py-2 text-white/90"
               onClick={() => {
                 setIsMobileMenuOpen(false);
                 setIsLocationOpen(true);
               }}
             >
-              <span className="text-xl leading-none">{preferences.flag}</span>
-              <span className="font-medium text-sm">
-                Deliver to: {preferences.countryCode} ({preferences.country})
-              </span>
+              <div className="flex items-center gap-3">
+                <span className="text-xl">{preferences.flag}</span>
+                <span className="font-semibold text-sm">Deliver to: {preferences.country}</span>
+              </div>
+              <span className="text-xs text-white/50 uppercase font-bold tracking-wider">Change</span>
             </button>
-            
+
             <button 
               type="button"
-              className="flex items-center gap-3 text-white/85 hover:text-white transition-colors text-left" 
+              className="flex items-center justify-between py-2 text-white/90"
               onClick={() => {
                 setIsMobileMenuOpen(false);
                 setIsLanguageOpen(true);
               }}
             >
-              <Globe size={20} strokeWidth={1.5} />
-              <span className="font-medium text-sm">
-                {preferences.language} - {preferences.currency} ({preferences.currencySymbol})
-              </span>
+              <div className="flex items-center gap-3">
+                <Globe size={18} strokeWidth={1.5} />
+                <span className="font-semibold text-sm">Currency: {preferences.currency} ({preferences.currencySymbol})</span>
+              </div>
+              <span className="text-xs text-white/50 uppercase font-bold tracking-wider">Change</span>
             </button>
-            
+
             <button 
               type="button"
-              className="flex items-center gap-3 text-white/85 hover:text-white transition-colors text-left" 
-              onClick={openSignIn}
+              className="flex items-center justify-between py-2 text-white/90"
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                openSignIn();
+              }}
             >
-              <User size={20} strokeWidth={1.5} />
-              <span className="font-medium text-sm">Sign in</span>
-            </button>
-            
-            <button 
-              type="button"
-              className="bg-amber-600 hover:bg-amber-700 text-white font-bold uppercase tracking-wider py-3.5 rounded-xl mt-4 transition-colors text-sm text-center shadow-lg"
-              onClick={openSignUp}
-            >
-              Create account
+              <div className="flex items-center gap-3">
+                <User size={18} strokeWidth={1.5} />
+                <span className="font-semibold text-sm">Sign In / Register</span>
+              </div>
+              <span className="text-xs text-white/50 uppercase font-bold tracking-wider">Account</span>
             </button>
           </div>
         </nav>
@@ -281,6 +364,9 @@ export default function Header() {
         onClose={() => setIsSearchOpen(false)}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
+        isSearchExecuted={isSearchExecuted}
+        setIsSearchExecuted={setIsSearchExecuted}
+        onExecuteSearch={handleExecuteSearch}
       />
 
       {/* Auth Modal (Sign In / Create Account) */}

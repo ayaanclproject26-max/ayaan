@@ -192,6 +192,36 @@ export function getProductColor(product: Product): string {
 }
 
 /**
+ * Search products matching a text query across all relevant fields.
+ */
+export function searchProducts(products: Product[], query: string): Product[] {
+  const q = query.toLowerCase().trim();
+  if (!q) return [];
+  const terms = q.split(/\s+/).filter(Boolean);
+
+  return products.filter((product) => {
+    const name = (product.name || "").toLowerCase();
+    const brand = (product.brand || "").toLowerCase();
+    const sku = (product.sku || "").toLowerCase();
+    const categoryId = (product.categoryId || "").toLowerCase();
+    const desc = (product.description || "").toLowerCase();
+    const color = (product.color || getProductColor(product) || "").toLowerCase();
+    const productCategories = getProductCategories(product).map((c) => c.toLowerCase());
+
+    return terms.every(
+      (term) =>
+        name.includes(term) ||
+        brand.includes(term) ||
+        sku.includes(term) ||
+        categoryId.includes(term) ||
+        desc.includes(term) ||
+        color.includes(term) ||
+        productCategories.some((c) => c.includes(term) || term.includes(c))
+    );
+  });
+}
+
+/**
  * Filter products across brand, audience, product categories, and colors:
  * (Brand 1 OR Brand 2) AND (Audience 1 OR Audience 2) AND (Category 1 OR Category 2) AND (Color 1 OR Color 2)
  */
