@@ -172,19 +172,41 @@ export function getProductCategories(product: Product): string[] {
 }
 
 /**
- * Filter products across brand, audience, and product categories using:
- * (Brand 1 OR Brand 2) AND (Audience 1 OR Audience 2) AND (Category 1 OR Category 2)
+ * Extracts normalized product color from color property, SKU, or product title.
+ */
+export function getProductColor(product: Product): string {
+  if (product.color) return product.color;
+  const sku = (product.sku || "").toUpperCase();
+  const name = (product.name || "").toLowerCase();
+
+  if (sku.includes("-WHT-") || name.includes("white")) return "White";
+  if (sku.includes("-BLK-") || name.includes("black") || name.includes("noir")) return "Black";
+  if (sku.includes("-GRY-") || name.includes("grey") || name.includes("gray") || name.includes("charcoal")) return "Grey";
+  if (sku.includes("-BEG-") || name.includes("beige") || name.includes("sand") || name.includes("cream")) return "Beige";
+  if (sku.includes("-BLU-") || sku.includes("-NVY-") || name.includes("blue") || name.includes("navy")) return "Blue";
+  if (sku.includes("-PNK-") || name.includes("pink")) return "Pink";
+  if (sku.includes("-RED-") || name.includes("red")) return "Red";
+  if (sku.includes("-GRN-") || sku.includes("-OLI-") || name.includes("green") || name.includes("olive")) return "Green";
+
+  return "";
+}
+
+/**
+ * Filter products across brand, audience, product categories, and colors:
+ * (Brand 1 OR Brand 2) AND (Audience 1 OR Audience 2) AND (Category 1 OR Category 2) AND (Color 1 OR Color 2)
  */
 export function filterProducts({
   products,
   brandIds = [],
   audienceIds = [],
   categoryNames = ["ALL"],
+  colors = ["ALL"],
 }: {
   products: Product[];
   brandIds?: string[];
   audienceIds?: string[];
   categoryNames?: string[];
+  colors?: string[];
 }): Product[] {
   return products.filter((product) => {
     // 1. Brand match (OR inside group)
@@ -213,11 +235,17 @@ export function filterProducts({
       });
 
     // 3. Category match (OR inside group, ALL = true)
-    const isAll = categoryNames.length === 0 || categoryNames.includes("ALL");
+    const isAllCategories = categoryNames.length === 0 || categoryNames.includes("ALL");
     const productCats = getProductCategories(product);
     const categoryOk =
-      isAll || categoryNames.some((cat) => productCats.includes(cat));
+      isAllCategories || categoryNames.some((cat) => productCats.includes(cat));
 
-    return brandOk && audienceOk && categoryOk;
+    // 4. Color match (OR inside group, ALL = true)
+    const isAllColors = colors.length === 0 || colors.includes("ALL");
+    const productColor = getProductColor(product);
+    const colorOk =
+      isAllColors || (productColor && colors.some((c) => c.toLowerCase() === productColor.toLowerCase()));
+
+    return brandOk && audienceOk && categoryOk && colorOk;
   });
 }

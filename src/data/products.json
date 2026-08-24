@@ -2873,5 +2873,193 @@
     "availableStock": 450,
     "brand": "Zara",
     "colours": 1
+  },
+  {
+    "id": "prd0121",
+    "name": "Luxury Turkish Bath Towel",
+    "slug": "luxury-turkish-bath-towel",
+    "price": 18,
+    "oldPrice": 35,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&q=80&w=800"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "UNIQ-TWL-U-WHT-OS-PRD0121",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 2400,
+    "brand": "Uniqlo",
+    "colours": 1,
+    "color": "White"
+  },
+  {
+    "id": "prd0122",
+    "name": "Plush Charcoal Spa Towel",
+    "slug": "plush-charcoal-spa-towel",
+    "price": 22,
+    "oldPrice": 42,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&q=80&w=800"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "HM-TWL-U-GRY-OS-PRD0122",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 1800,
+    "brand": "H&M",
+    "colours": 1,
+    "color": "Grey"
+  },
+  {
+    "id": "prd0123",
+    "name": "Organic Waffle Hand Towel",
+    "slug": "organic-waffle-hand-towel",
+    "price": 14,
+    "oldPrice": 28,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.pexels.com/photos/4207892/pexels-photo-4207892.jpeg?auto=compress&cs=tinysrgb&w=800"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "ZARA-TWL-U-BEG-OS-PRD0123",
+    "moq": 60,
+    "quantityStep": 60,
+    "availableStock": 3000,
+    "brand": "Zara",
+    "colours": 1,
+    "color": "Beige"
+  },
+  {
+    "id": "prd0124",
+    "name": "Quick-Dry Resort Beach Towel",
+    "slug": "quick-dry-resort-beach-towel",
+    "price": 26,
+    "oldPrice": 50,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&q=80&w=800"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "PAT-TWL-U-BLU-OS-PRD0124",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 1500,
+    "brand": "Patagonia",
+    "colours": 1,
+    "color": "Blue"
+  },
+  {
+    "id": "prd0125",
+    "name": "Ribbed Cotton Bath Sheet",
+    "slug": "ribbed-cotton-bath-sheet",
+    "price": 28,
+    "oldPrice": 55,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&q=80&w=800"
+    ],
+    "isNew": true,
+    "isHot": false,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "RALP-TWL-U-WHT-OS-PRD0125",
+    "moq": 40,
+    "quantityStep": 40,
+    "availableStock": 1200,
+    "brand": "Ralph Lauren",
+    "colours": 1,
+    "color": "White"
+  },
+  {
+    "id": "prd0126",
+    "name": "Premium Noir Gym Towel",
+    "slug": "premium-noir-gym-towel",
+    "price": 16,
+    "oldPrice": 30,
+    "categoryId": "c_unisex",
+    "images": [
+      "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&q=80&w=800"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "OS"
+    ],
+    "sku": "NIKE-TWL-U-BLK-OS-PRD0126",
+    "moq": 50,
+    "quantityStep": 50,
+    "availableStock": 2000,
+    "brand": "Nike",
+    "colours": 1,
+    "color": "Black"
+  },
+  {
+    "id": "prd0127",
+    "name": "Boys Cozy Knit Sweater",
+    "slug": "boys-cozy-knit-sweater",
+    "price": 24,
+    "oldPrice": 48,
+    "categoryId": "c_boys",
+    "images": [
+      "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&q=80&w=800"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "S",
+      "M"
+    ],
+    "sku": "GAP-SWT-K-BLU-S-PRD0127",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 800,
+    "brand": "Gap",
+    "colours": 1,
+    "color": "Blue"
+  },
+  {
+    "id": "prd0128",
+    "name": "Girls Cable Knit Cardigan",
+    "slug": "girls-cable-knit-cardigan",
+    "price": 26,
+    "oldPrice": 52,
+    "categoryId": "c_girls",
+    "images": [
+      "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&q=80&w=800"
+    ],
+    "isNew": true,
+    "isHot": true,
+    "sizes": [
+      "4T",
+      "5T"
+    ],
+    "sku": "CART-SWT-K-PNK-4T-PRD0128",
+    "moq": 30,
+    "quantityStep": 30,
+    "availableStock": 900,
+    "brand": "Carters",
+    "colours": 1,
+    "color": "Pink"
   }
 ]

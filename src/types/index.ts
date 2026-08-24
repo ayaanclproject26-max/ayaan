@@ -17,6 +17,7 @@ export interface Product {
   availableStock?: number;
   brand?: string;
   colours?: number;
+  color?: string;
   description?: string;
   createdAt?: string;
   addedAt?: string;
