@@ -1,10 +1,14 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef } from "react";
 import ProductCard from "../product/ProductCard";
 import productsData from "@/data/products.json";
 import { Product } from "@/types";
-import { X, Check, Filter, Sparkles, RotateCcw } from "lucide-react";
+import {
+  PRODUCT_CATEGORIES,
+  filterProducts,
+} from "@/lib/filters";
+import { X, Check, Filter, Sparkles, RotateCcw, User, Users, Smile } from "lucide-react";
 
 export interface Brand {
   id: string;
@@ -61,186 +65,9 @@ export const BRANDS: Brand[] = [
   { id: "new-balance", name: "New Balance", slug: "new-balance", logo: "/brands/new-balance.svg" },
 ];
 
-const AUDIENCE_FILTERS = [
-  { id: "MEN", label: "MEN", categoryId: "c_men", icon: "👨" },
-  { id: "WOMEN", label: "WOMEN", categoryId: "c_women", icon: "👩" },
-  { id: "BOYS", label: "BOYS", categoryId: "c_boys", icon: "👦" },
-  { id: "GIRLS", label: "GIRLS", categoryId: "c_girls", icon: "👧" },
-  { id: "UNISEX", label: "UNISEX", categoryId: "c_unisex", icon: "◎" },
-];
-
-const PRODUCT_CATEGORIES = [
-  "ALL",
-  "Sweaters",
-  "T-Shirts",
-  "Hoodies",
-  "Trousers",
-  "Pants",
-  "Shorts",
-  "Shirts",
-  "Beachwear",
-  "Socks",
-  "Blouse",
-  "Tank Top",
-  "Tops",
-  "Sports",
-  "Towels",
-];
-
-// Helper to extract detailed categories for each product
-function getProductCategories(product: Product): string[] {
-  const name = (product.name || "").toLowerCase();
-  const sku = (product.sku || "").toLowerCase();
-  const cats: string[] = [];
-
-  if (
-    name.includes("sweater") ||
-    name.includes("cardigan") ||
-    name.includes("knit") ||
-    name.includes("pullover") ||
-    name.includes("turtleneck") ||
-    sku.includes("-swt-")
-  ) {
-    cats.push("Sweaters");
-  }
-  if (
-    name.includes("t-shirt") ||
-    name.includes("tee") ||
-    name.includes("graphic t-shirt") ||
-    sku.includes("-tsh-")
-  ) {
-    cats.push("T-Shirts");
-  }
-  if (
-    name.includes("hoodie") ||
-    name.includes("sweatshirt") ||
-    name.includes("fleece") ||
-    sku.includes("-hd-")
-  ) {
-    cats.push("Hoodies");
-  }
-  if (
-    name.includes("trouser") ||
-    name.includes("chino") ||
-    name.includes("sweatpants") ||
-    name.includes("jogger") ||
-    name.includes("leggings") ||
-    name.includes("tights") ||
-    sku.includes("-trs-")
-  ) {
-    cats.push("Trousers");
-  }
-  if (
-    name.includes("pants") ||
-    name.includes("jeans") ||
-    name.includes("denim") ||
-    name.includes("overalls") ||
-    sku.includes("-jns-") ||
-    sku.includes("-trs-")
-  ) {
-    cats.push("Pants");
-  }
-  if (
-    name.includes("short") ||
-    name.includes("trunks") ||
-    name.includes("board shorts") ||
-    sku.includes("-sho-")
-  ) {
-    cats.push("Shorts");
-  }
-  if (
-    name.includes("shirt") ||
-    name.includes("polo") ||
-    name.includes("button-down") ||
-    name.includes("henley") ||
-    name.includes("oxford") ||
-    sku.includes("-sht-") ||
-    sku.includes("-pol-")
-  ) {
-    cats.push("Shirts");
-  }
-  if (
-    name.includes("swim") ||
-    name.includes("swimsuit") ||
-    name.includes("bikini") ||
-    name.includes("beach") ||
-    name.includes("trunks") ||
-    name.includes("board shorts") ||
-    sku.includes("-swm-")
-  ) {
-    cats.push("Beachwear");
-  }
-  if (name.includes("sock") || sku.includes("-sck-")) {
-    cats.push("Socks");
-  }
-  if (name.includes("blouse") || name.includes("camisole") || name.includes("silk") || name.includes("satin")) {
-    cats.push("Blouse");
-  }
-  if (name.includes("tank") || name.includes("tank top") || name.includes("camisole")) {
-    cats.push("Tank Top");
-  }
-  if (
-    name.includes("top") ||
-    name.includes("tee") ||
-    name.includes("t-shirt") ||
-    name.includes("shirt") ||
-    name.includes("blouse") ||
-    name.includes("tank") ||
-    name.includes("polo") ||
-    name.includes("camisole") ||
-    sku.includes("-tsh-") ||
-    sku.includes("-sht-")
-  ) {
-    cats.push("Tops");
-  }
-  if (
-    name.includes("sport") ||
-    name.includes("running") ||
-    name.includes("training") ||
-    name.includes("performance") ||
-    name.includes("athletic") ||
-    name.includes("gym") ||
-    name.includes("yoga") ||
-    name.includes("compression") ||
-    name.includes("jogger") ||
-    name.includes("sweatpants") ||
-    name.includes("visor") ||
-    product.brand === "Nike" ||
-    product.brand === "Adidas" ||
-    product.brand === "Puma" ||
-    product.brand === "Under Armour" ||
-    product.brand === "2XU" ||
-    product.brand === "Gymshark"
-  ) {
-    cats.push("Sports");
-  }
-  if (name.includes("towel") || sku.includes("-twl-")) {
-    cats.push("Towels");
-  }
-
-  return cats;
-}
-
-// Normalized brand matching helper
-function matchBrand(product: Product, brand: Brand): boolean {
-  if (!product.brand) return false;
-  const pBrand = product.brand.toLowerCase().trim();
-  const bName = brand.name.toLowerCase().trim();
-  const bSlug = brand.slug.toLowerCase().trim();
-
-  return (
-    pBrand === bName ||
-    pBrand.replace(/['’.\s-]/g, "") === bName.replace(/['’.\s-]/g, "") ||
-    pBrand.includes(bName) ||
-    bName.includes(pBrand) ||
-    bSlug.replace(/-/g, "").includes(pBrand.replace(/['’.\s-]/g, ""))
-  );
-}
-
 export default function ShopByBrand() {
   // Multi-select state
   const [selectedBrandIds, setSelectedBrandIds] = useState<string[]>([]);
-  const [selectedAudiences, setSelectedAudiences] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(["ALL"]);
   const [isMobileExpanded, setIsMobileExpanded] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
@@ -264,22 +91,10 @@ export default function ShopByBrand() {
       }
     });
 
-    // Smooth scroll to the collection filter/product section
+    // Smooth scroll to the collection showcase
     setTimeout(() => {
       collectionSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }, 150);
-  };
-
-  // Handle Audience filter toggle (multi-select)
-  const handleAudienceClick = (audienceId: string) => {
-    setHasInteracted(true);
-    setSelectedAudiences((prev) => {
-      if (prev.includes(audienceId)) {
-        return prev.filter((a) => a !== audienceId);
-      } else {
-        return [...prev, audienceId];
-      }
-    });
   };
 
   // Handle Category filter toggle (multi-select with ALL reset)
@@ -291,7 +106,6 @@ export default function ShopByBrand() {
     }
 
     setSelectedCategories((prev) => {
-      // Remove ALL if active
       const withoutAll = prev.filter((c) => c !== "ALL");
       if (withoutAll.includes(categoryName)) {
         const next = withoutAll.filter((c) => c !== categoryName);
@@ -305,13 +119,15 @@ export default function ShopByBrand() {
   // Clear all filters
   const handleClearAll = () => {
     setSelectedBrandIds([]);
-    setSelectedAudiences([]);
     setSelectedCategories(["ALL"]);
   };
 
   // Dynamic Collection Title
   const collectionTitle = useMemo(() => {
     if (selectedBrands.length === 0) {
+      if (!selectedCategories.includes("ALL") && selectedCategories.length > 0) {
+        return `${selectedCategories.join(" + ")} Collection`;
+      }
       return "All Brands Collection";
     }
     if (selectedBrands.length === 1) {
@@ -324,42 +140,23 @@ export default function ShopByBrand() {
       return `${selectedBrands[0].name} + ${selectedBrands[1].name} + ${selectedBrands[2].name} Collection`;
     }
     return `${selectedBrands[0].name}, ${selectedBrands[1].name} + ${selectedBrands.length - 2} More Collection`;
-  }, [selectedBrands]);
+  }, [selectedBrands, selectedCategories]);
 
-  // Combined Multi-Filter Execution: (Brand OR) AND (Audience OR) AND (Category OR)
+  // Combined Multi-Filter Execution using shared filter module
   const filteredProducts = useMemo(() => {
-    return allProducts.filter((product) => {
-      // 1. Brand Group Filter (OR inside group)
-      const brandMatch =
-        selectedBrands.length === 0 ||
-        selectedBrands.some((brand) => matchBrand(product, brand));
-
-      // 2. Audience Group Filter (OR inside group)
-      const audienceMatch =
-        selectedAudiences.length === 0 ||
-        selectedAudiences.some((aud) => {
-          const item = AUDIENCE_FILTERS.find((a) => a.id === aud);
-          return item ? product.categoryId === item.categoryId : false;
-        });
-
-      // 3. Category Group Filter (OR inside group, ALL = true)
-      const isAllCategories =
-        selectedCategories.length === 0 || selectedCategories.includes("ALL");
-      const productCats = getProductCategories(product);
-      const categoryMatch =
-        isAllCategories ||
-        selectedCategories.some((cat) => productCats.includes(cat));
-
-      // Inter-group AND logic
-      return brandMatch && audienceMatch && categoryMatch;
+    return filterProducts({
+      products: allProducts,
+      brandIds: selectedBrandIds,
+      categoryNames: selectedCategories,
     });
-  }, [allProducts, selectedBrands, selectedAudiences, selectedCategories]);
+  }, [allProducts, selectedBrandIds, selectedCategories]);
 
   // Check if any filter is active
   const hasActiveFilters =
     selectedBrandIds.length > 0 ||
-    selectedAudiences.length > 0 ||
     (!selectedCategories.includes("ALL") && selectedCategories.length > 0);
+
+  const shouldShowCollection = hasInteracted || selectedBrandIds.length > 0 || !selectedCategories.includes("ALL");
 
   return (
     <section id="brands" className="py-10 sm:py-14 bg-background border-t border-border/40">
@@ -384,16 +181,10 @@ export default function ShopByBrand() {
           )}
         </div>
 
-        {/* 
-          1. Brand Grid:
-          - Desktop (xl: 10 cols): ~4 balanced rows for full collection.
-          - Large (lg: 8 cols), Tablet (md: 6 cols, sm: 4 cols).
-          - Mobile (grid-cols-3): 3 visible rows (9 brands), with ALL BRANDS expansion.
-        */}
+        {/* Brand Grid (Desktop: 10 cols (~4 balanced rows), Mobile: 3 cols, 3 visible rows) */}
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2.5 sm:gap-3 transition-all duration-300">
           {BRANDS.map((brand, index) => {
             const isSelected = selectedBrandIds.includes(brand.id);
-            // On mobile: hide items past index 8 (first 9 brands) when collapsed
             const isHiddenOnMobile = index >= 9 && !isMobileExpanded;
 
             return (
@@ -410,12 +201,12 @@ export default function ShopByBrand() {
                     : "border-border/60 hover:border-foreground/30"
                 }`}
               >
-                {/* Logo Area (Uniform fixed height across all cards) */}
+                {/* Logo Area */}
                 <div className="w-full flex-1 flex items-center justify-center min-h-0 overflow-hidden px-1">
                   <BrandLogo brand={brand} />
                 </div>
 
-                {/* Brand Name (Uniform position & typography) */}
+                {/* Brand Name */}
                 <span
                   className={`text-[0.625rem] sm:text-[0.6875rem] font-semibold uppercase tracking-wider truncate w-full px-1 mt-1 transition-colors ${
                     isSelected ? "text-foreground font-bold" : "text-muted-foreground group-hover:text-foreground"
@@ -425,7 +216,7 @@ export default function ShopByBrand() {
                   {brand.name}
                 </span>
 
-                {/* Active checkmark / dot indicator */}
+                {/* Active Indicator */}
                 {isSelected && (
                   <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-foreground text-background flex items-center justify-center text-[10px] shadow-sm">
                     <Check size={10} strokeWidth={3} />
@@ -436,7 +227,7 @@ export default function ShopByBrand() {
           })}
         </div>
 
-        {/* Mobile Expand / Collapse Button (Only on mobile) */}
+        {/* Mobile Expand / Collapse Button */}
         <div className="mt-6 flex justify-center sm:hidden">
           <button
             type="button"
@@ -448,227 +239,177 @@ export default function ShopByBrand() {
         </div>
 
         {/* 
-          2. BRAND COLLECTION SHOWCASE & MULTI-SELECT FILTERING AREA
+          BRAND COLLECTION SHOWCASE & PRODUCT CATEGORY FILTERS
           Hierarchy:
           BRAND COLLECTION TITLE
           ↓
-          AUDIENCE FILTERS
-          ↓
-          PRODUCT CATEGORY FILTERS
+          PRODUCT CATEGORY FILTERS (Clean pill rows)
           ↓
           SELECTED FILTER SUMMARY / CLEAR ALL
           ↓
-          PRODUCTS (Grid)
+          PRODUCTS GRID
         */}
-        <div
-          ref={collectionSectionRef}
-          className="mt-12 pt-8 border-t border-border/70 animate-in fade-in duration-300"
-        >
-          {/* BRAND COLLECTION HEADING */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="flex -space-x-2 overflow-hidden items-center">
-                {selectedBrands.slice(0, 4).map((b) => (
-                  <div
-                    key={b.id}
-                    className="inline-block h-9 w-14 bg-card border border-border rounded-lg p-1 shadow-sm overflow-hidden flex items-center justify-center"
-                    title={b.name}
-                  >
-                    <BrandLogo brand={b} />
+        {shouldShowCollection && (
+          <div
+            ref={collectionSectionRef}
+            className="mt-12 pt-8 border-t border-border/70 animate-in fade-in duration-300"
+          >
+            {/* COLLECTION TITLE & COUNT */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex -space-x-2 overflow-hidden items-center">
+                  {selectedBrands.slice(0, 4).map((b) => (
+                    <div
+                      key={b.id}
+                      className="inline-block h-9 w-14 bg-card border border-border rounded-lg p-1 shadow-sm overflow-hidden flex items-center justify-center"
+                      title={b.name}
+                    >
+                      <BrandLogo brand={b} />
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xl sm:text-2xl font-display font-bold uppercase tracking-tight">
+                      {collectionTitle}
+                    </h3>
+                    <Sparkles size={16} className="text-primary hidden sm:inline-block" />
                   </div>
-                ))}
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xl sm:text-2xl font-display font-bold uppercase tracking-tight">
-                    {collectionTitle}
-                  </h3>
-                  <Sparkles size={16} className="text-primary hidden sm:inline-block" />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {selectedBrands.length > 0
-                    ? `Curated catalog matching ${selectedBrands.map((b) => b.name).join(" + ")}`
-                    : "Browsing all global manufacturer brands"}
-                </p>
-              </div>
-            </div>
-
-            {/* Product Count indicator */}
-            <div className="flex items-center gap-2 self-start sm:self-auto">
-              <span className="px-3.5 py-1.5 rounded-full bg-secondary text-foreground text-xs font-bold uppercase tracking-wider border border-border">
-                {filteredProducts.length} Product{filteredProducts.length !== 1 ? "s" : ""}
-              </span>
-            </div>
-          </div>
-
-          {/* FILTERS CONTAINER */}
-          <div className="bg-secondary/40 border border-border/60 rounded-2xl p-4 sm:p-6 mb-8 space-y-4 shadow-sm">
-            
-            {/* ROW 1: AUDIENCE / GENDER FILTER GROUP (Pills with Icon + Text) */}
-            <div className="flex flex-col gap-2">
-              <span className="text-[0.6875rem] font-bold uppercase tracking-wider text-muted-foreground">
-                Audience / Department:
-              </span>
-              <div className="overflow-x-auto no-scrollbar py-1">
-                <div className="flex items-center gap-2 min-w-max">
-                  {AUDIENCE_FILTERS.map((aud) => {
-                    const isSelected = selectedAudiences.includes(aud.id);
-                    return (
-                      <button
-                        key={aud.id}
-                        type="button"
-                        onClick={() => handleAudienceClick(aud.id)}
-                        className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
-                          isSelected
-                            ? "bg-foreground text-background shadow-sm ring-1 ring-foreground"
-                            : "bg-card hover:bg-card/80 text-foreground/80 border border-border/80 hover:border-foreground/40"
-                        }`}
-                      >
-                        <span className="text-sm leading-none">{aud.icon}</span>
-                        <span>{aud.label}</span>
-                        {isSelected && <Check size={12} strokeWidth={3} className="ml-0.5" />}
-                      </button>
-                    );
-                  })}
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {selectedBrands.length > 0
+                      ? `Curated catalog matching ${selectedBrands.map((b) => b.name).join(" + ")}`
+                      : "Browsing all global manufacturer brands"}
+                  </p>
                 </div>
               </div>
-            </div>
 
-            {/* ROW 2: PRODUCT CATEGORY FILTER GROUP (Pills with ALL reset) */}
-            <div className="flex flex-col gap-2 pt-2 border-t border-border/40">
-              <span className="text-[0.6875rem] font-bold uppercase tracking-wider text-muted-foreground">
-                Product Category:
-              </span>
-              <div className="overflow-x-auto no-scrollbar py-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  {PRODUCT_CATEGORIES.map((categoryName) => {
-                    const isSelected =
-                      categoryName === "ALL"
-                        ? selectedCategories.includes("ALL")
-                        : selectedCategories.includes(categoryName);
-
-                    return (
-                      <button
-                        key={categoryName}
-                        type="button"
-                        onClick={() => handleCategoryClick(categoryName)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium uppercase tracking-wider transition-all duration-200 cursor-pointer ${
-                          isSelected
-                            ? "bg-foreground text-background font-bold shadow-sm"
-                            : "bg-card hover:bg-card/80 text-foreground/75 border border-border/70 hover:border-foreground/30"
-                        }`}
-                      >
-                        {categoryName}
-                        {isSelected && categoryName !== "ALL" && (
-                          <span className="ml-1 text-[10px]">✓</span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
+              {/* Product Count indicator */}
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                <span className="px-3.5 py-1.5 rounded-full bg-secondary text-foreground text-xs font-bold uppercase tracking-wider border border-border">
+                  {filteredProducts.length} Product{filteredProducts.length !== 1 ? "s" : ""}
+                </span>
               </div>
             </div>
 
-            {/* ROW 3: SELECTED FILTER SUMMARY & CLEAR ALL (Active Pills) */}
-            {hasActiveFilters && (
-              <div className="pt-3 border-t border-border/50 flex flex-wrap items-center gap-2 text-xs">
-                <span className="text-muted-foreground font-medium mr-1">Active filters:</span>
-                
-                {/* Brand Badges */}
-                {selectedBrands.map((b) => (
-                  <span
-                    key={`badge-b-${b.id}`}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-card border border-border text-foreground font-semibold"
-                  >
-                    <span>{b.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleBrandClick(b)}
-                      className="hover:text-destructive transition-colors ml-0.5 p-0.5"
-                      title={`Remove ${b.name}`}
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
-                ))}
+            {/* PRODUCT CATEGORY FILTERS CONTAINER */}
+            <div className="bg-secondary/40 border border-border/60 rounded-2xl p-4 sm:p-5 mb-8 space-y-3 shadow-sm">
+              <div className="flex flex-col gap-2">
+                <span className="text-[0.6875rem] font-bold uppercase tracking-wider text-muted-foreground">
+                  Product Category:
+                </span>
+                <div className="overflow-x-auto no-scrollbar py-1">
+                  <div className="flex flex-wrap items-center gap-2 min-w-max sm:min-w-0">
+                    {PRODUCT_CATEGORIES.map((categoryName) => {
+                      const isSelected =
+                        categoryName === "ALL"
+                          ? selectedCategories.includes("ALL")
+                          : selectedCategories.includes(categoryName);
 
-                {/* Audience Badges */}
-                {selectedAudiences.map((aud) => (
-                  <span
-                    key={`badge-a-${aud}`}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-card border border-border text-foreground font-semibold"
-                  >
-                    <span>{aud}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleAudienceClick(aud)}
-                      className="hover:text-destructive transition-colors ml-0.5 p-0.5"
-                      title={`Remove ${aud}`}
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
-                ))}
+                      return (
+                        <button
+                          key={categoryName}
+                          type="button"
+                          onClick={() => handleCategoryClick(categoryName)}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                            isSelected
+                              ? "bg-foreground text-background font-bold shadow-sm"
+                              : "bg-card hover:bg-card/80 text-foreground/75 border border-border/70 hover:border-foreground/30"
+                          }`}
+                        >
+                          {categoryName}
+                          {isSelected && categoryName !== "ALL" && (
+                            <span className="ml-1 text-[10px]">✓</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
 
-                {/* Category Badges */}
-                {!selectedCategories.includes("ALL") &&
-                  selectedCategories.map((cat) => (
+              {/* Active Filter Badges & Clear All */}
+              {hasActiveFilters && (
+                <div className="pt-3 border-t border-border/50 flex flex-wrap items-center gap-2 text-xs">
+                  <span className="text-muted-foreground font-medium mr-1">Active filters:</span>
+                  
+                  {/* Brand Badges */}
+                  {selectedBrands.map((b) => (
                     <span
-                      key={`badge-c-${cat}`}
+                      key={`badge-b-${b.id}`}
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-card border border-border text-foreground font-semibold"
                     >
-                      <span>{cat}</span>
+                      <span>{b.name}</span>
                       <button
                         type="button"
-                        onClick={() => handleCategoryClick(cat)}
+                        onClick={() => handleBrandClick(b)}
                         className="hover:text-destructive transition-colors ml-0.5 p-0.5"
-                        title={`Remove ${cat}`}
+                        title={`Remove ${b.name}`}
                       >
                         <X size={12} />
                       </button>
                     </span>
                   ))}
 
-                {/* Clear All Trigger */}
+                  {/* Category Badges */}
+                  {!selectedCategories.includes("ALL") &&
+                    selectedCategories.map((cat) => (
+                      <span
+                        key={`badge-c-${cat}`}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-card border border-border text-foreground font-semibold"
+                      >
+                        <span>{cat}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleCategoryClick(cat)}
+                          className="hover:text-destructive transition-colors ml-0.5 p-0.5"
+                          title={`Remove ${cat}`}
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ))}
+
+                  {/* Clear All */}
+                  <button
+                    type="button"
+                    onClick={handleClearAll}
+                    className="text-xs font-bold text-destructive hover:underline ml-2 cursor-pointer"
+                  >
+                    Clear All
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* PRODUCTS GRID / EMPTY STATE */}
+            {filteredProducts.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10">
+                {filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            ) : (
+              <div className="bg-card border border-border/70 rounded-2xl p-8 sm:p-14 text-center max-w-lg mx-auto my-6 shadow-sm">
+                <div className="w-14 h-14 rounded-full bg-secondary/80 flex items-center justify-center mx-auto mb-4 text-muted-foreground">
+                  <Filter size={24} />
+                </div>
+                <h4 className="text-lg font-bold font-display uppercase mb-2">
+                  No Products Found
+                </h4>
+                <p className="text-xs sm:text-sm text-muted-foreground mb-6 leading-relaxed">
+                  No products match the selected combination of brands and categories. Try clearing one or more filters.
+                </p>
                 <button
                   type="button"
                   onClick={handleClearAll}
-                  className="text-xs font-bold text-destructive hover:underline ml-2 cursor-pointer"
+                  className="px-6 py-2.5 bg-foreground text-background text-xs font-semibold uppercase tracking-wider rounded-full hover:opacity-90 transition-opacity cursor-pointer"
                 >
-                  Clear All
+                  Clear All Filters
                 </button>
               </div>
             )}
           </div>
-
-          {/* 3. PRODUCTS GRID / EMPTY STATE */}
-          {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10">
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          ) : (
-            <div className="bg-card border border-border/70 rounded-2xl p-8 sm:p-14 text-center max-w-lg mx-auto my-6 shadow-sm">
-              <div className="w-14 h-14 rounded-full bg-secondary/80 flex items-center justify-center mx-auto mb-4 text-muted-foreground">
-                <Filter size={24} />
-              </div>
-              <h4 className="text-lg font-bold font-display uppercase mb-2">
-                No Products Found
-              </h4>
-              <p className="text-xs sm:text-sm text-muted-foreground mb-6 leading-relaxed">
-                No products match the selected combination of brands, audience, and categories. Try clearing one or more filters.
-              </p>
-              <button
-                type="button"
-                onClick={handleClearAll}
-                className="px-6 py-2.5 bg-foreground text-background text-xs font-semibold uppercase tracking-wider rounded-full hover:opacity-90 transition-opacity cursor-pointer"
-              >
-                Clear All Filters
-              </button>
-            </div>
-          )}
-        </div>
+        )}
 
       </div>
     </section>
