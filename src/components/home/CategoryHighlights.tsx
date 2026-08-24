@@ -32,8 +32,8 @@ export default function CategoryHighlights() {
           <h2 className="text-fluid-h2 font-display uppercase tracking-tight">SHOP BY CATEGORY</h2>
         </div>
         
-        {/* Primary Categories (Always visible) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* Primary Categories (5 in a single row on desktop) */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
           {categoriesData.map((category) => (
             <CategoryCard key={category.id} category={category} variant="primary" />
           ))}
@@ -89,7 +89,7 @@ function CategoryCard({
     <Link 
       href={`#category-${category.slug}`}
       className={`group relative rounded-xl overflow-hidden bg-secondary ${
-        variant === "primary" ? "aspect-[8/5]" : "aspect-[4/5]"
+        variant === "primary" ? "aspect-[4/3]" : "aspect-[4/5]"
       } ${
         isActive ? "ring-2 ring-foreground ring-offset-2 ring-offset-background" : ""
       }`}
@@ -107,12 +107,12 @@ function CategoryCard({
         </div>
       )}
       <div className="absolute inset-0 bg-[#111827]/30 group-hover:bg-[#111827]/45 transition-colors duration-500" />
-      <div className={`absolute inset-0 flex flex-col justify-end text-white ${variant === "primary" ? "p-5 sm:p-6" : "p-3 sm:p-4"}`}>
-        <h3 className={`${variant === "primary" ? "text-lg sm:text-xl" : "text-sm sm:text-base leading-tight"} font-medium tracking-wide mb-1 uppercase`}>
+      <div className={`absolute inset-0 flex flex-col justify-end text-white ${variant === "primary" ? "p-4 sm:p-5" : "p-3 sm:p-4"}`}>
+        <h3 className={`${variant === "primary" ? "text-base sm:text-lg lg:text-xl font-bold font-display" : "text-sm sm:text-base leading-tight"} font-medium tracking-wide mb-1 uppercase`}>
           {category.name}
         </h3>
         {variant === "primary" && (
-          <span className="text-sm font-medium tracking-widest uppercase opacity-0 transform translate-y-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
+          <span className="text-xs sm:text-sm font-medium tracking-widest uppercase opacity-0 transform translate-y-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
             Discover
           </span>
         )}

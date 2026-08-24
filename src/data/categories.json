@@ -1,28 +1,35 @@
 [
   {
     "id": "c_men",
-    "name": "Men",
+    "name": "MEN",
     "slug": "men",
     "image": "https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&q=80&w=800",
     "description": "Modern essentials and statement pieces for men."
   },
   {
     "id": "c_women",
-    "name": "Women",
+    "name": "WOMEN",
     "slug": "women",
     "image": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=800",
     "description": "Elegant and contemporary fashion for women."
   },
   {
-    "id": "c_kids",
-    "name": "Kids",
-    "slug": "kids",
-    "image": "https://images.unsplash.com/photo-1514090458221-65bb69cf63e6?auto=format&fit=crop&q=80&w=800",
-    "description": "Fun and stylish fashion for children."
+    "id": "c_boys",
+    "name": "BOYS",
+    "slug": "boys",
+    "image": "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&q=80&w=800",
+    "description": "Trendy and durable apparel crafted for boys."
+  },
+  {
+    "id": "c_girls",
+    "name": "GIRLS",
+    "slug": "girls",
+    "image": "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&q=80&w=800",
+    "description": "Vibrant and stylish fashion collection for girls."
   },
   {
     "id": "c_unisex",
-    "name": "Unisex",
+    "name": "UNISEX",
     "slug": "unisex",
     "image": "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800",
     "description": "Gender-neutral fashion for everyone."
