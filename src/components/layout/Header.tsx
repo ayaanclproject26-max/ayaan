@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { 
   Search, 
@@ -17,29 +18,32 @@ import { useCart } from "@/lib/CartContext";
 import { usePreferences } from "@/lib/PreferencesContext";
 
 const NAV_LINKS = [
-  { label: "ALL", href: "#categories" },
-  { label: "SWEATERS", href: "#hot-sales" },
-  { label: "T-SHIRTS", href: "#categories" },
-  { label: "HOODIES", href: "#categories" },
-  { label: "TROUSERS", href: "#categories" },
-  { label: "PANTS", href: "#categories" },
-  { label: "SHORTS", href: "#categories" },
-  { label: "SHIRTS", href: "#categories" },
-  { label: "BEACHWEAR", href: "#categories" },
-  { label: "SOCKS", href: "#categories" },
-  { label: "BLOUSE", href: "#categories" },
-  { label: "TANK TOP", href: "#categories" },
-  { label: "TOPS", href: "#categories" },
-  { label: "SPORTS", href: "#categories" },
-  { label: "TOWELS", href: "#hot-sales" },
-  { label: "HOT SALES", href: "#hot-sales", special: "hot" },
+  { label: "ALL", href: "/#categories" },
+  { label: "SWEATERS", href: "/#hot-sales" },
+  { label: "T-SHIRTS", href: "/#categories" },
+  { label: "HOODIES", href: "/#categories" },
+  { label: "TROUSERS", href: "/#categories" },
+  { label: "PANTS", href: "/#categories" },
+  { label: "SHORTS", href: "/#categories" },
+  { label: "SHIRTS", href: "/#categories" },
+  { label: "BEACHWEAR", href: "/#categories" },
+  { label: "SOCKS", href: "/#categories" },
+  { label: "BLOUSE", href: "/#categories" },
+  { label: "TANK TOP", href: "/#categories" },
+  { label: "TOPS", href: "/#categories" },
+  { label: "SPORTS", href: "/#categories" },
+  { label: "TOWELS", href: "/#hot-sales" },
+  { label: "HOT SALES", href: "/#hot-sales", special: "hot" },
 ];
 
-export default function Header() {
+function HeaderContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlQuery = searchParams.get("query");
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isSearchExecuted, setIsSearchExecuted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Modals state
@@ -51,6 +55,13 @@ export default function Header() {
   // Contexts
   const { totalItems, setIsCartOpen } = useCart();
   const { preferences } = usePreferences();
+
+  // Populate search input with active query if on search page
+  useEffect(() => {
+    if (urlQuery !== null && urlQuery !== undefined) {
+      setSearchQuery(urlQuery);
+    }
+  }, [urlQuery]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,12 +76,11 @@ export default function Header() {
     setIsAuthModalOpen(true);
   };
 
-  // Search execution handler
+  // Search execution handler -> Navigates to /search?query=...
   const handleExecuteSearch = (queryToSearch?: string) => {
     const q = (queryToSearch !== undefined ? queryToSearch : searchQuery).trim();
     if (q) {
-      setIsSearchOpen(true);
-      setIsSearchExecuted(true);
+      setIsSearchOpen(false);
 
       // Save to localStorage recent searches
       try {
@@ -81,6 +91,9 @@ export default function Header() {
       } catch {
         // Ignore storage errors
       }
+
+      // Navigate to dedicated search page
+      router.push(`/search?query=${encodeURIComponent(q)}`);
     }
   };
 
@@ -135,12 +148,7 @@ export default function Header() {
               }`}
               placeholder={isSearchOpen ? "Search product, brand, and more..." : "Search..."}
               value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                if (!e.target.value.trim()) {
-                  setIsSearchExecuted(false);
-                }
-              }}
+              onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setIsSearchOpen(true)}
             />
 
@@ -271,12 +279,7 @@ export default function Header() {
               }`}
               placeholder={isSearchOpen ? "Search product, brand, and more..." : "Search..."}
               value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                if (!e.target.value.trim()) {
-                  setIsSearchExecuted(false);
-                }
-              }}
+              onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setIsSearchOpen(true)}
             />
 
@@ -388,15 +391,13 @@ export default function Header() {
         </nav>
       </div>
 
-      {/* Search Overlay */}
+      {/* Search Discovery Overlay */}
       <SearchOverlay 
         isOpen={isSearchOpen} 
         onClose={() => setIsSearchOpen(false)}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        isSearchExecuted={isSearchExecuted}
-        setIsSearchExecuted={setIsSearchExecuted}
-        onExecuteSearch={handleExecuteSearch}
+        onSelectTerm={handleExecuteSearch}
       />
 
       {/* Auth Modal (Sign In / Create Account) */}
@@ -419,5 +420,15 @@ export default function Header() {
         onClose={() => setIsLanguageOpen(false)}
       />
     </>
+  );
+}
+
+export default function Header() {
+  return (
+    <Suspense fallback={
+      <header className="sticky top-0 z-50 w-full bg-[#0b1329] border-b border-white/10 h-16 sm:h-[4.25rem]" />
+    }>
+      <HeaderContent />
+    </Suspense>
   );
 }
