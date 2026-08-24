@@ -107,19 +107,33 @@ export default function Header() {
             <img src="/logo.png" alt="Ayaan Logo" className="h-8 sm:h-9 w-auto brightness-0 invert" />
           </Link>
 
-          {/* Search Bar with Right-Side Pill Button and Active Glow */}
+          {/* 
+            SEARCH BAR: Two clearly different states
+            - NORMAL: Dark navy pill, left search icon, minimal, placeholder "Search..."
+            - ACTIVE/PRESSED: White pill, subtle glow, dark input, right orange search action button with white icon
+          */}
           <form 
             onSubmit={handleSearchSubmit}
-            className={`flex w-full max-w-[45%] mx-auto items-center rounded-full pl-4 pr-1.5 h-10 border transition-all duration-200 cursor-text ${
+            className={`flex w-full max-w-[45%] mx-auto items-center rounded-full h-10 border transition-all duration-200 cursor-text ${
               isSearchOpen 
-                ? "bg-white/[0.15] border-white/40 shadow-lg ring-2 ring-white/20" 
-                : "bg-white/[0.08] border-white/15 hover:bg-white/[0.12] hover:border-white/30 focus-within:border-white/40 focus-within:bg-white/[0.15]"
+                ? "bg-white border-white text-slate-900 shadow-[0_0_20px_rgba(255,255,255,0.35)] ring-2 ring-white/30 pl-4 pr-1.5" 
+                : "bg-white/[0.08] border-white/15 text-white hover:bg-white/[0.12] hover:border-white/30 px-4"
             }`}
           >
+            {/* Normal State: Search Icon on the LEFT */}
+            {!isSearchOpen && (
+              <Search size={17} className="mr-2.5 shrink-0 text-white/50 transition-colors" />
+            )}
+
+            {/* Input Field */}
             <input 
               type="text"
-              className="bg-transparent border-none outline-none w-full text-[0.875rem] focus:ring-0 text-white placeholder:text-white/50 pr-2"
-              placeholder="Search products, brands, and more..."
+              className={`bg-transparent border-none outline-none w-full text-[0.875rem] focus:ring-0 transition-colors ${
+                isSearchOpen 
+                  ? "text-slate-900 placeholder:text-slate-400 font-medium pr-2" 
+                  : "text-white placeholder:text-white/50"
+              }`}
+              placeholder={isSearchOpen ? "Search product, brand, and more..." : "Search..."}
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -129,15 +143,18 @@ export default function Header() {
               }}
               onFocus={() => setIsSearchOpen(true)}
             />
-            {/* Right-Side Search Pill Button */}
-            <button 
-              type="submit"
-              className="shrink-0 h-7 px-3.5 rounded-full bg-white text-[#0b1329] hover:bg-white/90 active:scale-95 font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition-all duration-150 cursor-pointer"
-              aria-label="Search"
-              title="Search products"
-            >
-              <Search size={14} strokeWidth={2.5} />
-            </button>
+
+            {/* Active State: Orange Pill Search Action Button on the RIGHT */}
+            {isSearchOpen && (
+              <button 
+                type="submit"
+                className="shrink-0 h-7 px-3.5 rounded-full bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition-all duration-150 cursor-pointer animate-in fade-in zoom-in-90 duration-150"
+                aria-label="Search"
+                title="Search"
+              >
+                <Search size={14} className="text-white" strokeWidth={2.5} />
+              </button>
+            )}
           </form>
 
           {/* Desktop Utilities */}
@@ -230,19 +247,29 @@ export default function Header() {
             </button>
           </div>
           
-          {/* Mobile Search Bar with Right-Side Search Pill Button */}
+          {/* Mobile Search Bar: Normal vs Active State */}
           <form 
             onSubmit={handleSearchSubmit}
-            className={`flex w-full items-center rounded-full pl-4 pr-1.5 h-10 border transition-all duration-200 cursor-text ${
+            className={`flex w-full items-center rounded-full h-10 border transition-all duration-200 cursor-text ${
               isSearchOpen 
-                ? "bg-white/[0.15] border-white/40 shadow-lg ring-2 ring-white/20" 
-                : "bg-white/[0.08] border-white/15 hover:bg-white/[0.12] hover:border-white/30 focus-within:border-white/40 focus-within:bg-white/[0.15]"
+                ? "bg-white border-white text-slate-900 shadow-[0_0_20px_rgba(255,255,255,0.35)] ring-2 ring-white/30 pl-4 pr-1.5" 
+                : "bg-white/[0.08] border-white/15 text-white hover:bg-white/[0.12] hover:border-white/30 px-4"
             }`}
           >
+            {/* Normal State: Search Icon on the LEFT */}
+            {!isSearchOpen && (
+              <Search size={16} className="mr-2.5 shrink-0 text-white/50 transition-colors" />
+            )}
+
+            {/* Input Field */}
             <input 
               type="text"
-              className="bg-transparent border-none outline-none w-full text-[0.8125rem] focus:ring-0 text-white placeholder:text-white/50 pr-2"
-              placeholder="Search products, brands, and more..."
+              className={`bg-transparent border-none outline-none w-full text-[0.8125rem] focus:ring-0 transition-colors ${
+                isSearchOpen 
+                  ? "text-slate-900 placeholder:text-slate-400 font-medium pr-2" 
+                  : "text-white placeholder:text-white/50"
+              }`}
+              placeholder={isSearchOpen ? "Search product, brand, and more..." : "Search..."}
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -252,15 +279,18 @@ export default function Header() {
               }}
               onFocus={() => setIsSearchOpen(true)}
             />
-            {/* Right-Side Search Pill Button */}
-            <button 
-              type="submit"
-              className="shrink-0 h-7 px-3.5 rounded-full bg-white text-[#0b1329] hover:bg-white/90 active:scale-95 font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition-all duration-150 cursor-pointer"
-              aria-label="Search"
-              title="Search products"
-            >
-              <Search size={14} strokeWidth={2.5} />
-            </button>
+
+            {/* Active State: Orange Pill Search Action Button on the RIGHT */}
+            {isSearchOpen && (
+              <button 
+                type="submit"
+                className="shrink-0 h-7 px-3.5 rounded-full bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition-all duration-150 cursor-pointer animate-in fade-in zoom-in-90 duration-150"
+                aria-label="Search"
+                title="Search"
+              >
+                <Search size={14} className="text-white" strokeWidth={2.5} />
+              </button>
+            )}
           </form>
         </div>
 
