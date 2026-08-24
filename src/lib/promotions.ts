@@ -3,8 +3,6 @@ import productsData from "@/data/products.json";
 
 /**
  * Default static seed data for hero main carousel promotions.
- * When a real database or API is connected later, this will be replaced by
- * database queries (e.g. `SELECT * FROM hero_promotions WHERE active = true ORDER BY sort_order ASC`).
  */
 export const DEFAULT_HERO_PROMOTIONS: HeroPromotion[] = [
   {
@@ -37,8 +35,6 @@ export const DEFAULT_HERO_PROMOTIONS: HeroPromotion[] = [
 
 /**
  * Default admin-configured product promotions.
- * In a future database, this table/collection tracks admin-selected promotions,
- * active status, and optional start/end expiration timestamps.
  */
 export const DEFAULT_PRODUCT_PROMOTIONS: ProductPromotion[] = [
   {
@@ -48,20 +44,19 @@ export const DEFAULT_PRODUCT_PROMOTIONS: ProductPromotion[] = [
     active: true,
     priority: 1,
     customTitle: "LIMITED TIME OFFER",
-    customSubtitle: "Special prices on selected products.",
     customImage: "https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?auto=format&fit=crop&q=80&w=800",
   },
 ];
 
 /**
  * Default secondary banners for New Arrivals and Limited Time Offer.
+ * Clean: No subtitles below the headings.
  */
 export const DEFAULT_SECONDARY_BANNERS: HeroSecondaryBanner[] = [
   {
     id: "banner-new-arrivals",
     type: "new-arrivals",
     title: "NEW ARRIVALS",
-    subtitle: "Fresh styles just landed.",
     image: "https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&q=80&w=800",
     targetType: "featured-products",
     target: "#featured",
@@ -71,7 +66,6 @@ export const DEFAULT_SECONDARY_BANNERS: HeroSecondaryBanner[] = [
     id: "banner-limited-time",
     type: "limited-time-offer",
     title: "LIMITED TIME OFFER",
-    subtitle: "Special prices on selected products.",
     image: "https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?auto=format&fit=crop&q=80&w=800",
     targetType: "featured-products",
     target: "#featured",
@@ -103,10 +97,8 @@ export function isPromotionValid(
 
 /**
  * Query function to retrieve active hero promotions sorted by display order.
- * Future DB replacement: `await db.promotions.findMany({ where: { active: true } })`
  */
 export function getHeroPromotions(): HeroPromotion[] {
-  // Filter active and non-expired promotions, sorted by sortOrder
   const activePromos = DEFAULT_HERO_PROMOTIONS
     .filter(isPromotionValid)
     .sort((a, b) => a.sortOrder - b.sortOrder);
@@ -116,13 +108,11 @@ export function getHeroPromotions(): HeroPromotion[] {
 
 /**
  * Query function to retrieve newest products sorted by creation/addition timestamp.
- * In the future DB, sorts by `createdAt` / `addedAt` descending.
- * Fallback: Uses `isNew` boolean flag or top products.
+ * Uses real product timestamp (createdAt / addedAt / publishedAt) or isNew flag.
  */
 export function getNewArrivals(limit = 16): Product[] {
   const allProducts = productsData as Product[];
 
-  // If products have real date timestamps in future DB schema, sort by date
   const hasDateFields = allProducts.some((p) => p.createdAt || p.addedAt || p.publishedAt);
 
   if (hasDateFields) {
@@ -135,7 +125,6 @@ export function getNewArrivals(limit = 16): Product[] {
       .slice(0, limit);
   }
 
-  // Fallback: Products marked with isNew flag
   const newProducts = allProducts.filter((p) => p.isNew);
   return (newProducts.length > 0 ? newProducts : allProducts).slice(0, limit);
 }
@@ -151,7 +140,6 @@ export function getNewArrivalsBanner(): HeroSecondaryBanner {
     id: "banner-new-arrivals-fallback",
     type: "new-arrivals",
     title: "NEW ARRIVALS",
-    subtitle: "Fresh styles just landed.",
     image: "https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&q=80&w=800",
     targetType: "featured-products",
     target: "#featured",
@@ -160,10 +148,8 @@ export function getNewArrivalsBanner(): HeroSecondaryBanner {
 }
 
 /**
- * Query function to retrieve admin-selected Limited Time Offer products.
- * Future DB replacement:
- * Queries promotions table where `type = 'limited-time'` AND `active = true` AND not expired,
- * then joins with the products table.
+ * Shared query function for Best Deals and Limited Time Offers.
+ * Ensures consistent product data across Featured Products and Hero banner.
  */
 export function getLimitedTimeOffers(limit = 16): Product[] {
   const allProducts = productsData as Product[];
@@ -181,9 +167,9 @@ export function getLimitedTimeOffers(limit = 16): Product[] {
     }
   }
 
-  // 2. Check explicit product flag (isLimitedTimeOffer / promotionType)
+  // 2. Check explicit product flag (isLimitedTimeOffer / isHot / promotionType)
   const explicitOffers = allProducts.filter(
-    (p) => p.isLimitedTimeOffer || p.promotionType === "limited-time"
+    (p) => p.isLimitedTimeOffer || p.isHot || p.promotionType === "limited-time"
   );
   if (explicitOffers.length > 0) {
     return explicitOffers.slice(0, limit);
@@ -191,6 +177,13 @@ export function getLimitedTimeOffers(limit = 16): Product[] {
 
   // Fallback: Hot products
   return allProducts.filter((p) => p.isHot).slice(0, limit);
+}
+
+/**
+ * Shared alias for Best Deals to guarantee identical data source as Limited Time Offers.
+ */
+export function getBestDeals(limit = 16): Product[] {
+  return getLimitedTimeOffers(limit);
 }
 
 /**
@@ -204,7 +197,6 @@ export function getLimitedTimeOfferBanner(): HeroSecondaryBanner {
     id: "banner-limited-time-fallback",
     type: "limited-time-offer",
     title: "LIMITED TIME OFFER",
-    subtitle: "Special prices on selected products.",
     image: "https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?auto=format&fit=crop&q=80&w=800",
     targetType: "featured-products",
     target: "#featured",
@@ -214,7 +206,6 @@ export function getLimitedTimeOfferBanner(): HeroSecondaryBanner {
 
 /**
  * Smooth action handler for CTA button and promotional banner clicks.
- * Handles scrolling to '#featured' without page reloads or broken routes.
  */
 export function handlePromotionalClick(
   e: React.MouseEvent,

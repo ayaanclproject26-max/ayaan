@@ -22,7 +22,6 @@ export default function Hero({
   initialNewArrivalsBanner,
   initialLimitedTimeBanner,
 }: HeroProps) {
-  // Query layer consumption: uses provided props or falls back to promotional query service
   const slides = useMemo(
     () => initialPromotions ?? getHeroPromotions(),
     [initialPromotions]
@@ -79,14 +78,16 @@ export default function Hero({
                     <span className="text-[0.625rem] sm:text-xs font-bold tracking-[0.2em] uppercase mb-2 sm:mb-3 opacity-90">
                       {banner.eyebrow || banner.title}
                     </span>
-                    <h2 className="text-3xl sm:text-5xl md:text-6xl font-display leading-[1.1] tracking-tight mb-3 sm:mb-4 drop-shadow-sm">
+                    {/* Consistent title height across slides so CTA buttons align vertically */}
+                    <h2 className="text-3xl sm:text-5xl md:text-6xl font-display leading-[1.1] tracking-tight mb-3 sm:mb-4 drop-shadow-sm min-h-[2.2em] sm:min-h-[2.25em] flex items-end">
                       {banner.subtitle}
                     </h2>
                     {banner.description && (
-                      <p className="text-sm sm:text-lg opacity-90 mb-5 sm:mb-7 max-w-sm md:max-w-md leading-relaxed hidden sm:block drop-shadow-sm">
+                      <p className="text-sm sm:text-lg opacity-90 mb-5 sm:mb-7 max-w-sm md:max-w-md leading-relaxed hidden sm:block drop-shadow-sm min-h-[1.5em]">
                         {banner.description}
                       </p>
                     )}
+                    {/* CTA Button */}
                     <div>
                       <Link 
                         href={banner.buttonTarget || "#featured"}
@@ -138,10 +139,10 @@ export default function Hero({
               )}
             </div>
 
-            {/* Side Column */}
+            {/* Side Column: Clean Secondary Banners (Titles only, no subtitles) */}
             <div className="w-full lg:h-full min-h-0 lg:col-span-3 grid grid-cols-2 lg:grid-cols-1 lg:grid-rows-2 gap-4 sm:gap-5">
               
-              {/* Top Side Banner: New Arrivals */}
+              {/* Top Side Banner: NEW ARRIVALS */}
               <Link 
                 href={newArrivalsBanner.target || "#featured"} 
                 onClick={(e) => handlePromotionalClick(e, newArrivalsBanner.targetType, newArrivalsBanner.target)}
@@ -154,18 +155,13 @@ export default function Hero({
                 />
                 <div className="absolute inset-0 bg-[#111827]/30 group-hover:bg-[#111827]/40 transition-colors duration-300" />
                 <div className="absolute inset-0 p-4 sm:p-5 lg:p-6 flex flex-col justify-end text-white">
-                  <h3 className="text-sm sm:text-xl lg:text-2xl font-display font-semibold tracking-tight mb-1 leading-tight">
+                  <h3 className="text-sm sm:text-xl lg:text-2xl font-display font-semibold tracking-tight leading-tight uppercase">
                     {newArrivalsBanner.title}
                   </h3>
-                  {newArrivalsBanner.subtitle && (
-                    <p className="text-[0.625rem] sm:text-sm opacity-90 max-w-[90%] hidden sm:block">
-                      {newArrivalsBanner.subtitle}
-                    </p>
-                  )}
                 </div>
               </Link>
 
-              {/* Bottom Side Banner: Limited Time Offer */}
+              {/* Bottom Side Banner: LIMITED TIME OFFER */}
               <Link 
                 href={limitedTimeBanner.target || "#featured"} 
                 onClick={(e) => handlePromotionalClick(e, limitedTimeBanner.targetType, limitedTimeBanner.target)}
@@ -178,14 +174,9 @@ export default function Hero({
                 />
                 <div className="absolute inset-0 bg-[#111827]/30 group-hover:bg-[#111827]/40 transition-colors duration-300" />
                 <div className="absolute inset-0 p-4 sm:p-5 lg:p-6 flex flex-col justify-end text-white">
-                  <h3 className="text-sm sm:text-xl lg:text-2xl font-display font-semibold tracking-tight mb-1 leading-tight">
+                  <h3 className="text-sm sm:text-xl lg:text-2xl font-display font-semibold tracking-tight leading-tight uppercase">
                     {limitedTimeBanner.title}
                   </h3>
-                  {limitedTimeBanner.subtitle && (
-                    <p className="text-[0.625rem] sm:text-sm opacity-90 max-w-[90%] hidden sm:block">
-                      {limitedTimeBanner.subtitle}
-                    </p>
-                  )}
                 </div>
               </Link>
 
