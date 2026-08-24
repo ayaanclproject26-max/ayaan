@@ -74,7 +74,7 @@ export default function CategoryHighlights() {
   );
 }
 
-function CategoryCard({ 
+export function CategoryCard({ 
   category, 
   variant = "primary",
   isActive = false
