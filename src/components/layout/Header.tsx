@@ -56,13 +56,6 @@ function HeaderContent() {
   const { totalItems, setIsCartOpen } = useCart();
   const { preferences } = usePreferences();
 
-  // Populate search input with active query if on search page
-  useEffect(() => {
-    if (urlQuery !== null && urlQuery !== undefined) {
-      setSearchQuery(urlQuery);
-    }
-  }, [urlQuery]);
-
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -81,6 +74,7 @@ function HeaderContent() {
     const q = (queryToSearch !== undefined ? queryToSearch : searchQuery).trim();
     if (q) {
       setIsSearchOpen(false);
+      setSearchQuery(""); // Clear the visible input so search page loads with empty search bar
 
       // Save to localStorage recent searches
       try {
