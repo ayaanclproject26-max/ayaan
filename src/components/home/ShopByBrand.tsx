@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import ProductCard from "../product/ProductCard";
 import productsData from "@/data/products.json";
 import { Product } from "@/types";
-import { X, Sparkles } from "lucide-react";
+import { X, Check, Filter, Sparkles, RotateCcw } from "lucide-react";
 
 export interface Brand {
   id: string;
@@ -13,7 +13,7 @@ export interface Brand {
   logo: string;
 }
 
-// Canonical, normalized data-driven brand directory
+// Canonical, normalized data-driven brand directory (43 brands)
 export const BRANDS: Brand[] = [
   { id: "levis", name: "Levi's", slug: "levis", logo: "/brands/levis.png" },
   { id: "hugo-boss", name: "Hugo Boss", slug: "hugo-boss", logo: "/brands/hugo-boss.png" },
@@ -61,43 +61,305 @@ export const BRANDS: Brand[] = [
   { id: "new-balance", name: "New Balance", slug: "new-balance", logo: "/brands/new-balance.svg" },
 ];
 
-export default function ShopByBrand() {
-  const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
-  const [isMobileExpanded, setIsMobileExpanded] = useState(false);
-  const productsSectionRef = useRef<HTMLDivElement>(null);
+const AUDIENCE_FILTERS = [
+  { id: "MEN", label: "MEN", categoryId: "c_men", icon: "👨" },
+  { id: "WOMEN", label: "WOMEN", categoryId: "c_women", icon: "👩" },
+  { id: "BOYS", label: "BOYS", categoryId: "c_boys", icon: "👦" },
+  { id: "GIRLS", label: "GIRLS", categoryId: "c_girls", icon: "👧" },
+  { id: "UNISEX", label: "UNISEX", categoryId: "c_unisex", icon: "◎" },
+];
 
+const PRODUCT_CATEGORIES = [
+  "ALL",
+  "Sweaters",
+  "T-Shirts",
+  "Hoodies",
+  "Trousers",
+  "Pants",
+  "Shorts",
+  "Shirts",
+  "Beachwear",
+  "Socks",
+  "Blouse",
+  "Tank Top",
+  "Tops",
+  "Sports",
+  "Towels",
+];
+
+// Helper to extract detailed categories for each product
+function getProductCategories(product: Product): string[] {
+  const name = (product.name || "").toLowerCase();
+  const sku = (product.sku || "").toLowerCase();
+  const cats: string[] = [];
+
+  if (
+    name.includes("sweater") ||
+    name.includes("cardigan") ||
+    name.includes("knit") ||
+    name.includes("pullover") ||
+    name.includes("turtleneck") ||
+    sku.includes("-swt-")
+  ) {
+    cats.push("Sweaters");
+  }
+  if (
+    name.includes("t-shirt") ||
+    name.includes("tee") ||
+    name.includes("graphic t-shirt") ||
+    sku.includes("-tsh-")
+  ) {
+    cats.push("T-Shirts");
+  }
+  if (
+    name.includes("hoodie") ||
+    name.includes("sweatshirt") ||
+    name.includes("fleece") ||
+    sku.includes("-hd-")
+  ) {
+    cats.push("Hoodies");
+  }
+  if (
+    name.includes("trouser") ||
+    name.includes("chino") ||
+    name.includes("sweatpants") ||
+    name.includes("jogger") ||
+    name.includes("leggings") ||
+    name.includes("tights") ||
+    sku.includes("-trs-")
+  ) {
+    cats.push("Trousers");
+  }
+  if (
+    name.includes("pants") ||
+    name.includes("jeans") ||
+    name.includes("denim") ||
+    name.includes("overalls") ||
+    sku.includes("-jns-") ||
+    sku.includes("-trs-")
+  ) {
+    cats.push("Pants");
+  }
+  if (
+    name.includes("short") ||
+    name.includes("trunks") ||
+    name.includes("board shorts") ||
+    sku.includes("-sho-")
+  ) {
+    cats.push("Shorts");
+  }
+  if (
+    name.includes("shirt") ||
+    name.includes("polo") ||
+    name.includes("button-down") ||
+    name.includes("henley") ||
+    name.includes("oxford") ||
+    sku.includes("-sht-") ||
+    sku.includes("-pol-")
+  ) {
+    cats.push("Shirts");
+  }
+  if (
+    name.includes("swim") ||
+    name.includes("swimsuit") ||
+    name.includes("bikini") ||
+    name.includes("beach") ||
+    name.includes("trunks") ||
+    name.includes("board shorts") ||
+    sku.includes("-swm-")
+  ) {
+    cats.push("Beachwear");
+  }
+  if (name.includes("sock") || sku.includes("-sck-")) {
+    cats.push("Socks");
+  }
+  if (name.includes("blouse") || name.includes("camisole") || name.includes("silk") || name.includes("satin")) {
+    cats.push("Blouse");
+  }
+  if (name.includes("tank") || name.includes("tank top") || name.includes("camisole")) {
+    cats.push("Tank Top");
+  }
+  if (
+    name.includes("top") ||
+    name.includes("tee") ||
+    name.includes("t-shirt") ||
+    name.includes("shirt") ||
+    name.includes("blouse") ||
+    name.includes("tank") ||
+    name.includes("polo") ||
+    name.includes("camisole") ||
+    sku.includes("-tsh-") ||
+    sku.includes("-sht-")
+  ) {
+    cats.push("Tops");
+  }
+  if (
+    name.includes("sport") ||
+    name.includes("running") ||
+    name.includes("training") ||
+    name.includes("performance") ||
+    name.includes("athletic") ||
+    name.includes("gym") ||
+    name.includes("yoga") ||
+    name.includes("compression") ||
+    name.includes("jogger") ||
+    name.includes("sweatpants") ||
+    name.includes("visor") ||
+    product.brand === "Nike" ||
+    product.brand === "Adidas" ||
+    product.brand === "Puma" ||
+    product.brand === "Under Armour" ||
+    product.brand === "2XU" ||
+    product.brand === "Gymshark"
+  ) {
+    cats.push("Sports");
+  }
+  if (name.includes("towel") || sku.includes("-twl-")) {
+    cats.push("Towels");
+  }
+
+  return cats;
+}
+
+// Normalized brand matching helper
+function matchBrand(product: Product, brand: Brand): boolean {
+  if (!product.brand) return false;
+  const pBrand = product.brand.toLowerCase().trim();
+  const bName = brand.name.toLowerCase().trim();
+  const bSlug = brand.slug.toLowerCase().trim();
+
+  return (
+    pBrand === bName ||
+    pBrand.replace(/['’.\s-]/g, "") === bName.replace(/['’.\s-]/g, "") ||
+    pBrand.includes(bName) ||
+    bName.includes(pBrand) ||
+    bSlug.replace(/-/g, "").includes(pBrand.replace(/['’.\s-]/g, ""))
+  );
+}
+
+export default function ShopByBrand() {
+  // Multi-select state
+  const [selectedBrandIds, setSelectedBrandIds] = useState<string[]>([]);
+  const [selectedAudiences, setSelectedAudiences] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(["ALL"]);
+  const [isMobileExpanded, setIsMobileExpanded] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+
+  const collectionSectionRef = useRef<HTMLDivElement>(null);
   const allProducts = productsData as Product[];
 
-  // Normalize and filter products belonging to the selected brand
-  const filteredProducts = selectedBrand
-    ? allProducts.filter((p) => {
-        if (!p.brand) return false;
-        const pBrand = p.brand.toLowerCase().trim();
-        const bName = selectedBrand.name.toLowerCase().trim();
-        const bSlug = selectedBrand.slug.toLowerCase().trim();
-        
-        // Match exact or fuzzy (e.g., "The North Face" <-> "North Face", "Levi's" <-> "Levi's")
-        return (
-          pBrand === bName ||
-          pBrand.replace(/['’.\s-]/g, "") === bName.replace(/['’.\s-]/g, "") ||
-          pBrand.includes(bName) ||
-          bName.includes(pBrand) ||
-          bSlug.replace(/-/g, "").includes(pBrand.replace(/['’.\s-]/g, ""))
-        );
-      })
-    : [];
+  // Selected Brand Objects
+  const selectedBrands = useMemo(() => {
+    return BRANDS.filter((b) => selectedBrandIds.includes(b.id));
+  }, [selectedBrandIds]);
 
+  // Handle brand card toggle (multi-select)
   const handleBrandClick = (brand: Brand) => {
-    if (selectedBrand?.id === brand.id) {
-      setSelectedBrand(null);
-    } else {
-      setSelectedBrand(brand);
-      // Smooth scroll to the filtered products display
-      setTimeout(() => {
-        productsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }, 100);
-    }
+    setHasInteracted(true);
+    setSelectedBrandIds((prev) => {
+      if (prev.includes(brand.id)) {
+        return prev.filter((id) => id !== brand.id);
+      } else {
+        return [...prev, brand.id];
+      }
+    });
+
+    // Smooth scroll to the collection filter/product section
+    setTimeout(() => {
+      collectionSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }, 150);
   };
+
+  // Handle Audience filter toggle (multi-select)
+  const handleAudienceClick = (audienceId: string) => {
+    setHasInteracted(true);
+    setSelectedAudiences((prev) => {
+      if (prev.includes(audienceId)) {
+        return prev.filter((a) => a !== audienceId);
+      } else {
+        return [...prev, audienceId];
+      }
+    });
+  };
+
+  // Handle Category filter toggle (multi-select with ALL reset)
+  const handleCategoryClick = (categoryName: string) => {
+    setHasInteracted(true);
+    if (categoryName === "ALL") {
+      setSelectedCategories(["ALL"]);
+      return;
+    }
+
+    setSelectedCategories((prev) => {
+      // Remove ALL if active
+      const withoutAll = prev.filter((c) => c !== "ALL");
+      if (withoutAll.includes(categoryName)) {
+        const next = withoutAll.filter((c) => c !== categoryName);
+        return next.length === 0 ? ["ALL"] : next;
+      } else {
+        return [...withoutAll, categoryName];
+      }
+    });
+  };
+
+  // Clear all filters
+  const handleClearAll = () => {
+    setSelectedBrandIds([]);
+    setSelectedAudiences([]);
+    setSelectedCategories(["ALL"]);
+  };
+
+  // Dynamic Collection Title
+  const collectionTitle = useMemo(() => {
+    if (selectedBrands.length === 0) {
+      return "All Brands Collection";
+    }
+    if (selectedBrands.length === 1) {
+      return `${selectedBrands[0].name} Collection`;
+    }
+    if (selectedBrands.length === 2) {
+      return `${selectedBrands[0].name} + ${selectedBrands[1].name} Collection`;
+    }
+    if (selectedBrands.length === 3) {
+      return `${selectedBrands[0].name} + ${selectedBrands[1].name} + ${selectedBrands[2].name} Collection`;
+    }
+    return `${selectedBrands[0].name}, ${selectedBrands[1].name} + ${selectedBrands.length - 2} More Collection`;
+  }, [selectedBrands]);
+
+  // Combined Multi-Filter Execution: (Brand OR) AND (Audience OR) AND (Category OR)
+  const filteredProducts = useMemo(() => {
+    return allProducts.filter((product) => {
+      // 1. Brand Group Filter (OR inside group)
+      const brandMatch =
+        selectedBrands.length === 0 ||
+        selectedBrands.some((brand) => matchBrand(product, brand));
+
+      // 2. Audience Group Filter (OR inside group)
+      const audienceMatch =
+        selectedAudiences.length === 0 ||
+        selectedAudiences.some((aud) => {
+          const item = AUDIENCE_FILTERS.find((a) => a.id === aud);
+          return item ? product.categoryId === item.categoryId : false;
+        });
+
+      // 3. Category Group Filter (OR inside group, ALL = true)
+      const isAllCategories =
+        selectedCategories.length === 0 || selectedCategories.includes("ALL");
+      const productCats = getProductCategories(product);
+      const categoryMatch =
+        isAllCategories ||
+        selectedCategories.some((cat) => productCats.includes(cat));
+
+      // Inter-group AND logic
+      return brandMatch && audienceMatch && categoryMatch;
+    });
+  }, [allProducts, selectedBrands, selectedAudiences, selectedCategories]);
+
+  // Check if any filter is active
+  const hasActiveFilters =
+    selectedBrandIds.length > 0 ||
+    selectedAudiences.length > 0 ||
+    (!selectedCategories.includes("ALL") && selectedCategories.length > 0);
 
   return (
     <section id="brands" className="py-10 sm:py-14 bg-background border-t border-border/40">
@@ -108,31 +370,30 @@ export default function ShopByBrand() {
           <div>
             <h2 className="text-fluid-h2 font-display uppercase tracking-tight">SHOP BY BRAND</h2>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              Explore authentic collections from top global apparel and sportswear manufacturers
+              Select one or multiple brands to explore authentic wholesale & retail apparel
             </p>
           </div>
-          {selectedBrand && (
+          {hasActiveFilters && (
             <button
-              onClick={() => setSelectedBrand(null)}
+              onClick={handleClearAll}
               className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors self-center sm:self-auto"
             >
-              <X size={14} />
-              Clear Filter
+              <RotateCcw size={13} />
+              Reset Filters
             </button>
           )}
         </div>
 
         {/* 
-          Brand Grid:
-          - Desktop (xl: 10 cols): ~4 balanced rows for ~40 brands.
-          - Large screens (lg: 8 cols): ~5 balanced rows.
-          - Tablet (md: 6 cols, sm: 4 cols).
-          - Mobile (grid-cols-3): 3 cols. Shows first 9 (3 rows) initially, then reveals rest via ALL BRANDS.
+          1. Brand Grid:
+          - Desktop (xl: 10 cols): ~4 balanced rows for full collection.
+          - Large (lg: 8 cols), Tablet (md: 6 cols, sm: 4 cols).
+          - Mobile (grid-cols-3): 3 visible rows (9 brands), with ALL BRANDS expansion.
         */}
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2.5 sm:gap-3 transition-all duration-300">
           {BRANDS.map((brand, index) => {
-            const isSelected = selectedBrand?.id === brand.id;
-            // On mobile (< sm): hide items past the first 9 when collapsed
+            const isSelected = selectedBrandIds.includes(brand.id);
+            // On mobile: hide items past index 8 (first 9 brands) when collapsed
             const isHiddenOnMobile = index >= 9 && !isMobileExpanded;
 
             return (
@@ -145,7 +406,7 @@ export default function ShopByBrand() {
                   isHiddenOnMobile ? "hidden sm:flex" : "flex"
                 } ${
                   isSelected
-                    ? "border-foreground ring-2 ring-foreground/30 bg-secondary/80 shadow-md scale-[1.02]"
+                    ? "border-foreground ring-2 ring-foreground/30 bg-secondary/90 shadow-md scale-[1.02]"
                     : "border-border/60 hover:border-foreground/30"
                 }`}
               >
@@ -154,8 +415,8 @@ export default function ShopByBrand() {
                   <BrandLogo brand={brand} />
                 </div>
 
-                {/* Brand Name (Uniform text position & size) */}
-                <span 
+                {/* Brand Name (Uniform position & typography) */}
+                <span
                   className={`text-[0.625rem] sm:text-[0.6875rem] font-semibold uppercase tracking-wider truncate w-full px-1 mt-1 transition-colors ${
                     isSelected ? "text-foreground font-bold" : "text-muted-foreground group-hover:text-foreground"
                   }`}
@@ -164,16 +425,18 @@ export default function ShopByBrand() {
                   {brand.name}
                 </span>
 
-                {/* Subtle active indicator dot */}
+                {/* Active checkmark / dot indicator */}
                 {isSelected && (
-                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-primary" />
+                  <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-foreground text-background flex items-center justify-center text-[10px] shadow-sm">
+                    <Check size={10} strokeWidth={3} />
+                  </span>
                 )}
               </button>
             );
           })}
         </div>
 
-        {/* Mobile Expand / Collapse Button (Only shown on mobile) */}
+        {/* Mobile Expand / Collapse Button (Only on mobile) */}
         <div className="mt-6 flex justify-center sm:hidden">
           <button
             type="button"
@@ -184,67 +447,228 @@ export default function ShopByBrand() {
           </button>
         </div>
 
-        {/* Filtered Brand Products Showcase */}
-        {selectedBrand && (
-          <div 
-            ref={productsSectionRef}
-            className="mt-10 pt-8 border-t border-border/60 animate-in fade-in slide-in-from-top-4 duration-300"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-24 bg-card border border-border/80 rounded-lg p-1.5 flex items-center justify-center shadow-sm">
-                  <BrandLogo brand={selectedBrand} />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xl sm:text-2xl font-display font-bold uppercase tracking-tight">
-                      {selectedBrand.name} Collection
-                    </h3>
-                    <Sparkles size={16} className="text-primary hidden sm:inline-block" />
+        {/* 
+          2. BRAND COLLECTION SHOWCASE & MULTI-SELECT FILTERING AREA
+          Hierarchy:
+          BRAND COLLECTION TITLE
+          ↓
+          AUDIENCE FILTERS
+          ↓
+          PRODUCT CATEGORY FILTERS
+          ↓
+          SELECTED FILTER SUMMARY / CLEAR ALL
+          ↓
+          PRODUCTS (Grid)
+        */}
+        <div
+          ref={collectionSectionRef}
+          className="mt-12 pt-8 border-t border-border/70 animate-in fade-in duration-300"
+        >
+          {/* BRAND COLLECTION HEADING */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex -space-x-2 overflow-hidden items-center">
+                {selectedBrands.slice(0, 4).map((b) => (
+                  <div
+                    key={b.id}
+                    className="inline-block h-9 w-14 bg-card border border-border rounded-lg p-1 shadow-sm overflow-hidden flex items-center justify-center"
+                    title={b.name}
+                  >
+                    <BrandLogo brand={b} />
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {filteredProducts.length > 0
-                      ? `Showing ${filteredProducts.length} wholesale & retail product${filteredProducts.length > 1 ? "s" : ""}`
-                      : "Direct catalog query"}
-                  </span>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setSelectedBrand(null)}
-                className="self-start sm:self-auto px-4 py-2 text-xs font-semibold uppercase tracking-wider border border-border rounded-full hover:bg-secondary transition-colors"
-              >
-                Close View
-              </button>
-            </div>
-
-            {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10">
-                {filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
                 ))}
               </div>
-            ) : (
-              <div className="bg-card border border-border/60 rounded-2xl p-8 sm:p-12 text-center max-w-xl mx-auto my-4">
-                <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4 text-muted-foreground">
-                  <BrandLogo brand={selectedBrand} />
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xl sm:text-2xl font-display font-bold uppercase tracking-tight">
+                    {collectionTitle}
+                  </h3>
+                  <Sparkles size={16} className="text-primary hidden sm:inline-block" />
                 </div>
-                <h4 className="text-base sm:text-lg font-bold font-display uppercase mb-2">
-                  No {selectedBrand.name} Products In Stock
-                </h4>
-                <p className="text-xs sm:text-sm text-muted-foreground mb-6 leading-relaxed">
-                  We are currently restocking products for {selectedBrand.name}. Inquire directly for bulk wholesale custom orders or explore other brands above.
+                <p className="text-xs text-muted-foreground">
+                  {selectedBrands.length > 0
+                    ? `Curated catalog matching ${selectedBrands.map((b) => b.name).join(" + ")}`
+                    : "Browsing all global manufacturer brands"}
                 </p>
+              </div>
+            </div>
+
+            {/* Product Count indicator */}
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <span className="px-3.5 py-1.5 rounded-full bg-secondary text-foreground text-xs font-bold uppercase tracking-wider border border-border">
+                {filteredProducts.length} Product{filteredProducts.length !== 1 ? "s" : ""}
+              </span>
+            </div>
+          </div>
+
+          {/* FILTERS CONTAINER */}
+          <div className="bg-secondary/40 border border-border/60 rounded-2xl p-4 sm:p-6 mb-8 space-y-4 shadow-sm">
+            
+            {/* ROW 1: AUDIENCE / GENDER FILTER GROUP (Pills with Icon + Text) */}
+            <div className="flex flex-col gap-2">
+              <span className="text-[0.6875rem] font-bold uppercase tracking-wider text-muted-foreground">
+                Audience / Department:
+              </span>
+              <div className="overflow-x-auto no-scrollbar py-1">
+                <div className="flex items-center gap-2 min-w-max">
+                  {AUDIENCE_FILTERS.map((aud) => {
+                    const isSelected = selectedAudiences.includes(aud.id);
+                    return (
+                      <button
+                        key={aud.id}
+                        type="button"
+                        onClick={() => handleAudienceClick(aud.id)}
+                        className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                          isSelected
+                            ? "bg-foreground text-background shadow-sm ring-1 ring-foreground"
+                            : "bg-card hover:bg-card/80 text-foreground/80 border border-border/80 hover:border-foreground/40"
+                        }`}
+                      >
+                        <span className="text-sm leading-none">{aud.icon}</span>
+                        <span>{aud.label}</span>
+                        {isSelected && <Check size={12} strokeWidth={3} className="ml-0.5" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* ROW 2: PRODUCT CATEGORY FILTER GROUP (Pills with ALL reset) */}
+            <div className="flex flex-col gap-2 pt-2 border-t border-border/40">
+              <span className="text-[0.6875rem] font-bold uppercase tracking-wider text-muted-foreground">
+                Product Category:
+              </span>
+              <div className="overflow-x-auto no-scrollbar py-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  {PRODUCT_CATEGORIES.map((categoryName) => {
+                    const isSelected =
+                      categoryName === "ALL"
+                        ? selectedCategories.includes("ALL")
+                        : selectedCategories.includes(categoryName);
+
+                    return (
+                      <button
+                        key={categoryName}
+                        type="button"
+                        onClick={() => handleCategoryClick(categoryName)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                          isSelected
+                            ? "bg-foreground text-background font-bold shadow-sm"
+                            : "bg-card hover:bg-card/80 text-foreground/75 border border-border/70 hover:border-foreground/30"
+                        }`}
+                      >
+                        {categoryName}
+                        {isSelected && categoryName !== "ALL" && (
+                          <span className="ml-1 text-[10px]">✓</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* ROW 3: SELECTED FILTER SUMMARY & CLEAR ALL (Active Pills) */}
+            {hasActiveFilters && (
+              <div className="pt-3 border-t border-border/50 flex flex-wrap items-center gap-2 text-xs">
+                <span className="text-muted-foreground font-medium mr-1">Active filters:</span>
+                
+                {/* Brand Badges */}
+                {selectedBrands.map((b) => (
+                  <span
+                    key={`badge-b-${b.id}`}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-card border border-border text-foreground font-semibold"
+                  >
+                    <span>{b.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleBrandClick(b)}
+                      className="hover:text-destructive transition-colors ml-0.5 p-0.5"
+                      title={`Remove ${b.name}`}
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+
+                {/* Audience Badges */}
+                {selectedAudiences.map((aud) => (
+                  <span
+                    key={`badge-a-${aud}`}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-card border border-border text-foreground font-semibold"
+                  >
+                    <span>{aud}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleAudienceClick(aud)}
+                      className="hover:text-destructive transition-colors ml-0.5 p-0.5"
+                      title={`Remove ${aud}`}
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+
+                {/* Category Badges */}
+                {!selectedCategories.includes("ALL") &&
+                  selectedCategories.map((cat) => (
+                    <span
+                      key={`badge-c-${cat}`}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-card border border-border text-foreground font-semibold"
+                    >
+                      <span>{cat}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCategoryClick(cat)}
+                        className="hover:text-destructive transition-colors ml-0.5 p-0.5"
+                        title={`Remove ${cat}`}
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+
+                {/* Clear All Trigger */}
                 <button
-                  onClick={() => setSelectedBrand(null)}
-                  className="px-6 py-2.5 bg-foreground text-background text-xs font-semibold uppercase tracking-wider rounded-full hover:opacity-90 transition-opacity"
+                  type="button"
+                  onClick={handleClearAll}
+                  className="text-xs font-bold text-destructive hover:underline ml-2 cursor-pointer"
                 >
-                  Explore All Brands
+                  Clear All
                 </button>
               </div>
             )}
           </div>
-        )}
+
+          {/* 3. PRODUCTS GRID / EMPTY STATE */}
+          {filteredProducts.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10">
+              {filteredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-card border border-border/70 rounded-2xl p-8 sm:p-14 text-center max-w-lg mx-auto my-6 shadow-sm">
+              <div className="w-14 h-14 rounded-full bg-secondary/80 flex items-center justify-center mx-auto mb-4 text-muted-foreground">
+                <Filter size={24} />
+              </div>
+              <h4 className="text-lg font-bold font-display uppercase mb-2">
+                No Products Found
+              </h4>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-6 leading-relaxed">
+                No products match the selected combination of brands, audience, and categories. Try clearing one or more filters.
+              </p>
+              <button
+                type="button"
+                onClick={handleClearAll}
+                className="px-6 py-2.5 bg-foreground text-background text-xs font-semibold uppercase tracking-wider rounded-full hover:opacity-90 transition-opacity cursor-pointer"
+              >
+                Clear All Filters
+              </button>
+            </div>
+          )}
+        </div>
 
       </div>
     </section>
