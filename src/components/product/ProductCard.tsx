@@ -41,8 +41,16 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
         </Link>
         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 z-10">
-          {product.isNew && <span className="text-[0.5625rem] font-bold uppercase py-0.5 px-2 bg-background/90 text-primary tracking-[0.1em] backdrop-blur-sm rounded-sm">New</span>}
-          {product.isHot && <span className="text-[0.5625rem] font-bold uppercase py-0.5 px-2 bg-destructive/90 text-destructive-foreground tracking-[0.1em] backdrop-blur-sm rounded-sm">Hot</span>}
+          {product.isNew && (
+            <span className="text-[0.5625rem] font-bold uppercase py-0.5 px-2 bg-background/90 text-primary tracking-[0.1em] backdrop-blur-sm rounded-sm">
+              New
+            </span>
+          )}
+          {product.isHot && (
+            <span className="text-[0.5625rem] font-bold uppercase py-0.5 px-2 bg-destructive/90 text-destructive-foreground tracking-[0.1em] backdrop-blur-sm rounded-sm">
+              Hot
+            </span>
+          )}
           {discount && discount >= 10 && (
             <span className="text-[0.5625rem] font-bold uppercase py-0.5 px-2 bg-[#111827]/85 text-white tracking-[0.1em] backdrop-blur-sm rounded-sm">
               -{discount}%
@@ -51,7 +59,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
         <div className="absolute bottom-0 left-0 w-full p-3 translate-y-5 opacity-0 transition-all duration-400 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] z-10 group-hover:translate-y-0 group-hover:opacity-100">
           <button
-            className="w-full bg-background/95 text-foreground border border-transparent p-2.5 text-xs font-semibold uppercase tracking-wider transition-all duration-300 backdrop-blur-md rounded-full hover:bg-foreground hover:text-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+            className="w-full bg-background/95 text-foreground border border-transparent p-2.5 text-xs font-semibold uppercase tracking-wider transition-all duration-300 backdrop-blur-md rounded-full hover:bg-foreground hover:text-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none cursor-pointer"
             onClick={handleQuickAdd}
           >
             Quick Add
@@ -60,7 +68,9 @@ export default function ProductCard({ product }: ProductCardProps) {
       </div>
       <div className="flex flex-col gap-1.5 px-0.5">
         <Link href={`#product-${product.slug}`}>
-          <h3 className="text-[0.8125rem] font-medium text-foreground transition-colors group-hover:text-muted-foreground line-clamp-1">{product.name}</h3>
+          <h3 className="text-[0.8125rem] font-medium text-foreground transition-colors group-hover:text-muted-foreground line-clamp-1">
+            {product.name}
+          </h3>
         </Link>
         <div className="flex items-center gap-2.5">
           <span className="text-[0.8125rem] font-semibold">${product.price.toFixed(2)}</span>
