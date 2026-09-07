@@ -1,41 +1,38 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { TRANSLATIONS, LanguageCode } from "./translations";
 
 export interface CountryInfo {
   code: string;
   name: string;
   flag: string;
-  defaultCurrency: string;
-  defaultLanguage: string;
+  defaultLanguage: LanguageCode;
   postalCodePlaceholder?: string;
   postalCodeRequired?: boolean;
 }
 
 export const SUPPORTED_COUNTRIES: CountryInfo[] = [
   {
-    code: "BD",
-    name: "Bangladesh",
-    flag: "🇧🇩",
-    defaultCurrency: "BDT",
-    defaultLanguage: "English",
-    postalCodePlaceholder: "e.g. 1212 or 1000",
-    postalCodeRequired: false,
-  },
-  {
     code: "US",
     name: "United States",
     flag: "🇺🇸",
-    defaultCurrency: "USD",
     defaultLanguage: "English",
     postalCodePlaceholder: "e.g. 90210 or 10001",
+    postalCodeRequired: false,
+  },
+  {
+    code: "BD",
+    name: "Bangladesh",
+    flag: "🇧🇩",
+    defaultLanguage: "English",
+    postalCodePlaceholder: "e.g. 1212 or 1000",
     postalCodeRequired: false,
   },
   {
     code: "GB",
     name: "United Kingdom",
     flag: "🇬🇧",
-    defaultCurrency: "GBP",
     defaultLanguage: "English",
     postalCodePlaceholder: "e.g. SW1A 1AA",
     postalCodeRequired: false,
@@ -44,7 +41,6 @@ export const SUPPORTED_COUNTRIES: CountryInfo[] = [
     code: "AE",
     name: "United Arab Emirates",
     flag: "🇦🇪",
-    defaultCurrency: "AED",
     defaultLanguage: "English",
     postalCodePlaceholder: "e.g. Dubai / Abu Dhabi",
     postalCodeRequired: false,
@@ -53,7 +49,6 @@ export const SUPPORTED_COUNTRIES: CountryInfo[] = [
     code: "CA",
     name: "Canada",
     flag: "🇨🇦",
-    defaultCurrency: "USD",
     defaultLanguage: "English",
     postalCodePlaceholder: "e.g. M5V 2T6",
     postalCodeRequired: false,
@@ -62,7 +57,6 @@ export const SUPPORTED_COUNTRIES: CountryInfo[] = [
     code: "SA",
     name: "Saudi Arabia",
     flag: "🇸🇦",
-    defaultCurrency: "AED",
     defaultLanguage: "Arabic",
     postalCodePlaceholder: "e.g. 11564",
     postalCodeRequired: false,
@@ -71,7 +65,6 @@ export const SUPPORTED_COUNTRIES: CountryInfo[] = [
     code: "AU",
     name: "Australia",
     flag: "🇦🇺",
-    defaultCurrency: "USD",
     defaultLanguage: "English",
     postalCodePlaceholder: "e.g. 2000",
     postalCodeRequired: false,
@@ -80,7 +73,6 @@ export const SUPPORTED_COUNTRIES: CountryInfo[] = [
     code: "DE",
     name: "Germany",
     flag: "🇩🇪",
-    defaultCurrency: "EUR",
     defaultLanguage: "English",
     postalCodePlaceholder: "e.g. 10115",
     postalCodeRequired: false,
@@ -89,7 +81,6 @@ export const SUPPORTED_COUNTRIES: CountryInfo[] = [
     code: "FR",
     name: "France",
     flag: "🇫🇷",
-    defaultCurrency: "EUR",
     defaultLanguage: "English",
     postalCodePlaceholder: "e.g. 75001",
     postalCodeRequired: false,
@@ -98,25 +89,16 @@ export const SUPPORTED_COUNTRIES: CountryInfo[] = [
     code: "IT",
     name: "Italy",
     flag: "🇮🇹",
-    defaultCurrency: "EUR",
     defaultLanguage: "English",
     postalCodePlaceholder: "e.g. 00100",
     postalCodeRequired: false,
   },
 ];
 
-export const SUPPORTED_LANGUAGES = [
+export const SUPPORTED_LANGUAGES: { code: LanguageCode; label: string; native: string }[] = [
   { code: "English", label: "English", native: "English" },
   { code: "Bengali", label: "Bengali", native: "বাংলা" },
   { code: "Arabic", label: "Arabic", native: "العربية" },
-];
-
-export const SUPPORTED_CURRENCIES = [
-  { code: "BDT", symbol: "৳", name: "BDT - Bangladeshi Taka" },
-  { code: "USD", symbol: "$", name: "USD - US Dollar" },
-  { code: "EUR", symbol: "€", name: "EUR - Euro" },
-  { code: "GBP", symbol: "£", name: "GBP - British Pound" },
-  { code: "AED", symbol: "د.إ", name: "AED - UAE Dirham" },
 ];
 
 export interface UserPreferences {
@@ -124,22 +106,22 @@ export interface UserPreferences {
   countryCode: string;
   flag: string;
   postalCode: string;
-  language: string;
-  currency: string;
-  currencySymbol: string;
+  language: LanguageCode;
+  currency: "USD";
+  currencySymbol: "$";
   lastUpdated: number;
 }
 
 const STORAGE_KEY = "ayaan_user_preferences";
 
 const DEFAULT_PREFERENCES: UserPreferences = {
-  country: "Bangladesh",
-  countryCode: "BD",
-  flag: "🇧🇩",
+  country: "United States",
+  countryCode: "US",
+  flag: "🇺🇸",
   postalCode: "",
   language: "English",
-  currency: "BDT",
-  currencySymbol: "৳",
+  currency: "USD",
+  currencySymbol: "$",
   lastUpdated: Date.now(),
 };
 
@@ -147,8 +129,10 @@ interface PreferencesContextType {
   preferences: UserPreferences;
   isLoaded: boolean;
   updateLocation: (countryCode: string, postalCode?: string) => void;
-  updateLanguageCurrency: (language: string, currency: string) => void;
+  updateLanguage: (language: LanguageCode) => void;
+  updateLanguageCurrency: (language: string, currency?: string) => void;
   updateAllPreferences: (newPrefs: Partial<UserPreferences>) => void;
+  t: (key: string) => string;
 }
 
 const PreferencesContext = createContext<PreferencesContextType | undefined>(undefined);
@@ -160,11 +144,7 @@ function detectBrowserCountry(): CountryInfo {
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
     const locale = (navigator.language || "").toLowerCase();
 
-    // 1. Check TimeZone signals
     if (timeZone.includes("Dhaka")) return SUPPORTED_COUNTRIES.find(c => c.code === "BD")!;
-    if (timeZone.includes("New_York") || timeZone.includes("Los_Angeles") || timeZone.includes("Chicago") || timeZone.includes("Denver")) {
-      return SUPPORTED_COUNTRIES.find(c => c.code === "US")!;
-    }
     if (timeZone.includes("London")) return SUPPORTED_COUNTRIES.find(c => c.code === "GB")!;
     if (timeZone.includes("Dubai")) return SUPPORTED_COUNTRIES.find(c => c.code === "AE")!;
     if (timeZone.includes("Riyadh")) return SUPPORTED_COUNTRIES.find(c => c.code === "SA")!;
@@ -174,13 +154,10 @@ function detectBrowserCountry(): CountryInfo {
     if (timeZone.includes("Paris")) return SUPPORTED_COUNTRIES.find(c => c.code === "FR")!;
     if (timeZone.includes("Rome")) return SUPPORTED_COUNTRIES.find(c => c.code === "IT")!;
 
-    // 2. Check Locale signals
     if (locale.includes("bn") || locale.includes("bd")) return SUPPORTED_COUNTRIES.find(c => c.code === "BD")!;
     if (locale.includes("en-gb")) return SUPPORTED_COUNTRIES.find(c => c.code === "GB")!;
-    if (locale.includes("en-us")) return SUPPORTED_COUNTRIES.find(c => c.code === "US")!;
     if (locale.includes("ar")) return SUPPORTED_COUNTRIES.find(c => c.code === "AE")!;
 
-    // Default fallback
     return SUPPORTED_COUNTRIES[0];
   } catch {
     return SUPPORTED_COUNTRIES[0];
@@ -192,7 +169,6 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // Priority 1: Check localStorage
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
@@ -201,6 +177,8 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
           setPreferences({
             ...DEFAULT_PREFERENCES,
             ...parsed,
+            currency: "USD",
+            currencySymbol: "$",
           });
           setIsLoaded(true);
           return;
@@ -210,18 +188,15 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
       // ignore JSON parse or localStorage failure
     }
 
-    // Priority 2: Non-intrusive Browser / Location signal detection
     const detected = detectBrowserCountry();
-    const currObj = SUPPORTED_CURRENCIES.find(c => c.code === detected.defaultCurrency) || SUPPORTED_CURRENCIES[0];
-
     const detectedPrefs: UserPreferences = {
       country: detected.name,
       countryCode: detected.code,
       flag: detected.flag,
       postalCode: "",
       language: detected.defaultLanguage,
-      currency: detected.defaultCurrency,
-      currencySymbol: currObj.symbol,
+      currency: "USD",
+      currencySymbol: "$",
       lastUpdated: Date.now(),
     };
 
@@ -236,9 +211,6 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
 
   const updateLocation = (countryCode: string, postalCode = "") => {
     const countryObj = SUPPORTED_COUNTRIES.find(c => c.code === countryCode) || SUPPORTED_COUNTRIES[0];
-    
-    // Automatically pair smart default currency if user hadn't explicitly customized it
-    const currObj = SUPPORTED_CURRENCIES.find(c => c.code === countryObj.defaultCurrency) || SUPPORTED_CURRENCIES[0];
 
     setPreferences(prev => {
       const updated: UserPreferences = {
@@ -247,8 +219,8 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
         countryCode: countryObj.code,
         flag: countryObj.flag,
         postalCode: postalCode.trim(),
-        currency: countryObj.defaultCurrency,
-        currencySymbol: currObj.symbol,
+        currency: "USD",
+        currencySymbol: "$",
         lastUpdated: Date.now(),
       };
       try {
@@ -260,16 +232,15 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
     });
   };
 
-  const updateLanguageCurrency = (language: string, currency: string) => {
-    const currObj = SUPPORTED_CURRENCIES.find(c => c.code === currency) || SUPPORTED_CURRENCIES[0];
+  const updateLanguage = (language: LanguageCode) => {
     const langObj = SUPPORTED_LANGUAGES.find(l => l.code === language) || SUPPORTED_LANGUAGES[0];
 
     setPreferences(prev => {
       const updated: UserPreferences = {
         ...prev,
         language: langObj.code,
-        currency: currObj.code,
-        currencySymbol: currObj.symbol,
+        currency: "USD",
+        currencySymbol: "$",
         lastUpdated: Date.now(),
       };
       try {
@@ -279,6 +250,11 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
       }
       return updated;
     });
+  };
+
+  // Backwards compatible method name
+  const updateLanguageCurrency = (language: string, _currency?: string) => {
+    updateLanguage(language as LanguageCode);
   };
 
   const updateAllPreferences = (newPrefs: Partial<UserPreferences>) => {
@@ -286,6 +262,8 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
       const updated: UserPreferences = {
         ...prev,
         ...newPrefs,
+        currency: "USD",
+        currencySymbol: "$",
         lastUpdated: Date.now(),
       };
       try {
@@ -297,14 +275,22 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
     });
   };
 
+  const t = useCallback((key: string): string => {
+    const lang = preferences.language || "English";
+    const dict = TRANSLATIONS[lang] || TRANSLATIONS.English;
+    return dict[key] || TRANSLATIONS.English[key] || key;
+  }, [preferences.language]);
+
   return (
     <PreferencesContext.Provider
       value={{
         preferences,
         isLoaded,
         updateLocation,
+        updateLanguage,
         updateLanguageCurrency,
         updateAllPreferences,
+        t,
       }}
     >
       {children}

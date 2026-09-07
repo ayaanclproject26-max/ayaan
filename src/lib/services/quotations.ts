@@ -2,10 +2,10 @@ import {
   QuotationRecord, 
   QuotationStatus, 
   CommercialDocument, 
-  CommercialDocType,
-  RfqRecord 
+  CommercialDocType 
 } from "@/types/b2b";
 import { updateRfqStatus } from "./rfq";
+import BUSINESS_PROFILE from "@/config/business-profile";
 
 const QUOTE_STORAGE_KEY = "ayaan_b2b_quotations_db";
 
@@ -222,12 +222,82 @@ export async function buyerRespondToQuotation(
 }
 
 /**
- * Generate standardized Commercial Document layout (Quotation, PI, Invoice, Packing List, Chalan)
+ * Generate standardized Commercial Document layout (Quotation, PI, Order Sheet, Invoice, Packing List, Chalan)
+ * Supports both official Quotes and Orders.
  */
 export async function getCommercialDocument(
   docType: CommercialDocType,
   id: string
 ): Promise<CommercialDocument | null> {
+  // Check if ID refers to an Order
+  const cleanId = id.startsWith("order_") ? id.replace("order_", "") : id;
+
+  try {
+    const { orderService } = await import("@/services/order.service");
+    const orderDoc = await orderService.getOrderCommercialDocument(cleanId, docType);
+    if (orderDoc && orderDoc.doc_number) {
+      return {
+        id: orderDoc.id || `doc_${docType}_${orderDoc.order_id}`,
+        docNumber: orderDoc.doc_number,
+        docType: (orderDoc.doc_type || docType) as CommercialDocType,
+        title: orderDoc.title,
+        date: orderDoc.date,
+        orderNumber: orderDoc.order_number,
+        order_id: orderDoc.order_id,
+        companyName: orderDoc.buyer?.company_name || orderDoc.buyer?.name || "Consignee",
+        buyerName: orderDoc.buyer?.name || "Valued Buyer",
+        buyerEmail: orderDoc.buyer?.email || "",
+        buyerPhone: orderDoc.buyer?.phone,
+        buyerAddress: [
+          orderDoc.buyer?.address1,
+          orderDoc.buyer?.address2,
+          orderDoc.buyer?.city,
+          orderDoc.buyer?.region,
+          orderDoc.buyer?.postal_code,
+        ].filter(Boolean).join(", "),
+        buyerCountry: orderDoc.buyer?.country_code || "US",
+        shipping_snapshot: orderDoc.shipping_snapshot,
+        items: (orderDoc.items || []).map((item: any) => ({
+          description: item.description || item.product_name,
+          sku: item.sku || "AYN-SKU",
+          product_image_url: item.product_image_url,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice ?? item.unit_price,
+          total: item.total ?? item.line_total,
+          size: item.size,
+          color: item.color,
+          package_breakdown: item.package_breakdown,
+          details: item.details,
+        })),
+        subtotal: orderDoc.financials?.subtotal ?? orderDoc.financials?.goods_value ?? 0,
+        goods_value: orderDoc.financials?.goods_value ?? orderDoc.financials?.subtotal ?? 0,
+        discount: orderDoc.financials?.discount_amount ?? 0,
+        shipping: orderDoc.financials?.shipping_charge ?? 0,
+        tax: orderDoc.financials?.tax_amount ?? 0,
+        other_charges: orderDoc.financials?.other_charges ?? 0,
+        grandTotal: orderDoc.financials?.grand_total ?? orderDoc.financials?.total_payable ?? 0,
+        total_payable: orderDoc.financials?.total_payable ?? orderDoc.financials?.grand_total ?? 0,
+        currency: orderDoc.financials?.currency || "USD",
+        paymentTerms: orderDoc.payment_terms,
+        shippingTerms: orderDoc.shipping_terms,
+        incoterm: orderDoc.incoterm,
+        validUntil: orderDoc.valid_until,
+        notes: orderDoc.notes,
+        bankDetails: {
+          isConfigured: Boolean(orderDoc.bank_details?.is_configured),
+          beneficiaryName: orderDoc.bank_details?.beneficiary_name || BUSINESS_PROFILE.name,
+          bankName: orderDoc.bank_details?.bank_name || null,
+          accountNumber: orderDoc.bank_details?.account_number || null,
+          swiftCode: orderDoc.bank_details?.swift_code || null,
+          branch: orderDoc.bank_details?.branch || null,
+          routing_no: orderDoc.bank_details?.routing_no || null,
+        },
+      };
+    }
+  } catch {
+    // If not found in orders, proceed to search quotations
+  }
+
   const quote = await getQuotationById(id);
   if (!quote) return null;
 
@@ -237,6 +307,9 @@ export async function getCommercialDocument(
   if (docType === "PROFORMA_INVOICE") {
     title = "PROFORMA INVOICE";
     docNumber = quote.proformaInvoiceId || `PI-2026-${quote.quotationNumber.split("-")[2] || "0001"}`;
+  } else if (docType === "ORDER_SHEET") {
+    title = "COMMERCIAL ORDER SHEET";
+    docNumber = `ORD-2026-${quote.quotationNumber.split("-")[2] || "0001"}`;
   } else if (docType === "COMMERCIAL_INVOICE") {
     title = "COMMERCIAL INVOICE";
     docNumber = `INV-2026-${quote.quotationNumber.split("-")[2] || "0001"}`;
@@ -271,10 +344,13 @@ export async function getCommercialDocument(
       details: item.variantTitle,
     })),
     subtotal: quote.subtotal,
+    goods_value: quote.subtotal,
     discount: quote.discountTotal,
     shipping: quote.shippingFee,
     tax: quote.taxAmount,
+    other_charges: 0,
     grandTotal: quote.grandTotal,
+    total_payable: quote.grandTotal,
     currency: quote.currency,
     paymentTerms: quote.paymentTerms,
     shippingTerms: quote.shippingTerms,
@@ -282,11 +358,13 @@ export async function getCommercialDocument(
     validUntil: quote.validUntil,
     notes: quote.adminNotes,
     bankDetails: {
-      beneficiaryName: "Ayaan Clothing Manufacturing & Export Ltd.",
-      bankName: "Standard Chartered Bank",
-      accountNumber: "01-8273918-01",
-      swiftCode: "SCBLBDDX",
-      branch: "Gulshan Corporate Branch, Dhaka, Bangladesh",
+      isConfigured: BUSINESS_PROFILE.banking.isConfigured,
+      beneficiaryName: BUSINESS_PROFILE.name,
+      bankName: BUSINESS_PROFILE.banking.bankName,
+      accountNumber: BUSINESS_PROFILE.banking.accountNumber,
+      swiftCode: BUSINESS_PROFILE.banking.swiftCode,
+      branch: BUSINESS_PROFILE.banking.branch,
+      routing_no: BUSINESS_PROFILE.banking.routingNumber,
     },
   };
 }

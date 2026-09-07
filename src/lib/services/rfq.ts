@@ -1,4 +1,4 @@
-import { RfqRecord, RfqStatus, RfqMessage, RfqItem } from "@/types/b2b";
+import { RfqRecord, RfqStatus, RfqMessage } from "@/types/b2b";
 
 const RFQ_STORAGE_KEY = "ayaan_b2b_rfqs_db";
 
@@ -49,7 +49,7 @@ const INITIAL_DEMO_RFQS: RfqRecord[] = [
         id: "msg_2",
         rfqId: "rfq_demo_101",
         senderRole: "sales",
-        senderName: "Ayaan Export Team",
+        senderName: "Ayaan Clothing Export Team",
         message: "Thank you for the inquiry. Production lead time is 14 days. We are preparing your official quotation now.",
         createdAt: "2026-08-24T15:10:00Z",
       },

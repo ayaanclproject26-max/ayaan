@@ -123,7 +123,7 @@ export default function LocationPopover({
         <div className="flex flex-col gap-4">
           {/* Country Selection */}
           <div>
-            <label className="block text-[11px] font-bold text-white/60 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-white/60 uppercase tracking-wider mb-2">
               Country / Region
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -159,7 +159,7 @@ export default function LocationPopover({
           {/* Division/City for Bangladesh */}
           {currentCountryObj.cities && (
             <div>
-              <label className="block text-[11px] font-bold text-white/60 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-white/60 uppercase tracking-wider mb-1.5">
                 City / Division
               </label>
               <select
@@ -178,7 +178,7 @@ export default function LocationPopover({
 
           {/* Postal Code */}
           <div>
-            <label className="block text-[11px] font-bold text-white/60 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-white/60 uppercase tracking-wider mb-1.5">
               Postal Code / Area (Optional)
             </label>
             <input

@@ -44,12 +44,12 @@ export default function Testimonials() {
     <section id="testimonials" className="py-10 sm:py-12 bg-secondary">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="text-center mb-6 md:mb-8">
-          <h2 className="text-fluid-h2 font-display uppercase tracking-tight mb-1.5">WHAT OUR CUSTOMERS SAY</h2>
-          <p className="text-fluid-body text-muted-foreground">Real experiences from our community</p>
+          <h2 className="text-fluid-h2 font-display font-bold uppercase tracking-tight mb-1.5">WHAT OUR CUSTOMERS SAY</h2>
+          <p className="text-fluid-body font-sans text-muted-foreground">Real experiences from our community</p>
         </div>
         
         {/* Mobile: Swipeable | Desktop: Grid */}
-        <div className="w-full overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="w-full overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 font-sans">
           <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 min-w-max md:min-w-0 pb-4 md:pb-0">
             {testimonials.map((testimonial) => (
               <div 
@@ -62,10 +62,10 @@ export default function Testimonials() {
                     <Star key={i} size={14} fill="currentColor" />
                   ))}
                 </div>
-                <p className="text-sm text-foreground/90 italic flex-grow mb-4 leading-relaxed">&ldquo;{testimonial.content}&rdquo;</p>
+                <p className="text-sm font-sans text-foreground/90 italic flex-grow mb-4 leading-relaxed">&ldquo;{testimonial.content}&rdquo;</p>
                 <div className="mt-auto pt-3 border-t border-border/40">
-                  <p className="text-sm font-semibold text-foreground">{testimonial.name}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{testimonial.role}</p>
+                  <p className="text-sm font-sans font-semibold text-foreground">{testimonial.name}</p>
+                  <p className="text-xs font-sans text-muted-foreground mt-0.5">{testimonial.role}</p>
                 </div>
               </div>
             ))}

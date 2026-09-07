@@ -267,8 +267,24 @@ export function filterProducts({
     // 3. Category match (OR inside group, ALL = true)
     const isAllCategories = categoryNames.length === 0 || categoryNames.includes("ALL");
     const productCats = getProductCategories(product);
+    if (product.categoryName) productCats.push(product.categoryName);
+    if (product.categoryId) productCats.push(String(product.categoryId));
+    if (Array.isArray((product as any).categories)) {
+      (product as any).categories.forEach((c: any) => {
+        if (typeof c === "string") productCats.push(c);
+        else if (c && typeof c === "object") {
+          if (c.name) productCats.push(c.name);
+          if (c.slug) productCats.push(c.slug);
+          if (c.id) productCats.push(String(c.id));
+        }
+      });
+    }
     const categoryOk =
-      isAllCategories || categoryNames.some((cat) => productCats.includes(cat));
+      isAllCategories ||
+      categoryNames.some((cat) => {
+        const normalizedCat = cat.toLowerCase().trim();
+        return productCats.some((pc) => pc.toLowerCase().trim() === normalizedCat);
+      });
 
     // 4. Color match (OR inside group, ALL = true)
     const isAllColors = colors.length === 0 || colors.includes("ALL");

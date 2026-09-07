@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Mail, Phone, MapPin, ArrowUp, MessageCircle } from "lucide-react";
+import BrandName from "../common/BrandName";
+import BUSINESS_PROFILE, { getWhatsAppUrl } from "@/config/business-profile";
 
 export default function Footer() {
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -53,11 +55,10 @@ export default function Footer() {
           {/* Main 4-Column Grid (Desktop 4 cols, Tablet 2 cols, Mobile Stacked 1 col) */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12 border-b border-white/10">
             
-            {/* COLUMN 1 — AYAAN / ABOUT US (Col span 4) */}
+            {/* COLUMN 1 — AYAAN CLOTHING / ABOUT US (Col span 4) */}
             <div className="lg:col-span-4 flex flex-col gap-4">
-              <Link href="/" className="flex items-center inline-block w-fit">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo.png" alt="Ayaan Clothing Logo" className="h-9 w-auto brightness-0 invert" />
+              <Link href="/" className="flex items-center inline-block w-fit" aria-label="Ayaan Clothing Home">
+                <BrandName className="font-black text-2xl tracking-widest text-white" />
               </Link>
               
               <div>
@@ -67,10 +68,10 @@ export default function Footer() {
                   className="text-xs font-bold uppercase tracking-[0.15em] text-white hover:text-white/80 transition-colors text-left flex items-center gap-1 group cursor-pointer"
                 >
                   <span>ABOUT US</span>
-                  <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">↗</span>
+                  <span className="text-xs opacity-0 group-hover:opacity-100 transition-opacity">↗</span>
                 </button>
                 <p className="text-sm text-white/70 leading-relaxed mt-2.5 max-w-sm">
-                  Modern, premium fashion for men, women, and children. Designed with elegance and crafted with quality.
+                  {BUSINESS_PROFILE.description}. Established in {BUSINESS_PROFILE.establishedYear}, serving international buyers with premium ready-made garments manufacturing & export.
                 </p>
               </div>
 
@@ -110,12 +111,9 @@ export default function Footer() {
                   </button>
                 </li>
                 <li>
-                  <a
-                    href="mailto:export@ayaanclothing.com"
-                    className="hover:text-white transition-colors"
-                  >
-                    Contact Us
-                  </a>
+                  <Link href="/rfq" className="hover:text-white transition-colors">
+                    Request for Quotation (RFQ)
+                  </Link>
                 </li>
                 <li>
                   <Link href="#privacy" className="hover:text-white transition-colors">
@@ -130,11 +128,11 @@ export default function Footer() {
               </ul>
             </div>
 
-            {/* COLUMN 3 — SOCIAL NETWORK & CONTACT (Col span 3) */}
+            {/* COLUMN 3 — OFFICIAL BUSINESS ADDRESS & CONTACT (Col span 3) */}
             <div className="lg:col-span-3 flex flex-col gap-4">
               <div>
                 <h3 className="text-xs font-bold uppercase tracking-[0.15em] mb-4 text-white/50">
-                  SOCIAL NETWORK & CONTACT
+                  OFFICIAL BUSINESS ADDRESS
                 </h3>
                 
                 {/* Social Icons (Line style SVGs) */}
@@ -169,28 +167,27 @@ export default function Footer() {
                 </div>
               </div>
 
-              {/* Contact Information */}
+              {/* Official Business Information */}
               <div className="space-y-2.5 text-xs text-white/75">
                 <div className="flex items-start gap-2.5">
-                  <Mail size={15} className="text-white/60 shrink-0 mt-0.5" />
-                  <a href="mailto:export@ayaanclothing.com" className="hover:text-white transition-colors">
-                    export@ayaanclothing.com
-                  </a>
+                  <MapPin size={15} className="text-white/60 shrink-0 mt-0.5" />
+                  <span className="leading-relaxed">
+                    {BUSINESS_PROFILE.address.formatted}
+                  </span>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <Phone size={15} className="text-white/60 shrink-0 mt-0.5" />
+                  <MessageCircle size={15} className="text-[#25D366] shrink-0 mt-0.5" />
                   <a
-                    href="https://wa.me/8801711000000"
+                    href={getWhatsAppUrl(`Hi ${BUSINESS_PROFILE.name}, I have an inquiry regarding wholesale apparel.`)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-white transition-colors"
+                    className="hover:text-white transition-colors underline-offset-4 hover:underline"
                   >
-                    +880 1711-000000 (WhatsApp)
+                    Chat on WhatsApp
                   </a>
                 </div>
-                <div className="flex items-start gap-2.5">
-                  <MapPin size={15} className="text-white/60 shrink-0 mt-0.5" />
-                  <span>House 12, Road 4, Sector 3, Uttara, Dhaka - 1230, Bangladesh</span>
+                <div className="text-[11px] text-white/50 pl-6">
+                  Established: {BUSINESS_PROFILE.establishedYear} • Brand Mark: {BUSINESS_PROFILE.brandMark}
                 </div>
               </div>
             </div>
@@ -207,7 +204,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="#tracking" className="hover:text-white transition-colors">
+                  <Link href="/profile/orders" className="hover:text-white transition-colors">
                     Order Tracking
                   </Link>
                 </li>
@@ -224,13 +221,13 @@ export default function Footer() {
           {/* Brand Legal Disclaimer */}
           <div className="pt-6 pb-6 text-xs text-white/50 leading-relaxed border-b border-white/5">
             <p>
-              Disclaimer: All brand names, logos, trademarks, and registered trademarks displayed on this website are the property of their respective owners. Ayaan Clothing is an independent wholesale distributor and export house.
+              Disclaimer: All brand names, logos, trademarks, and registered trademarks displayed on this website are the property of their respective owners. {BUSINESS_PROFILE.name} is an independent ready-made garments manufacturer and exporter.
             </p>
           </div>
 
           {/* Bottom Copyright & Legal Row */}
           <div className="flex flex-col sm:flex-row items-center justify-between pt-6 gap-4 text-xs text-white/40">
-            <p>© 2026 Ayaan Clothing. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} {BUSINESS_PROFILE.name}. All rights reserved.</p>
             <div className="flex items-center gap-6">
               <Link href="#privacy" className="hover:text-white/70 transition-colors">
                 Privacy Policy
@@ -259,7 +256,7 @@ export default function Footer() {
 
       {/* Floating WhatsApp Button */}
       <a
-        href="https://wa.me/8801711000000?text=Hi%20Ayaan%20Clothing%2C%20I%20have%20an%20inquiry%20regarding%20wholesale%20apparel"
+        href={getWhatsAppUrl(`Hi ${BUSINESS_PROFILE.name}, I have an inquiry regarding wholesale apparel.`)}
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-[#25D366] text-white shadow-xl flex items-center justify-center hover:bg-[#20ba59] hover:scale-105 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

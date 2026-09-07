@@ -4,7 +4,13 @@ export interface Product {
   slug: string;
   price: number;
   oldPrice?: number;
+  wholesalePrice?: number;
+  standardPrice?: number;
+  bulkThreshold?: number;
+  bulkPrice?: number;
+  fullStockPrice?: number;
   categoryId: string;
+  categoryName?: string;
   images: string[];
   isNew?: boolean;
   isHot?: boolean;
@@ -16,12 +22,60 @@ export interface Product {
   quantityStep?: number;
   availableStock?: number;
   brand?: string;
+  brandLogo?: string;
   colours?: number;
   color?: string;
   description?: string;
   createdAt?: string;
   addedAt?: string;
   publishedAt?: string;
+  pricingTiers?: PricingTier[];
+  packageAllocations?: PackageAllocation[];
+  shippingPackageProfiles?: ShippingPackageProfile[];
+  shipping_package_profiles?: ShippingPackageProfile[];
+  isPackageAssortment?: boolean;
+  fullStockQuantity?: number;
+  videoUrl?: string;
+  youtubeVideoId?: string;
+  youtubeEmbedUrl?: string;
+}
+
+export interface ShippingPackageProfile {
+  id?: string | number;
+  product_id?: string | number;
+  package_quantity: number;
+  quantity_max?: number | null;
+  carton_count: number;
+  carton_length: number;
+  carton_width: number;
+  carton_height: number;
+  dimension_unit: "cm" | "in" | "m";
+  gross_weight: number;
+  net_weight?: number | null;
+  weight_unit: "kg" | "lbs" | "g";
+  notes?: string | null;
+  is_active?: boolean;
+  total_cbm?: number;
+}
+
+export interface PricingTier {
+  min_quantity: number;
+  max_quantity: number | null;
+  unit_price: number;
+}
+
+export interface PackageAllocation {
+  product_variant_id: number;
+  quantity: number;
+  color: string | null;
+  size: string | null;
+}
+
+export interface PackageBreakdown {
+  product_variant_id: number | null;
+  quantity: number;
+  size?: string;
+  color?: string;
 }
 
 export interface Category {
@@ -76,3 +130,6 @@ export interface ProductPromotion {
   customSubtitle?: string;
   customImage?: string;
 }
+
+export * from "./api";
+

@@ -1,239 +1,519 @@
 "use client";
 
-import { Suspense, useState, useMemo, useEffect, useCallback, useRef } from "react";
+/**
+ * /search — Infinite Scroll Product Listing
+ *
+ * Architecture:
+ *  - Server-side pagination via GET /api/v1/products?page=N&per_page=24
+ *  - IntersectionObserver sentinel triggers next-page fetches automatically
+ *  - AbortController + generation counter prevents stale/race-condition appends
+ *  - Duplicate product IDs are tracked and filtered at render time
+ *  - URL stays in sync (?page=N) for crawlable paginated URLs
+ *  - Filter/sort/query changes reset the list and restart from page 1
+ */
+
+import {
+  Suspense,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import productsData from "@/data/products.json";
 import ProductCard from "@/components/product/ProductCard";
+import { ProductSkeletonRow } from "@/components/product/ProductCardSkeleton";
 import { Product } from "@/types";
+import { toStorefrontProduct } from "@/lib/services/products";
+import { productService } from "@/services/product.service";
+import { brandService, BrandModel } from "@/services/brand.service";
+import { categoryService, CategoryModel } from "@/services/category.service";
+import { getBrandLogoUrl } from "@/lib/brand-logos";
 import {
-  searchProducts,
-  filterProducts,
-} from "@/lib/filters";
-import { BRANDS } from "@/components/home/ShopByBrand";
-import { 
-  X, 
-  Filter, 
-  Sparkles, 
-  Search, 
-  User, 
-  Users, 
-  Smile, 
+  X,
+  Filter,
+  Sparkles,
+  Search,
+  User,
+  Users,
+  Smile,
   SlidersHorizontal,
-  ChevronLeft,
-  ChevronRight,
-  Check
+  Check,
+  AlertCircle,
+  RotateCcw,
+  ChevronDown,
 } from "lucide-react";
 
-const PRODUCTS_PER_PAGE = 30;
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const PER_PAGE = 24;
+
+const SORT_OPTIONS = [
+  { value: "newest",     label: "Newest First" },
+  { value: "price_asc",  label: "Price: Low → High" },
+  { value: "price_desc", label: "Price: High → Low" },
+  { value: "popular",    label: "Most Popular" },
+  { value: "name_asc",   label: "Name A → Z" },
+  { value: "name_desc",  label: "Name Z → A" },
+] as const;
+
+type SortValue = (typeof SORT_OPTIONS)[number]["value"];
 
 const AUDIENCE_OPTIONS = [
-  { id: "MEN", label: "MEN", icon: User },
-  { id: "WOMEN", label: "WOMEN", icon: User },
-  { id: "BOYS", label: "BOYS", icon: Smile },
-  { id: "GIRLS", label: "GIRLS", icon: Sparkles },
+  { id: "MEN",    label: "MEN",    icon: User },
+  { id: "WOMEN",  label: "WOMEN",  icon: User },
+  { id: "BOYS",   label: "BOYS",   icon: Smile },
+  { id: "GIRLS",  label: "GIRLS",  icon: Sparkles },
   { id: "UNISEX", label: "UNISEX", icon: Users },
 ];
 
-function getPaginationItems(currentPage: number, totalPages: number): (number | "ellipsis")[] {
-  if (totalPages <= 7) {
-    return Array.from({ length: totalPages }, (_, i) => i + 1);
-  }
-  const items: (number | "ellipsis")[] = [1];
-  if (currentPage > 3) {
-    items.push("ellipsis");
-  }
-  const start = Math.max(2, currentPage - 1);
-  const end = Math.min(totalPages - 1, currentPage + 1);
-  for (let i = start; i <= end; i++) {
-    if (!items.includes(i)) items.push(i);
-  }
-  if (currentPage < totalPages - 2) {
-    items.push("ellipsis");
-  }
-  if (!items.includes(totalPages)) items.push(totalPages);
-  return items;
-}
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
 
 function SearchResultsContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const resultsTopRef = useRef<HTMLDivElement>(null);
+  const router      = useRouter();
 
-  const query = searchParams.get("query") || "";
-  const initialBrandParam = searchParams.get("brand") || "";
-  const initialAudienceParam = searchParams.get("audience") || "";
-  const initialPageParam = parseInt(searchParams.get("page") || "1", 10);
+  // ── URL params ──────────────────────────────────────────────────────────
+  const query               = searchParams.get("query") || "";
+  const initialBrandParam   = searchParams.get("brand") || "";
+  const initialAudienceParam= searchParams.get("audience") || "";
+  const initialCategoryParam= searchParams.get("category") || "";
+  const initialSortParam    = (searchParams.get("sort") || "newest") as SortValue;
+  const initialPageParam    = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1);
 
-  const allProducts = productsData as Product[];
-
-  // Mobile Filter Drawer state
+  // ── Filter state (3 Distinct Dimensions: Audience, Category, Brand) ──────
+  const [selectedBrands, setSelectedBrands] = useState<string[]>(() =>
+    initialBrandParam ? initialBrandParam.split(",").map((s) => s.trim()).filter(Boolean) : []
+  );
+  const [selectedAudiences, setSelectedAudiences] = useState<string[]>(() =>
+    initialAudienceParam
+      ? initialAudienceParam.toUpperCase().split(",").map((s) => s.trim()).filter(Boolean)
+      : []
+  );
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(() =>
+    initialCategoryParam ? initialCategoryParam.split(",").map((s) => s.trim()).filter(Boolean) : []
+  );
+  const [sort, setSort] = useState<SortValue>(initialSortParam);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState<number>(() => {
-    return isNaN(initialPageParam) || initialPageParam < 1 ? 1 : initialPageParam;
-  });
+  // ── Infinite scroll state ────────────────────────────────────────────────
+  const [products,    setProducts]    = useState<Product[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);   // 0 = not yet fetched
+  const [lastPage,    setLastPage]    = useState(1);
+  const [total,       setTotal]       = useState(0);
+  const [loading,     setLoading]     = useState(true);  // initial load
+  const [loadingMore, setLoadingMore] = useState(false); // subsequent pages
+  const [error,       setError]       = useState<string | null>(null);
 
-  // Filter state initialized from URL search params
-  const [selectedBrands, setSelectedBrands] = useState<string[]>(() => {
-    return initialBrandParam ? initialBrandParam.split(",").map((s) => s.trim()).filter(Boolean) : [];
-  });
-  const [selectedAudiences, setSelectedAudiences] = useState<string[]>(() => {
-    return initialAudienceParam ? initialAudienceParam.toUpperCase().split(",").map((s) => s.trim()).filter(Boolean) : [];
-  });
+  // Duplicate guard
+  const loadedIdsRef = useRef<Set<string>>(new Set());
+  // Generation counter: increments on every filter/query/sort change
+  const genRef = useRef(0);
+  // Sentinel div observed by IntersectionObserver
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  // Active AbortController for the current in-flight request
+  const abortRef = useRef<AbortController | null>(null);
 
-  // Synchronize state with URL params
+  // ── Available live brands and product categories ──────────────────────────
+  const [liveBrands, setLiveBrands] = useState<BrandModel[]>([]);
+  const [liveCategories, setLiveCategories] = useState<CategoryModel[]>([]);
+
   useEffect(() => {
-    if (initialBrandParam) {
-      setSelectedBrands(initialBrandParam.split(",").map((s) => s.trim()).filter(Boolean));
-    } else {
-      setSelectedBrands([]);
+    async function loadTaxonomies() {
+      try {
+        const [bData, cData] = await Promise.all([
+          brandService.getBrands(),
+          categoryService.getCategories(),
+        ]);
+        setLiveBrands(bData);
+        setLiveCategories(cData);
+      } catch (err) {
+        console.error("Failed to load search taxonomies:", err);
+      }
     }
+    loadTaxonomies();
+  }, []);
 
-    if (initialAudienceParam) {
-      setSelectedAudiences(initialAudienceParam.toUpperCase().split(",").map((s) => s.trim()).filter(Boolean));
-    } else {
-      setSelectedAudiences([]);
-    }
+  const availableBrands = useMemo(() => {
+    return liveBrands.map((b) => b.name);
+  }, [liveBrands]);
 
-    const pageNum = parseInt(searchParams.get("page") || "1", 10);
-    setCurrentPage(isNaN(pageNum) || pageNum < 1 ? 1 : pageNum);
-  }, [initialBrandParam, initialAudienceParam, searchParams]);
+  const availableCategories = useMemo(() => {
+    return liveCategories.map((c) => c.name);
+  }, [liveCategories]);
 
-  // Update URL search parameters when filters or page change
-  const updateUrlParams = useCallback(
-    (newBrands: string[], newAudiences: string[], page: number) => {
+  // ── URL sync helper ───────────────────────────────────────────────────────
+  const updateUrl = useCallback(
+    (brands: string[], audiences: string[], categories: string[], sortVal: SortValue, page: number) => {
       const params = new URLSearchParams();
-      if (query) params.set("query", query);
-      if (newBrands.length > 0) params.set("brand", newBrands.join(","));
-      if (newAudiences.length > 0) params.set("audience", newAudiences.map((a) => a.toLowerCase()).join(","));
-      if (page > 1) params.set("page", page.toString());
-
-      const newUrl = `/search?${params.toString()}`;
-      router.replace(newUrl, { scroll: false });
+      if (query)             params.set("query",    query);
+      if (brands.length)     params.set("brand",    brands.join(","));
+      if (audiences.length)  params.set("audience", audiences.map((a) => a.toLowerCase()).join(","));
+      if (categories.length) params.set("category", categories.map((c) => c.toLowerCase()).join(","));
+      if (sortVal !== "newest") params.set("sort", sortVal);
+      if (page > 1)          params.set("page",     page.toString());
+      router.replace(`/search?${params.toString()}`, { scroll: false });
     },
     [query, router]
   );
 
-  // 1. Search products matching text query
-  const searchBaseResults = useMemo(() => {
-    if (!query.trim()) return allProducts;
-    return searchProducts(allProducts, query);
-  }, [allProducts, query]);
+  // ── Core fetch function ───────────────────────────────────────────────────
+  const fetchPage = useCallback(
+    async (page: number, gen: number) => {
+      // Abort any previous in-flight request
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
 
-  // 2. Extract real unique brands present in the search result set
-  const availableBrands = useMemo(() => {
-    const brands = searchBaseResults
-      .map((p) => p.brand)
-      .filter((b): b is string => Boolean(b));
-    return Array.from(new Set(brands)).sort((a, b) => a.localeCompare(b));
-  }, [searchBaseResults]);
+      const isFirstPage = page === 1;
+      if (isFirstPage) {
+        setLoading(true);
+        setError(null);
+      } else {
+        setLoadingMore(true);
+        setError(null);
+      }
 
-  // 3. Narrow results by selected brands (OR) and selected audiences (OR)
-  const filteredProducts = useMemo(() => {
-    return filterProducts({
-      products: searchBaseResults,
-      brandIds: selectedBrands,
-      audienceIds: selectedAudiences,
-    });
-  }, [searchBaseResults, selectedBrands, selectedAudiences]);
+      try {
+        const result = await productService.getProductsPaginated(
+          {
+            q:        query || undefined,
+            brand:    selectedBrands.join(",") || undefined,
+            audience: selectedAudiences.join(",") || undefined,
+            category: selectedCategories.join(",") || undefined,
+            sort,
+            page,
+            per_page: PER_PAGE,
+          },
+          controller.signal
+        );
 
-  // 4. Pagination calculations
-  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
-  const validatedCurrentPage = Math.min(Math.max(1, currentPage), totalPages || 1);
+        // Discard stale responses (generation changed while request was in flight)
+        if (gen !== genRef.current) return;
 
-  const paginatedProducts = useMemo(() => {
-    const startIndex = (validatedCurrentPage - 1) * PRODUCTS_PER_PAGE;
-    return filteredProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
-  }, [filteredProducts, validatedCurrentPage]);
+        const newProducts = result.data
+          .map(toStorefrontProduct)
+          .filter((p) => {
+            if (loadedIdsRef.current.has(p.id)) return false;
+            loadedIdsRef.current.add(p.id);
+            return true;
+          });
 
-  // Handle Page Change
-  const handlePageChange = (page: number) => {
-    if (page < 1 || page > totalPages || page === validatedCurrentPage) return;
-    setCurrentPage(page);
-    updateUrlParams(selectedBrands, selectedAudiences, page);
-    
-    // Smooth scroll to top of products grid
-    resultsTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+        setProducts((prev) => (isFirstPage ? newProducts : [...prev, ...newProducts]));
+        setCurrentPage(result.meta.current_page);
+        setLastPage(result.meta.last_page);
+        setTotal(result.meta.total);
 
-  // Toggle brand selection (resets page to 1)
-  const handleBrandToggle = (brandName: string) => {
-    const updated = selectedBrands.includes(brandName)
-      ? selectedBrands.filter((b) => b !== brandName)
-      : [...selectedBrands, brandName];
-    setSelectedBrands(updated);
-    setCurrentPage(1);
-    updateUrlParams(updated, selectedAudiences, 1);
-  };
+        // Sync URL
+        updateUrl(selectedBrands, selectedAudiences, selectedCategories, sort, result.meta.current_page);
+      } catch (err: any) {
+        if (err?.name === "AbortError" || err?.message === "AbortError") return;
+        if (gen !== genRef.current) return;
+        setError("Couldn't load products. Please try again.");
+      } finally {
+        if (gen === genRef.current) {
+          setLoading(false);
+          setLoadingMore(false);
+        }
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [query, selectedBrands, selectedAudiences, selectedCategories, sort]
+  );
 
-  // Toggle audience selection (resets page to 1)
-  const handleAudienceToggle = (audId: string) => {
-    const upper = audId.toUpperCase();
-    const updated = selectedAudiences.includes(upper)
-      ? selectedAudiences.filter((a) => a !== upper)
-      : [...selectedAudiences, upper];
-    setSelectedAudiences(updated);
-    setCurrentPage(1);
-    updateUrlParams(selectedBrands, updated, 1);
-  };
+  // ── Reset & reload on filter/sort/query change ────────────────────────────
+  const resetAndReload = useCallback(
+    (brands: string[], audiences: string[], categories: string[], sortVal: SortValue) => {
+      genRef.current += 1;
+      loadedIdsRef.current = new Set();
+      setProducts([]);
+      setCurrentPage(0);
+      setLastPage(1);
+      setTotal(0);
+      setError(null);
 
-  // Clear filters only (preserve query, reset page to 1)
-  const handleClearFilters = () => {
+      // Build params for fetchPage using latest filter values
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+      const gen = genRef.current;
+
+      setLoading(true);
+
+      productService
+        .getProductsPaginated(
+          {
+            q:        query || undefined,
+            brand:    brands.join(",") || undefined,
+            audience: audiences.join(",") || undefined,
+            category: categories.join(",") || undefined,
+            sort:     sortVal,
+            page:     1,
+            per_page: PER_PAGE,
+          },
+          controller.signal
+        )
+        .then((result) => {
+          if (gen !== genRef.current) return;
+          const newProducts = result.data
+            .map(toStorefrontProduct)
+            .filter((p) => {
+              if (loadedIdsRef.current.has(p.id)) return false;
+              loadedIdsRef.current.add(p.id);
+              return true;
+            });
+          setProducts(newProducts);
+          setCurrentPage(result.meta.current_page);
+          setLastPage(result.meta.last_page);
+          setTotal(result.meta.total);
+          updateUrl(brands, audiences, categories, sortVal, 1);
+        })
+        .catch((err) => {
+          if (err?.name === "AbortError" || err?.message === "AbortError") return;
+          if (gen !== genRef.current) return;
+          setError("Couldn't load products. Please try again.");
+        })
+        .finally(() => {
+          if (gen === genRef.current) {
+            setLoading(false);
+            setLoadingMore(false);
+          }
+        });
+    },
+    [query, updateUrl]
+  );
+
+  // ── Initial load (on mount and when query changes) ────────────────────────
+  useEffect(() => {
+    genRef.current += 1;
+    loadedIdsRef.current = new Set();
+    const gen = genRef.current;
+
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    setProducts([]);
+    setCurrentPage(0);
+    setLastPage(1);
+    setTotal(0);
+    setError(null);
+    setLoading(true);
+
+    productService
+      .getProductsPaginated(
+        {
+          q:        query || undefined,
+          brand:    selectedBrands.join(",") || undefined,
+          audience: selectedAudiences.join(",") || undefined,
+          category: selectedCategories.join(",") || undefined,
+          sort,
+          page:     initialPageParam,
+          per_page: PER_PAGE,
+        },
+        controller.signal
+      )
+      .then((result) => {
+        if (gen !== genRef.current) return;
+        const newProducts = result.data
+          .map(toStorefrontProduct)
+          .filter((p) => {
+            if (loadedIdsRef.current.has(p.id)) return false;
+            loadedIdsRef.current.add(p.id);
+            return true;
+          });
+        setProducts(newProducts);
+        setCurrentPage(result.meta.current_page);
+        setLastPage(result.meta.last_page);
+        setTotal(result.meta.total);
+      })
+      .catch((err) => {
+        if (err?.name === "AbortError" || err?.message === "AbortError") return;
+        if (gen !== genRef.current) return;
+        setError("Couldn't load products. Please try again.");
+      })
+      .finally(() => {
+        if (gen === genRef.current) setLoading(false);
+      });
+
+    return () => {
+      controller.abort();
+    };
+    // Only re-run on query change (filters have their own handlers)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
+
+  // ── IntersectionObserver: auto-load next page ─────────────────────────────
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          !loading &&
+          !loadingMore &&
+          !error &&
+          currentPage > 0 &&
+          currentPage < lastPage
+        ) {
+          const nextPage = currentPage + 1;
+          const gen = genRef.current;
+          setLoadingMore(true);
+
+          productService
+            .getProductsPaginated(
+              {
+                q:        query || undefined,
+                brand:    selectedBrands.join(",") || undefined,
+                audience: selectedAudiences.join(",") || undefined,
+                sort,
+                page:     nextPage,
+                per_page: PER_PAGE,
+              },
+              undefined // no abort for sequential scroll loads
+            )
+            .then((result) => {
+              if (gen !== genRef.current) return;
+              const newProducts = result.data
+                .map(toStorefrontProduct)
+                .filter((p) => {
+                  if (loadedIdsRef.current.has(p.id)) return false;
+                  loadedIdsRef.current.add(p.id);
+                  return true;
+                });
+              setProducts((prev) => [...prev, ...newProducts]);
+              setCurrentPage(result.meta.current_page);
+              setLastPage(result.meta.last_page);
+              setTotal(result.meta.total);
+              updateUrl(selectedBrands, selectedAudiences, selectedCategories, sort, result.meta.current_page);
+            })
+            .catch((err) => {
+              if (err?.name === "AbortError") return;
+              if (gen !== genRef.current) return;
+              setError("Couldn't load more products.");
+            })
+            .finally(() => {
+              if (gen === genRef.current) setLoadingMore(false);
+            });
+        }
+      },
+      { rootMargin: "600px" }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loading, loadingMore, error, currentPage, lastPage, query, selectedBrands, selectedAudiences, sort, updateUrl]);
+
+  // ── Retry failed page ─────────────────────────────────────────────────────
+  const handleRetry = useCallback(() => {
+    const nextPage = currentPage < lastPage ? currentPage + 1 : currentPage;
+    fetchPage(nextPage, genRef.current);
+  }, [currentPage, lastPage, fetchPage]);
+
+  // ── Filter toggle handlers ────────────────────────────────────────────────
+  const handleBrandToggle = useCallback(
+    (brandName: string) => {
+      const updated = selectedBrands.includes(brandName)
+        ? selectedBrands.filter((b) => b !== brandName)
+        : [...selectedBrands, brandName];
+      setSelectedBrands(updated);
+      resetAndReload(updated, selectedAudiences, selectedCategories, sort);
+    },
+    [selectedBrands, selectedAudiences, selectedCategories, sort, resetAndReload]
+  );
+
+  const handleAudienceToggle = useCallback(
+    (audId: string) => {
+      const upper = audId.toUpperCase();
+      const updated = selectedAudiences.includes(upper)
+        ? selectedAudiences.filter((a) => a !== upper)
+        : [...selectedAudiences, upper];
+      setSelectedAudiences(updated);
+      resetAndReload(selectedBrands, updated, selectedCategories, sort);
+    },
+    [selectedBrands, selectedAudiences, selectedCategories, sort, resetAndReload]
+  );
+
+  const handleCategoryToggle = useCallback(
+    (catName: string) => {
+      const updated = selectedCategories.some((c) => c.toLowerCase() === catName.toLowerCase())
+        ? selectedCategories.filter((c) => c.toLowerCase() !== catName.toLowerCase())
+        : [...selectedCategories, catName];
+      setSelectedCategories(updated);
+      resetAndReload(selectedBrands, selectedAudiences, updated, sort);
+    },
+    [selectedBrands, selectedAudiences, selectedCategories, sort, resetAndReload]
+  );
+
+  const handleSortChange = useCallback(
+    (newSort: SortValue) => {
+      setSort(newSort);
+      setIsSortOpen(false);
+      resetAndReload(selectedBrands, selectedAudiences, selectedCategories, newSort);
+    },
+    [selectedBrands, selectedAudiences, selectedCategories, resetAndReload]
+  );
+
+  const handleClearFilters = useCallback(() => {
     setSelectedBrands([]);
     setSelectedAudiences([]);
-    setCurrentPage(1);
-    updateUrlParams([], [], 1);
-  };
+    setSelectedCategories([]);
+    resetAndReload([], [], [], sort);
+  }, [sort, resetAndReload]);
 
-  // Clear search completely (return to homepage)
-  const handleClearSearch = () => {
+  const handleClearSearch = useCallback(() => {
     router.push("/");
-  };
+  }, [router]);
 
-  // Lock body scroll when mobile drawer is open
+  // ── Body scroll lock (mobile drawer) ─────────────────────────────────────
   useEffect(() => {
-    if (isMobileDrawerOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
+    document.body.style.overflow = isMobileDrawerOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
   }, [isMobileDrawerOpen]);
 
-  // Close drawer on Escape key
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isMobileDrawerOpen) {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
         setIsMobileDrawerOpen(false);
+        setIsSortOpen(false);
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isMobileDrawerOpen]);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
-  const activeFilterCount = selectedBrands.length + selectedAudiences.length;
-  const hasActiveFilters = activeFilterCount > 0;
+  // ── Derived values ────────────────────────────────────────────────────────
+  const activeFilterCount = selectedBrands.length + selectedAudiences.length + selectedCategories.length;
+  const hasActiveFilters  = activeFilterCount > 0;
+  const hasMore           = currentPage < lastPage;
+  const isEndOfResults    = currentPage >= lastPage && currentPage > 0 && products.length > 0;
 
-  // Helper to find logo asset for a brand name
   const getBrandLogo = (brandName: string) => {
-    const normalized = brandName.toLowerCase().replace(/['’.\s-]/g, "");
-    const match = BRANDS.find(
+    const normalized = brandName.toLowerCase().replace(/[''.\s-]/g, "");
+    const match = liveBrands.find(
       (b) =>
         b.name.toLowerCase() === brandName.toLowerCase() ||
-        b.id.toLowerCase() === normalized ||
+        String(b.id).toLowerCase() === normalized ||
         b.slug.toLowerCase() === normalized
     );
-    return match ? match.logo : null;
+    return getBrandLogoUrl(brandName, match?.logo_url || match?.logo);
   };
 
-  // Reusable Filter Content (Brand logo tiles in 2-col, Audience tiles in 2-col, and active filters)
+  const currentSortLabel =
+    SORT_OPTIONS.find((o) => o.value === sort)?.label ?? "Sort";
+
+  // ── Filter sidebar content (reused in desktop sidebar + mobile drawer) ────
   const renderFilterContent = () => (
     <div className="space-y-6">
-      {/* BRAND FILTER SECTION (2-COLUMN GRID OF REAL LOGO TILES) */}
+      {/* BRAND FILTER */}
       {availableBrands.length > 0 && (
         <div className="flex flex-col gap-2.5">
           <div className="flex items-center justify-between">
@@ -264,31 +544,34 @@ function SearchResultsContent() {
                   }`}
                   title={brandName}
                 >
-                  {/* Subtle active checkmark badge */}
                   {isSelected && (
                     <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
                       <Check size={9} strokeWidth={3} />
                     </span>
                   )}
-
-                  {/* Real Brand Logo or Styled Name */}
-                  {logo ? (
-                    <div className="h-7 w-full flex items-center justify-center px-1 mb-1">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <div className="h-7 w-full flex items-center justify-center px-1 mb-1">
+                    {logo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={logo}
-                        alt={brandName}
+                        alt={`${brandName} logo`}
                         className="max-h-7 max-w-[80px] w-auto object-contain"
                         loading="lazy"
                       />
-                    </div>
-                  ) : (
-                    <span className="text-xs font-bold font-display uppercase tracking-tight text-foreground line-clamp-1 mb-0.5">
-                      {brandName}
-                    </span>
-                  )}
-
-                  <span className="text-[10px] font-semibold text-foreground/80 truncate max-w-full px-0.5">
+                    ) : (
+                      <span className="text-xs font-extrabold text-muted-foreground select-none">
+                        {brandName.length <= 3
+                          ? brandName.toUpperCase()
+                          : brandName
+                              .split(/\s+/)
+                              .map((w) => w[0])
+                              .join("")
+                              .toUpperCase()
+                              .slice(0, 2)}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs font-semibold text-foreground/80 truncate max-w-full px-0.5">
                     {brandName}
                   </span>
                 </button>
@@ -298,11 +581,11 @@ function SearchResultsContent() {
         </div>
       )}
 
-      {/* AUDIENCE FILTER SECTION (2-COLUMN GRID TILES MATCHING BRAND TILE SIZE, UNISEX CENTERED) */}
+      {/* 1. AUDIENCE / DEPARTMENT FILTER */}
       <div className="flex flex-col gap-2.5">
         <div className="flex items-center justify-between">
           <span className="text-[0.6875rem] font-bold uppercase tracking-wider text-muted-foreground">
-            AUDIENCE
+            AUDIENCE / DEPARTMENT
           </span>
           {selectedAudiences.length > 0 && (
             <span className="text-[0.6875rem] font-semibold text-primary">
@@ -312,11 +595,9 @@ function SearchResultsContent() {
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          {/* First 4 Audiences (MEN, WOMEN, BOYS, GIRLS) */}
           {AUDIENCE_OPTIONS.slice(0, 4).map((aud) => {
             const Icon = aud.icon;
             const isSelected = selectedAudiences.includes(aud.id);
-
             return (
               <button
                 key={aud.id}
@@ -341,17 +622,16 @@ function SearchResultsContent() {
             );
           })}
 
-          {/* UNISEX: Centered underneath in the 2-column layout */}
+          {/* UNISEX centred */}
           <div className="col-span-2 flex justify-center">
             {(() => {
-              const unisexAud = AUDIENCE_OPTIONS[4];
-              const Icon = unisexAud.icon;
-              const isSelected = selectedAudiences.includes(unisexAud.id);
-
+              const aud = AUDIENCE_OPTIONS[4];
+              const Icon = aud.icon;
+              const isSelected = selectedAudiences.includes(aud.id);
               return (
                 <button
                   type="button"
-                  onClick={() => handleAudienceToggle(unisexAud.id)}
+                  onClick={() => handleAudienceToggle(aud.id)}
                   className={`relative flex flex-col items-center justify-center p-2 rounded-xl border transition-all duration-200 cursor-pointer h-[72px] text-center w-[calc(50%-0.25rem)] ${
                     isSelected
                       ? "border-primary bg-primary/[0.08] ring-1 ring-primary/30 shadow-xs"
@@ -365,7 +645,7 @@ function SearchResultsContent() {
                   )}
                   <Icon size={18} className={`mb-1 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
                   <span className="text-xs font-bold uppercase tracking-wider text-foreground">
-                    {unisexAud.label}
+                    {aud.label}
                   </span>
                 </button>
               );
@@ -374,7 +654,44 @@ function SearchResultsContent() {
         </div>
       </div>
 
-      {/* ACTIVE FILTERS SECTION */}
+      {/* 2. PRODUCT CATEGORY FILTER (Dynamic) */}
+      {availableCategories.length > 0 && (
+        <div className="flex flex-col gap-2.5 pt-2 border-t border-border/50">
+          <div className="flex items-center justify-between">
+            <span className="text-[0.6875rem] font-bold uppercase tracking-wider text-muted-foreground">
+              PRODUCT CATEGORY
+            </span>
+            {selectedCategories.length > 0 && (
+              <span className="text-[0.6875rem] font-semibold text-primary">
+                {selectedCategories.length} selected
+              </span>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-1.5 max-h-56 overflow-y-auto pr-1">
+            {availableCategories.map((catName) => {
+              const isSelected = selectedCategories.some((c) => c.toLowerCase() === catName.toLowerCase());
+              return (
+                <button
+                  key={catName}
+                  type="button"
+                  onClick={() => handleCategoryToggle(catName)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                    isSelected
+                      ? "bg-primary text-primary-foreground shadow-xs scale-[1.02]"
+                      : "bg-secondary/60 hover:bg-secondary border border-border/80 text-foreground/80 hover:text-foreground"
+                  }`}
+                >
+                  {isSelected && <Check size={11} strokeWidth={3} />}
+                  <span>{catName}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ACTIVE FILTERS */}
       {hasActiveFilters && (
         <div className="pt-4 border-t border-border/60 flex flex-col gap-2.5">
           <div className="flex items-center justify-between">
@@ -422,51 +739,131 @@ function SearchResultsContent() {
                 </button>
               </span>
             ))}
+            {selectedCategories.map((c) => (
+              <span
+                key={`side-c-${c}`}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary border border-border text-foreground font-semibold text-xs"
+              >
+                <span>{c}</span>
+                <button
+                  type="button"
+                  onClick={() => handleCategoryToggle(c)}
+                  className="hover:text-destructive transition-colors ml-0.5 p-0.5 cursor-pointer"
+                  title={`Remove ${c}`}
+                >
+                  <X size={11} />
+                </button>
+              </span>
+            ))}
           </div>
         </div>
       )}
     </div>
   );
 
+  // ── Initial loading skeleton (full grid) ──────────────────────────────────
+  if (loading) {
+    return (
+      <div className="w-full bg-background min-h-[70vh] py-6 sm:py-8">
+        <div className="mx-auto w-full max-w-[1720px] px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-border/70 mb-6">
+            <div className="space-y-2">
+              <div className="h-7 bg-secondary/60 rounded-full w-64 animate-pulse" />
+              <div className="h-4 bg-secondary/40 rounded-full w-48 animate-pulse" />
+            </div>
+          </div>
+          <div className="flex flex-col lg:flex-row items-start gap-6 xl:gap-8 w-full">
+            <aside className="hidden lg:block w-64 xl:w-72 flex-shrink-0">
+              <div className="bg-card border border-border/70 rounded-2xl p-5 h-96 animate-pulse" />
+            </aside>
+            <div className="flex-1 min-w-0">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-5">
+                <ProductSkeletonRow count={10} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Full render ───────────────────────────────────────────────────────────
   return (
-    <div className="w-full bg-background min-h-[70vh] py-6 sm:py-8" ref={resultsTopRef}>
-      {/* Expansive Full-Width Container (92–96% viewport width) */}
+    <div className="w-full bg-background min-h-[70vh] py-6 sm:py-8">
       <div className="mx-auto w-full max-w-[1720px] px-4 sm:px-6 lg:px-8">
-        
-        {/* Top Header Row: Heading with Total Count & Clear Search */}
+
+        {/* Header row */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-border/70 mb-6">
           <div>
             <div className="flex items-center gap-2.5">
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-display font-bold uppercase tracking-tight text-foreground">
-                SEARCH RESULTS — {filteredProducts.length} PRODUCT{filteredProducts.length !== 1 ? "S" : ""}
+                {query.trim()
+                  ? `SEARCH RESULTS — ${total.toLocaleString()} PRODUCT${total !== 1 ? "S" : ""}`
+                  : `ALL PRODUCTS — ${total.toLocaleString()} PRODUCT${total !== 1 ? "S" : ""}`}
               </h1>
               <Sparkles size={18} className="text-primary hidden sm:inline-block" />
             </div>
             {query.trim() && (
               <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                Showing authentic wholesale & retail products matching &ldquo;<span className="font-semibold text-foreground">{query}</span>&rdquo;
+                Showing wholesale &amp; retail products matching{" "}
+                <span className="font-semibold text-foreground">&ldquo;{query}&rdquo;</span>
+              </p>
+            )}
+            {products.length > 0 && total > PER_PAGE && (
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {products.length.toLocaleString()} of {total.toLocaleString()} loaded
               </p>
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={handleClearSearch}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-border text-foreground hover:bg-secondary text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer self-start sm:self-auto active:scale-95 shadow-sm"
-          >
-            <X size={14} />
-            <span>Clear Search</span>
-          </button>
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            {/* Sort dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsSortOpen((v) => !v)}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-border text-xs font-bold uppercase tracking-wider text-foreground bg-card hover:bg-secondary transition-colors cursor-pointer shadow-sm active:scale-95"
+              >
+                <span>{currentSortLabel}</span>
+                <ChevronDown size={13} className={`transition-transform ${isSortOpen ? "rotate-180" : ""}`} />
+              </button>
+              {isSortOpen && (
+                <div className="absolute right-0 top-full mt-1.5 w-52 bg-card border border-border/80 rounded-xl shadow-xl z-40 py-1 animate-in fade-in zoom-in-95 duration-100">
+                  {SORT_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => handleSortChange(opt.value)}
+                      className={`w-full text-left px-4 py-2.5 text-xs font-semibold transition-colors cursor-pointer ${
+                        sort === opt.value
+                          ? "text-primary bg-primary/[0.07]"
+                          : "text-foreground hover:bg-secondary"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {query.trim() && (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-border text-foreground hover:bg-secondary text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer self-start sm:self-auto active:scale-95 shadow-sm"
+              >
+                <X size={14} />
+                <span>Clear</span>
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* 
-          MAIN CONTENT AREA: 
-          - Desktop: Left Portrait Sidebar + Right 30-Product Grid
-          - Mobile: Mobile Filter Button + Slide-in Left Drawer + Product Grid
-        */}
+        {/* Main content area */}
         <div className="flex flex-col lg:flex-row items-start gap-6 xl:gap-8 w-full">
-          
-          {/* DESKTOP LEFT SIDEBAR (STICKY PORTRAIT CARD) */}
+
+          {/* Desktop sidebar */}
           <aside className="hidden lg:block w-64 xl:w-72 flex-shrink-0">
             <div className="sticky top-[5.25rem] bg-card border border-border/70 rounded-2xl p-5 shadow-sm space-y-6 max-h-[calc(100vh-6.5rem)] overflow-y-auto">
               <div className="flex items-center justify-between pb-3 border-b border-border/60">
@@ -486,30 +883,28 @@ function SearchResultsContent() {
                   </button>
                 )}
               </div>
-
-              {/* Vertical Filter Groups */}
               {renderFilterContent()}
             </div>
           </aside>
 
-          {/* RIGHT PRODUCT GRID AREA & PAGINATION */}
-          <div className="flex-1 min-w-0 w-full flex flex-col">
-            
-            {/* Mobile / Tablet Filter Button */}
-            <div className="lg:hidden flex items-center justify-between pb-4">
+          {/* Product grid area */}
+          <div className="flex-1 min-w-0 w-full flex flex-col gap-4">
+
+            {/* Mobile filter button row */}
+            <div className="lg:hidden flex items-center justify-between pb-2">
               <button
                 type="button"
                 onClick={() => setIsMobileDrawerOpen(true)}
                 className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-sm active:scale-95 ${
                   hasActiveFilters
-                    ? "bg-primary text-primary-foreground border-primary font-bold"
+                    ? "bg-primary text-primary-foreground border-primary"
                     : "bg-card hover:bg-secondary border-border text-foreground"
                 }`}
               >
                 <SlidersHorizontal size={14} />
                 <span>Filter</span>
                 {activeFilterCount > 0 && (
-                  <span className="w-5 h-5 rounded-full bg-primary-foreground text-primary text-[10px] font-bold flex items-center justify-center">
+                  <span className="w-5 h-5 rounded-full bg-primary-foreground text-primary text-xs font-bold flex items-center justify-center">
                     {activeFilterCount}
                   </span>
                 )}
@@ -526,15 +921,18 @@ function SearchResultsContent() {
               )}
             </div>
 
-            {/* Product Grid (30 Products: 5 columns x 6 rows on desktop) */}
-            {paginatedProducts.length > 0 ? (
+            {/* Product grid */}
+            {products.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-5">
-                {paginatedProducts.map((product) => (
+                {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
+
+                {/* Loading more — skeleton cards inline with grid */}
+                {loadingMore && <ProductSkeletonRow count={5} />}
               </div>
             ) : (
-              /* Empty State */
+              /* Empty state */
               <div className="w-full py-16 px-4 text-center bg-card rounded-2xl border border-dashed border-border/80 flex flex-col items-center justify-center my-6 shadow-sm">
                 <div className="w-14 h-14 rounded-full bg-secondary/80 flex items-center justify-center text-muted-foreground mb-3.5">
                   <Search size={24} />
@@ -543,9 +941,11 @@ function SearchResultsContent() {
                   No Products Found
                 </h3>
                 <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mb-6 leading-relaxed">
-                  {query.trim()
-                    ? `No products match "${query}" with your selected filters. Try changing your search or filters.`
-                    : "No products match your selected filter criteria. Try clearing one or more filters."}
+                  {query.trim() ? (
+                    <>No products match &ldquo;{query}&rdquo; with your selected filters. Try changing your search or filters.</>
+                  ) : (
+                    <>No products match your selected filter criteria. Try clearing one or more filters.</>
+                  )}
                 </p>
                 <div className="flex items-center gap-3">
                   {hasActiveFilters && (
@@ -568,98 +968,62 @@ function SearchResultsContent() {
               </div>
             )}
 
-            {/* 
-              PAGINATION CONTROLS:
-              - Visible only when filtered products count > 30
-              - 30 items per page
-              - Elegant Ayaan styling with Previous / Next / Numbers / Ellipsis
-            */}
-            {filteredProducts.length > PRODUCTS_PER_PAGE && (
-              <div className="mt-12 pt-8 border-t border-border/70 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <p className="text-xs text-muted-foreground font-medium order-2 sm:order-1">
-                  Showing <span className="font-semibold text-foreground">{(validatedCurrentPage - 1) * PRODUCTS_PER_PAGE + 1}</span>–<span className="font-semibold text-foreground">{Math.min(validatedCurrentPage * PRODUCTS_PER_PAGE, filteredProducts.length)}</span> of <span className="font-semibold text-foreground">{filteredProducts.length}</span> products
-                </p>
+            {/* Error / retry state */}
+            {error && !loadingMore && (
+              <div className="flex flex-col items-center gap-3 py-8 text-center animate-in fade-in">
+                <div className="flex items-center gap-2 text-sm text-destructive font-semibold">
+                  <AlertCircle size={16} />
+                  <span>{error}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRetry}
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-border text-xs font-bold uppercase tracking-wider text-foreground hover:bg-secondary transition-colors cursor-pointer active:scale-95 shadow-sm"
+                >
+                  <RotateCcw size={13} />
+                  <span>Retry</span>
+                </button>
+              </div>
+            )}
 
-                <nav className="flex items-center gap-1.5 order-1 sm:order-2" aria-label="Product Pagination">
-                  {/* Previous Button */}
-                  <button
-                    type="button"
-                    onClick={() => handlePageChange(validatedCurrentPage - 1)}
-                    disabled={validatedCurrentPage === 1}
-                    className="w-9 h-9 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-secondary disabled:opacity-35 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors cursor-pointer active:scale-95"
-                    aria-label="Previous Page"
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
+            {/* Sentinel — triggers next page when it enters the viewport */}
+            {hasMore && !error && (
+              <div
+                ref={sentinelRef}
+                className="w-full h-4 mt-2"
+                aria-hidden="true"
+              />
+            )}
 
-                  {/* Page Numbers */}
-                  {getPaginationItems(validatedCurrentPage, totalPages).map((item, idx) => {
-                    if (item === "ellipsis") {
-                      return (
-                        <span
-                          key={`ell-${idx}`}
-                          className="w-9 h-9 flex items-center justify-center text-muted-foreground text-xs font-bold select-none"
-                        >
-                          ...
-                        </span>
-                      );
-                    }
-
-                    const pageNum = item as number;
-                    const isCurrent = pageNum === validatedCurrentPage;
-
-                    return (
-                      <button
-                        key={`page-${pageNum}`}
-                        type="button"
-                        onClick={() => handlePageChange(pageNum)}
-                        className={`w-9 h-9 rounded-full text-xs font-bold transition-all duration-150 cursor-pointer ${
-                          isCurrent
-                            ? "bg-foreground text-background shadow-sm"
-                            : "border border-border text-foreground hover:bg-secondary active:scale-95"
-                        }`}
-                        aria-label={`Page ${pageNum}`}
-                        aria-current={isCurrent ? "page" : undefined}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
-
-                  {/* Next Button */}
-                  <button
-                    type="button"
-                    onClick={() => handlePageChange(validatedCurrentPage + 1)}
-                    disabled={validatedCurrentPage === totalPages}
-                    className="w-9 h-9 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-secondary disabled:opacity-35 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors cursor-pointer active:scale-95"
-                    aria-label="Next Page"
-                  >
-                    <ChevronRight size={16} />
-                  </button>
-                </nav>
+            {/* End of results indicator */}
+            {isEndOfResults && !hasMore && (
+              <div className="flex items-center justify-center gap-3 py-10">
+                <div className="h-px flex-1 bg-border/60" />
+                <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground px-3">
+                  End of results — {total.toLocaleString()} products
+                </span>
+                <div className="h-px flex-1 bg-border/60" />
               </div>
             )}
 
           </div>
-
         </div>
-
       </div>
 
-      {/* MOBILE SLIDE-IN FILTER DRAWER (FROM LEFT) */}
+      {/* Mobile drawer backdrop */}
       {isMobileDrawerOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-ink/50 backdrop-blur-sm z-50 lg:hidden transition-opacity duration-300 animate-in fade-in"
           onClick={() => setIsMobileDrawerOpen(false)}
         />
       )}
 
+      {/* Mobile slide-in filter drawer */}
       <div
         className={`fixed inset-y-0 left-0 w-[85vw] max-w-sm bg-card z-50 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out lg:hidden border-r border-border ${
           isMobileDrawerOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Drawer Header */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
           <div className="flex items-center gap-2">
             <Filter size={16} className="text-foreground" />
@@ -677,12 +1041,10 @@ function SearchResultsContent() {
           </button>
         </div>
 
-        {/* Drawer Body (Scrollable) */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-6">
           {renderFilterContent()}
         </div>
 
-        {/* Drawer Footer CTA */}
         <div className="p-4 border-t border-border bg-card flex items-center gap-3">
           {hasActiveFilters && (
             <button
@@ -698,14 +1060,25 @@ function SearchResultsContent() {
             onClick={() => setIsMobileDrawerOpen(false)}
             className="flex-1 py-2.5 px-4 rounded-full bg-foreground text-background text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity text-center cursor-pointer font-display active:scale-95"
           >
-            View {filteredProducts.length} Results
+            View {total.toLocaleString()} Results
           </button>
         </div>
       </div>
 
+      {/* Sort dropdown backdrop */}
+      {isSortOpen && (
+        <div
+          className="fixed inset-0 z-30"
+          onClick={() => setIsSortOpen(false)}
+        />
+      )}
     </div>
   );
 }
+
+// ---------------------------------------------------------------------------
+// Page export (wrapped in Suspense for useSearchParams)
+// ---------------------------------------------------------------------------
 
 export default function SearchPage() {
   return (

@@ -32,19 +32,19 @@ export default function BuyerQuotesPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "SUBMITTED":
-        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-500/15 text-blue-600 dark:text-blue-400">SUBMITTED</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-500/15 text-blue-600 dark:text-blue-400">SUBMITTED</span>;
       case "UNDER_REVIEW":
-        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400">UNDER REVIEW</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400">UNDER REVIEW</span>;
       case "QUOTATION_PREPARED":
-        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-purple-500/15 text-purple-600 dark:text-purple-400">QUOTE READY</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-500/15 text-purple-600 dark:text-purple-400">QUOTE READY</span>;
       case "ACCEPTED":
-        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">ACCEPTED</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">ACCEPTED</span>;
       case "NEGOTIATION":
-        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-500/15 text-indigo-600 dark:text-indigo-400">IN NEGOTIATION</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-500/15 text-indigo-600 dark:text-indigo-400">IN NEGOTIATION</span>;
       case "REJECTED":
-        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-destructive/15 text-destructive">REJECTED</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-destructive/15 text-destructive">REJECTED</span>;
       default:
-        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-secondary text-foreground">{status}</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-secondary text-foreground">{status}</span>;
     }
   };
 

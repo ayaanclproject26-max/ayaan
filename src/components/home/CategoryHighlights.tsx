@@ -1,41 +1,124 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import categoriesData from "@/data/categories.json";
-import productsData from "@/data/products.json";
+import initialProductsData from "@/data/products.json";
 import ProductCard from "../product/ProductCard";
 import { Product } from "@/types";
+import { getProducts, toStorefrontProduct } from "@/lib/services/products";
 import {
-  PRODUCT_CATEGORIES,
   filterProducts,
 } from "@/lib/filters";
-import { Check, X, Sparkles, Filter, RotateCcw } from "lucide-react";
-
-const detailedCategories = [
-  { id: "all", name: "ALL", image: "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=800" },
-  { id: "sweaters", name: "Sweaters", image: "https://images.unsplash.com/photo-1612423284934-2850a4ea6b0f?auto=format&fit=crop&q=80&w=800" },
-  { id: "t-shirts", name: "T-Shirts", image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=800" },
-  { id: "hoodies", name: "Hoodies", image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&q=80&w=800" },
-  { id: "trousers", name: "Trousers", image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&q=80&w=800" },
-  { id: "pants", name: "Pants", image: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&q=80&w=800" },
-  { id: "shorts", name: "Shorts", image: "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?auto=format&fit=crop&q=80&w=800" },
-  { id: "shirts", name: "Shirts", image: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&q=80&w=800" },
-  { id: "beachwear", name: "Beachwear", image: "https://images.pexels.com/photos/103123/pexels-photo-103123.jpeg?auto=compress&cs=tinysrgb&w=800" },
-  { id: "socks", name: "Socks", image: "https://images.unsplash.com/photo-1582966772680-860e372bb558?auto=format&fit=crop&q=80&w=800" },
-  { id: "blouse", name: "Blouse", image: "https://images.unsplash.com/photo-1589465885857-44edb59bbff2?auto=format&fit=crop&q=80&w=800" },
-  { id: "tank-top", name: "Tank Top", image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&q=80&w=800" },
-  { id: "tops", name: "Tops", image: "https://images.unsplash.com/photo-1503342394128-c104d54dba01?auto=format&fit=crop&q=80&w=800" },
-  { id: "sports", name: "Sports", image: "https://images.unsplash.com/photo-1518310383802-640c2de311b2?auto=format&fit=crop&q=80&w=800" },
-  { id: "towels", name: "Towels", image: "https://images.pexels.com/photos/4207892/pexels-photo-4207892.jpeg?auto=compress&cs=tinysrgb&w=800" },
-];
+import { Check, X, Sparkles, RotateCcw } from "lucide-react";
+import { categoryService, CategoryModel } from "@/services/category.service";
 
 export default function CategoryHighlights() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedAudiences, setSelectedAudiences] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(["ALL"]);
 
+  const [dynamicCategories, setDynamicCategories] = useState<CategoryModel[]>([]);
   const collectionSectionRef = useRef<HTMLDivElement>(null);
-  const allProducts = productsData as Product[];
+  const [allProducts, setAllProducts] = useState<Product[]>(() => (initialProductsData as Product[]));
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const [dbList, cats] = await Promise.all([
+          getProducts(),
+          categoryService.getCategories(),
+        ]);
+        if (dbList && dbList.length > 0) {
+          setAllProducts(dbList.map(toStorefrontProduct));
+        }
+        if (cats && cats.length > 0) {
+          setDynamicCategories(cats);
+        }
+      } catch (err) {
+        console.error("Failed to load storefront categories:", err);
+      }
+    }
+    load();
+  }, []);
+
+  // Detailed product categories array with "ALL" prepended (strictly excludes audience segments)
+  const detailedCategories = useMemo(() => {
+    const audienceIds = new Set(["c_men", "c_women", "c_boys", "c_girls", "c_unisex", "men", "women", "boys", "girls", "unisex"]);
+    const audienceNames = new Set(["MEN", "WOMEN", "BOYS", "GIRLS", "UNISEX"]);
+
+    const productOnlyCats = dynamicCategories.filter(
+      (c) =>
+        !audienceIds.has(String(c.id).toLowerCase()) &&
+        !audienceIds.has(String(c.slug || "").toLowerCase()) &&
+        !audienceNames.has((c.name || "").toUpperCase()) &&
+        c.is_active !== false
+    );
+
+    const allTile = {
+      id: "all",
+      name: "ALL",
+      slug: "all",
+      image: "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=800",
+      image_url: "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=800",
+      sort_order: 0,
+      is_active: true,
+    };
+    return [allTile, ...productOnlyCats];
+  }, [dynamicCategories]);
+
+  // The 5 Core Audience Departments for the main tiles: MEN, WOMEN, BOYS, GIRLS, UNISEX
+  const audienceDepartments = [
+    {
+      id: "c_men",
+      name: "MEN",
+      slug: "men",
+      image: "https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&q=80&w=800",
+      imageClass: "object-[center_20%]",
+    },
+    {
+      id: "c_women",
+      name: "WOMEN",
+      slug: "women",
+      image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=800",
+      imageClass: "object-[center_20%]",
+    },
+    {
+      id: "c_boys",
+      name: "BOYS",
+      slug: "boys",
+      image: "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&q=80&w=800",
+      imageClass: "object-[center_20%]",
+    },
+    {
+      id: "c_girls",
+      name: "GIRLS",
+      slug: "girls",
+      image: "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&q=80&w=800",
+      imageClass: "object-[center_20%]",
+    },
+    {
+      id: "c_unisex",
+      name: "UNISEX",
+      slug: "unisex",
+      image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800",
+      imageClass: "object-center",
+    },
+  ];
+
+  // Product categories list for filter pills
+  const filterCategoryNames = useMemo(() => {
+    const audienceIds = new Set(["c_men", "c_women", "c_boys", "c_girls", "c_unisex", "men", "women", "boys", "girls", "unisex"]);
+    const audienceNames = new Set(["MEN", "WOMEN", "BOYS", "GIRLS", "UNISEX"]);
+
+    const productOnlyCats = dynamicCategories.filter(
+      (c) =>
+        !audienceIds.has(String(c.id).toLowerCase()) &&
+        !audienceIds.has(String(c.slug || "").toLowerCase()) &&
+        !audienceNames.has((c.name || "").toUpperCase()) &&
+        c.is_active !== false
+    );
+    return ["ALL", ...productOnlyCats.map((c) => c.name)];
+  }, [dynamicCategories]);
 
   // Collection is open ONLY when an audience or specific category is selected
   const isCollectionOpen =
@@ -69,7 +152,7 @@ export default function CategoryHighlights() {
 
     // Match proper case category
     const matched =
-      PRODUCT_CATEGORIES.find(
+      filterCategoryNames.find(
         (c) => c.toLowerCase() === catName.toLowerCase()
       ) || catName;
 
@@ -123,21 +206,21 @@ export default function CategoryHighlights() {
   }, [allProducts, selectedAudiences, selectedCategories, isCollectionOpen]);
 
   return (
-    <section id="categories" className="py-10 sm:py-12 bg-background">
+    <section id="categories" className="py-5 sm:py-8 bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         
         {/* Section Title */}
-        <div className="mb-6 md:mb-8 text-center md:text-left flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+        <div className="mb-3.5 sm:mb-5 text-center md:text-left flex flex-col sm:flex-row sm:items-end justify-between gap-1.5 sm:gap-2">
           <div>
-            <h2 className="text-fluid-h2 font-display uppercase tracking-tight">SHOP BY CATEGORY</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+            <h2 className="text-fluid-h2 font-display font-bold uppercase tracking-tight">SHOP BY CATEGORY</h2>
+            <p className="text-xs sm:text-sm font-sans text-muted-foreground mt-0.5 sm:mt-1">
               Select one or multiple departments to explore tailored collections
             </p>
           </div>
           {isCollectionOpen && (
             <button
               onClick={handleClearAll}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors self-center sm:self-auto cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs font-sans font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors self-center sm:self-auto cursor-pointer"
             >
               <RotateCcw size={13} />
               Exit Collection
@@ -145,9 +228,9 @@ export default function CategoryHighlights() {
           )}
         </div>
         
-        {/* Primary Five Categories (MEN, WOMEN, BOYS, GIRLS, UNISEX) */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-          {categoriesData.map((category) => {
+        {/* Primary Five Audience Department Tiles (MEN, WOMEN, BOYS, GIRLS, UNISEX) + 6th Mobile Slot (ALL CATEGORIES) */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3.5">
+          {audienceDepartments.map((category) => {
             const isSelected = selectedAudiences.includes(category.name.toUpperCase());
             return (
               <CategoryCard
@@ -159,13 +242,38 @@ export default function CategoryHighlights() {
               />
             );
           })}
+
+          {/* 6th Slot: ALL CATEGORIES Tile for Mobile & Tablet Grid */}
+          <button
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className={`group relative overflow-hidden rounded-xl sm:rounded-2xl border transition-all duration-300 w-full aspect-[16/10] flex flex-col items-center justify-center p-2.5 sm:p-3.5 text-center cursor-pointer bg-[#F3EEE5] dark:bg-stone-900/90 lg:hidden ${
+              isExpanded
+                ? "border-foreground ring-2 ring-foreground shadow-lg scale-[1.02]"
+                : "border-border hover:border-foreground/40 shadow-xs hover:shadow-md hover:-translate-y-0.5"
+            }`}
+            aria-label={isExpanded ? "Collapse categories list" : "Expand all product categories"}
+            aria-expanded={isExpanded}
+          >
+            {/* Active Selection / Expanded Indicator Badge */}
+            {isExpanded && (
+              <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 w-5 h-5 sm:w-5.5 sm:h-5.5 rounded-full bg-foreground text-background flex items-center justify-center shadow-md animate-in zoom-in-75">
+                <Check size={11} strokeWidth={3} className="sm:w-3 sm:h-3" />
+              </div>
+            )}
+
+            {/* Centered Category Label */}
+            <h3 className="font-display font-bold uppercase tracking-tight text-foreground text-xs sm:text-sm md:text-base leading-tight">
+              {isExpanded ? "SHOW LESS" : "ALL CATEGORIES"}
+            </h3>
+          </button>
         </div>
 
-        {/* Action Button: ALL CATEGORIES accordion */}
-        <div className="mt-6 sm:mt-8 flex justify-center">
+        {/* Action Button: ALL CATEGORIES accordion (Desktop only where 5 tiles span 1 row) */}
+        <div className="hidden lg:flex justify-center mt-5 sm:mt-6">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="px-6 py-2.5 sm:px-8 sm:py-3 border border-foreground text-foreground text-sm font-semibold uppercase tracking-wider rounded-full hover:bg-foreground hover:text-background transition-colors duration-300 active:scale-95 cursor-pointer"
+            className="px-6 sm:px-8 py-2.5 sm:py-3 border border-foreground text-foreground text-xs sm:text-sm font-semibold uppercase tracking-wider rounded-full hover:bg-foreground hover:text-background transition-colors duration-300 active:scale-95 cursor-pointer"
           >
             {isExpanded ? "SHOW LESS" : "ALL CATEGORIES"}
           </button>
@@ -174,11 +282,11 @@ export default function CategoryHighlights() {
         {/* Expanded Detailed Categories Grid */}
         <div
           className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${
-            isExpanded ? "grid-rows-[1fr] opacity-100 mt-6 sm:mt-8" : "grid-rows-[0fr] opacity-0 mt-0"
+            isExpanded ? "grid-rows-[1fr] opacity-100 mt-5 sm:mt-6" : "grid-rows-[0fr] opacity-0 mt-0"
           }`}
         >
           <div className="overflow-hidden">
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2.5 sm:gap-3.5">
               {detailedCategories.map((category) => {
                 const isSelected =
                   category.name === "ALL"
@@ -190,7 +298,12 @@ export default function CategoryHighlights() {
                 return (
                   <CategoryCard 
                     key={category.id} 
-                    category={{ ...category, slug: category.id }} 
+                    category={{ 
+                      id: String(category.id),
+                      name: category.name,
+                      slug: category.slug || String(category.id),
+                      image: category.image_url || category.image || "/categories/default.jpg"
+                    }} 
                     variant="compact"
                     isActive={isSelected}
                     onClick={() => handleCategoryClick(category.name)}
@@ -252,7 +365,7 @@ export default function CategoryHighlights() {
                 </span>
                 <div className="overflow-x-auto no-scrollbar py-1">
                   <div className="flex flex-wrap items-center gap-2 min-w-max sm:min-w-0">
-                    {PRODUCT_CATEGORIES.map((categoryName) => {
+                    {filterCategoryNames.map((categoryName) => {
                       const isSelected =
                         categoryName === "ALL"
                           ? selectedCategories.includes("ALL")
@@ -271,7 +384,7 @@ export default function CategoryHighlights() {
                         >
                           {categoryName}
                           {isSelected && categoryName !== "ALL" && (
-                            <span className="ml-1 text-[10px]">✓</span>
+                            <span className="ml-1 text-xs">✓</span>
                           )}
                         </button>
                       );
@@ -287,14 +400,14 @@ export default function CategoryHighlights() {
                 {/* Audience Badges */}
                 {selectedAudiences.map((aud) => (
                   <span
-                    key={`badge-aud-${aud}`}
+                    key={`badge-a-${aud}`}
                     className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-card border border-border text-foreground font-semibold"
                   >
                     <span>{aud}</span>
                     <button
                       type="button"
                       onClick={() => handleAudienceToggle(aud)}
-                      className="hover:text-destructive transition-colors ml-0.5 p-0.5 cursor-pointer"
+                      className="hover:text-destructive transition-colors ml-0.5 p-0.5"
                       title={`Remove ${aud}`}
                     >
                       <X size={12} />
@@ -306,14 +419,14 @@ export default function CategoryHighlights() {
                 {!selectedCategories.includes("ALL") &&
                   selectedCategories.map((cat) => (
                     <span
-                      key={`badge-cat-${cat}`}
+                      key={`badge-c-${cat}`}
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-card border border-border text-foreground font-semibold"
                     >
                       <span>{cat}</span>
                       <button
                         type="button"
                         onClick={() => handleCategoryClick(cat)}
-                        className="hover:text-destructive transition-colors ml-0.5 p-0.5 cursor-pointer"
+                        className="hover:text-destructive transition-colors ml-0.5 p-0.5"
                         title={`Remove ${cat}`}
                       >
                         <X size={12} />
@@ -321,18 +434,18 @@ export default function CategoryHighlights() {
                     </span>
                   ))}
 
-                {/* Clear All: Exits/Collapses Collection */}
+                {/* Exit Collection Action */}
                 <button
                   type="button"
                   onClick={handleClearAll}
                   className="text-xs font-bold text-destructive hover:underline ml-2 cursor-pointer"
                 >
-                  Clear All
+                  Exit Collection
                 </button>
               </div>
             </div>
 
-            {/* PRODUCT GRID / EMPTY STATE */}
+            {/* PRODUCTS GRID */}
             {filteredProducts.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10">
                 {filteredProducts.map((product) => (
@@ -342,13 +455,13 @@ export default function CategoryHighlights() {
             ) : (
               <div className="bg-card border border-border/70 rounded-2xl p-8 sm:p-14 text-center max-w-lg mx-auto my-6 shadow-sm">
                 <div className="w-14 h-14 rounded-full bg-secondary/80 flex items-center justify-center mx-auto mb-4 text-muted-foreground">
-                  <Filter size={24} />
+                  <RotateCcw size={24} />
                 </div>
                 <h4 className="text-lg font-bold font-display uppercase mb-2">
                   No Products Found
                 </h4>
                 <p className="text-xs sm:text-sm text-muted-foreground mb-6 leading-relaxed">
-                  No products match the selected combination of audience and categories. Try clearing one or more filters.
+                  No products currently match this combination of audience and categories. Try selecting another category or clearing filters.
                 </p>
                 <button
                   type="button"
@@ -367,65 +480,84 @@ export default function CategoryHighlights() {
   );
 }
 
-export function CategoryCard({ 
-  category, 
-  variant = "primary",
-  isActive = false,
-  onClick,
-}: { 
-  category: { name: string; slug: string; image: string; [key: string]: any };
+interface CategoryCardProps {
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+    image: string;
+    description?: string;
+    imageClass?: string;
+  };
   variant?: "primary" | "compact";
   isActive?: boolean;
   onClick?: () => void;
-}) {
-  const [imgError, setImgError] = useState(false);
+}
+
+export function CategoryCard({
+  category,
+  variant = "primary",
+  isActive = false,
+  onClick,
+}: CategoryCardProps) {
+  const isPrimary = variant === "primary";
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`group relative rounded-xl overflow-hidden bg-secondary text-left w-full cursor-pointer transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-        variant === "primary" ? "aspect-[4/3]" : "aspect-[4/5]"
+      className={`group relative overflow-hidden rounded-xl sm:rounded-2xl border transition-all duration-300 block w-full text-left cursor-pointer ${
+        isPrimary ? "aspect-[16/10]" : "aspect-[4/3]"
       } ${
         isActive
-          ? "ring-2 ring-foreground ring-offset-2 ring-offset-background shadow-md scale-[1.02]"
-          : "hover:shadow-md hover:-translate-y-0.5"
+          ? "border-foreground ring-2 ring-foreground shadow-lg scale-[1.02]"
+          : "border-border hover:border-foreground/40 shadow-xs hover:shadow-md hover:-translate-y-0.5"
       }`}
     >
-      {!imgError ? (
-        <img 
-          src={category.image} 
-          alt={category.name} 
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          onError={() => setImgError(true)}
-        />
-      ) : (
-        <div className="w-full h-full bg-gradient-to-br from-[#1a1a2e] to-[#16213e] flex items-center justify-center">
-          <span className="text-white/20 text-xl md:text-2xl font-display font-bold uppercase text-center px-2">{category.name}</span>
+      {/* Background Image */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={category.image}
+        alt={category.name}
+        className={`absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${
+          category.imageClass || "object-center"
+        }`}
+      />
+
+      {/* Subtle Gradient Overlay for Text Legibility */}
+      <div
+        className={`absolute inset-0 bg-gradient-to-t transition-opacity duration-300 ${
+          isPrimary
+            ? "from-black/80 via-black/25 to-black/5 group-hover:from-black/85"
+            : "from-black/80 via-black/25 to-black/5 group-hover:from-black/90"
+        } ${isActive ? "from-black/90 via-black/35" : ""}`}
+      />
+
+      {/* Active Selection Checkmark Badge */}
+      {isActive && (
+        <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 w-5 h-5 sm:w-5.5 sm:h-5.5 rounded-full bg-foreground text-background flex items-center justify-center shadow-md animate-in zoom-in-75">
+          <Check size={11} strokeWidth={3} className="sm:w-3 sm:h-3" />
         </div>
       )}
-      
-      <div className={`absolute inset-0 transition-colors duration-500 ${
-        isActive ? "bg-[#111827]/45" : "bg-[#111827]/30 group-hover:bg-[#111827]/45"
-      }`} />
-      
-      <div className={`absolute inset-0 flex flex-col justify-end text-white ${variant === "primary" ? "p-4 sm:p-5" : "p-3 sm:p-4"}`}>
-        <h3 className={`${variant === "primary" ? "text-base sm:text-lg lg:text-xl font-bold font-display" : "text-sm sm:text-base leading-tight"} font-medium tracking-wide mb-1 uppercase`}>
-          {category.name}
-        </h3>
-        {variant === "primary" && (
-          <span className="text-xs sm:text-sm font-medium tracking-widest uppercase opacity-0 transform translate-y-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
-            {isActive ? "Selected ✓" : "Discover"}
-          </span>
-        )}
-      </div>
 
-      {/* Active Checkmark Badge */}
-      {isActive && (
-        <span className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-white text-black flex items-center justify-center text-xs font-bold shadow-md">
-          <Check size={12} strokeWidth={3} />
-        </span>
-      )}
+      {/* Category Content */}
+      <div
+        className={`absolute inset-x-0 bottom-0 flex flex-col justify-end ${
+          isPrimary ? "p-2.5 sm:p-3.5" : "p-2 sm:p-2.5"
+        }`}
+      >
+        <div className="flex items-center justify-between gap-1">
+          <h3
+            className={`font-display font-bold uppercase tracking-tight text-white ${
+              isPrimary
+                ? "text-xs sm:text-sm md:text-base leading-tight"
+                : "text-[11px] sm:text-xs font-semibold leading-tight"
+            }`}
+          >
+            {category.name}
+          </h3>
+        </div>
+      </div>
     </button>
   );
 }

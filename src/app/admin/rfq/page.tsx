@@ -49,19 +49,19 @@ export default function AdminRfqPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "SUBMITTED":
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/15 text-blue-600 dark:text-blue-400">NEW INQUIRY</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-500/15 text-blue-600 dark:text-blue-400">NEW INQUIRY</span>;
       case "UNDER_REVIEW":
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400">UNDER REVIEW</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400">UNDER REVIEW</span>;
       case "QUOTATION_PREPARED":
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-500/15 text-purple-600 dark:text-purple-400">QUOTE SENT</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-500/15 text-purple-600 dark:text-purple-400">QUOTE SENT</span>;
       case "ACCEPTED":
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">ACCEPTED</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">ACCEPTED</span>;
       case "NEGOTIATION":
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-500/15 text-indigo-600 dark:text-indigo-400">NEGOTIATING</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-500/15 text-indigo-600 dark:text-indigo-400">NEGOTIATING</span>;
       case "REJECTED":
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-destructive/15 text-destructive">REJECTED</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-destructive/15 text-destructive">REJECTED</span>;
       default:
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-secondary text-foreground">{status}</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-secondary text-foreground">{status}</span>;
     }
   };
 
@@ -81,7 +81,7 @@ export default function AdminRfqPage() {
       {/* Metrics Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3.5">
         <div className="p-4 rounded-2xl bg-card border border-border/70 shadow-xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
             Total Inquiries
           </span>
           <span className="text-2xl font-display font-bold text-foreground mt-1 block">
@@ -90,7 +90,7 @@ export default function AdminRfqPage() {
         </div>
 
         <div className="p-4 rounded-2xl bg-card border border-border/70 shadow-xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block">
+          <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block">
             Needs Review
           </span>
           <span className="text-2xl font-display font-bold text-amber-600 dark:text-amber-400 mt-1 block">
@@ -99,7 +99,7 @@ export default function AdminRfqPage() {
         </div>
 
         <div className="p-4 rounded-2xl bg-card border border-border/70 shadow-xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 block">
+          <span className="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 block">
             Quotes Prepared
           </span>
           <span className="text-2xl font-display font-bold text-purple-600 dark:text-purple-400 mt-1 block">
@@ -108,7 +108,7 @@ export default function AdminRfqPage() {
         </div>
 
         <div className="p-4 rounded-2xl bg-card border border-border/70 shadow-xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">
             Accepted Orders
           </span>
           <span className="text-2xl font-display font-bold text-emerald-600 dark:text-emerald-400 mt-1 block">
@@ -117,7 +117,7 @@ export default function AdminRfqPage() {
         </div>
 
         <div className="p-4 rounded-2xl bg-card border border-border/70 shadow-xs col-span-2 sm:col-span-1">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-primary block">
+          <span className="text-xs font-bold uppercase tracking-wider text-primary block">
             Total Inquired Units
           </span>
           <span className="text-2xl font-display font-bold text-primary mt-1 block">
@@ -161,7 +161,7 @@ export default function AdminRfqPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-border bg-secondary/40 text-muted-foreground uppercase text-[10px] font-bold tracking-wider">
+              <tr className="border-b border-border bg-secondary/40 text-muted-foreground uppercase text-xs font-bold tracking-wider">
                 <th className="py-3 px-4">RFQ Ref</th>
                 <th className="py-3 px-3">Buyer & Company</th>
                 <th className="py-3 px-3">Destination</th>
@@ -190,7 +190,7 @@ export default function AdminRfqPage() {
                         <span className="font-mono font-bold text-foreground block">
                           {r.rfqNumber}
                         </span>
-                        <span className="text-[10px] text-muted-foreground truncate max-w-[160px] block">
+                        <span className="text-xs text-muted-foreground truncate max-w-[160px] block">
                           {r.requestTitle || "General Inquiry"}
                         </span>
                       </td>
@@ -199,7 +199,7 @@ export default function AdminRfqPage() {
                         <span className="font-bold text-foreground block">
                           {r.buyerName}
                         </span>
-                        <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
                           <Building2 size={11} />
                           {r.companyName}
                         </span>
@@ -210,7 +210,7 @@ export default function AdminRfqPage() {
                           {r.destinationCity}, {r.destinationCountry}
                         </span>
                         {r.shippingPort && (
-                          <span className="text-[10px] text-muted-foreground font-mono">
+                          <span className="text-xs text-muted-foreground font-mono">
                             Port: {r.shippingPort}
                           </span>
                         )}
@@ -220,7 +220,7 @@ export default function AdminRfqPage() {
                         <span className="font-bold text-foreground block">
                           {totalQty.toLocaleString()} pcs
                         </span>
-                        <span className="text-[10px] text-muted-foreground">
+                        <span className="text-xs text-muted-foreground">
                           {r.items.length} line item(s)
                         </span>
                       </td>

@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Clock, ArrowRight, TrendingUp } from "lucide-react";
-import productsData from "@/data/products.json";
+import initialProductsData from "@/data/products.json";
 import ProductCard from "../product/ProductCard";
 import { Product } from "@/types";
+import { getProducts, toStorefrontProduct } from "@/lib/services/products";
 
 interface SearchOverlayProps {
   isOpen: boolean;
@@ -24,7 +25,17 @@ export default function SearchOverlay({
   setSearchQuery,
   onSelectTerm,
 }: SearchOverlayProps) {
-  const allProducts = productsData as Product[];
+  const [allProducts, setAllProducts] = useState<Product[]>(() => (initialProductsData as Product[]));
+
+  useEffect(() => {
+    async function load() {
+      const dbList = await getProducts();
+      if (dbList && dbList.length > 0) {
+        setAllProducts(dbList.map(toStorefrontProduct));
+      }
+    }
+    load();
+  }, []);
 
   // Persistent recent searches from localStorage
   const [recentSearches, setRecentSearches] = useState<string[]>(DEFAULT_RECENT);

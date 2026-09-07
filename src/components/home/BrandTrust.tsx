@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
 interface Certificate {
@@ -35,27 +35,36 @@ const certificates: Certificate[] = [
 export default function BrandTrust() {
   const [selectedCert, setSelectedCert] = useState<Certificate | null>(null);
 
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.body.style.overflow = selectedCert ? "hidden" : "";
+    }
+    return () => {
+      if (typeof document !== "undefined") {
+        document.body.style.overflow = "";
+      }
+    };
+  }, [selectedCert]);
+
   const openLightbox = (cert: Certificate) => {
     setSelectedCert(cert);
-    document.body.style.overflow = 'hidden';
   };
 
   const closeLightbox = () => {
     setSelectedCert(null);
-    document.body.style.overflow = '';
   };
 
   return (
     <section id="brand-trust" className="py-10 sm:py-12 bg-[#f8f6f0]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mb-6 md:mb-8">
-          <h2 className="text-fluid-h2 font-display font-semibold text-foreground mb-2 tracking-tight">Compliance & certifications</h2>
-          <p className="text-muted-foreground text-sm md:text-base">
+          <h2 className="text-fluid-h2 font-display font-bold text-foreground mb-2 tracking-tight">Compliance & certifications</h2>
+          <p className="font-sans text-muted-foreground text-sm md:text-base">
             Verified registrations and quality certifications. Tap any document to view it in full.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 font-sans">
           {certificates.map((cert) => (
             <div 
               key={cert.id} 
@@ -69,7 +78,7 @@ export default function BrandTrust() {
                   className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
                 />
               </div>
-              <h3 className="text-sm font-medium text-foreground px-0.5 pb-0.5 line-clamp-2">{cert.title}</h3>
+              <h3 className="text-sm font-display font-semibold text-foreground px-0.5 pb-0.5 line-clamp-2">{cert.title}</h3>
             </div>
           ))}
         </div>

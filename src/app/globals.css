@@ -2,12 +2,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
+@theme inline {
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
   --breakpoint-laptop: 1025px;
   --breakpoint-desktop: 1440px;
-}
-
-@theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -41,13 +43,18 @@
   --color-brass-ink: var(--brass-ink);
   --color-ink: var(--ink);
   --color-ink-foreground: var(--ink-foreground);
+  --color-brand-orange: var(--brand-orange);
 
-  --font-display: "Fraunces", ui-serif, Georgia, serif;
-  --font-sans: "Manrope", "Noto Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-body: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: var(--font-manrope), "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-heading: var(--font-manrope), "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-brand: "Alro", "ITC Bauhaus Pro Medium", sans-serif;
 }
 
 :root {
   --radius: 0.75rem;
+  --brand-orange: #EA580C;
   --background: oklch(0.985 0.008 85);
   --foreground: oklch(0.22 0.02 265);
   --card: oklch(1 0 0);
@@ -76,6 +83,7 @@
 }
 
 .dark {
+  --brand-orange: #EA580C;
   --background: oklch(0.19 0.02 262);
   --foreground: oklch(0.96 0.008 85);
   --card: oklch(0.24 0.025 262);
@@ -109,16 +117,31 @@
     scroll-behavior: smooth;
     scroll-padding-top: 4.5rem;
     -webkit-text-size-adjust: 100%;
+    font-size: 16px;
   }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.65;
     overflow-x: clip;
     overscroll-behavior-y: none;
   }
-  h1, h2, h3 {
+  h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
+  }
+  h1 {
+    font-weight: 700;
+  }
+  h2 {
+    font-weight: 600;
+  }
+  h3 {
+    font-weight: 600;
+  }
+  h4, h5, h6 {
+    font-weight: 500;
   }
   [dir="rtl"] body,
   [dir="rtl"] h1,
@@ -151,13 +174,13 @@
 }
 
 @utility text-fluid-h2 {
-  font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.875rem);
+  font-size: clamp(1.375rem, 1.1rem + 1vw, 1.875rem);
   line-height: 1.2;
 }
 
 @utility text-fluid-body {
-  font-size: clamp(0.9375rem, 0.9rem + 0.2vw, 1.0625rem);
-  line-height: 1.6;
+  font-size: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);
+  line-height: 1.65;
 }
 
 @keyframes ayc-rise {

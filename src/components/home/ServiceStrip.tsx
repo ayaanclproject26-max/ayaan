@@ -1,203 +1,171 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import {
-  ShieldCheck,
-  Globe2,
-  Sparkles,
-  Handshake,
-  PackageCheck,
-  ChevronDown,
-  ChevronUp,
-  CheckCircle2,
-  Building2,
-  Truck,
-  Award,
-} from "lucide-react";
+import { ShieldCheck, Globe2, Factory, Package, ChevronDown, ChevronUp } from "lucide-react";
 
-const FEATURES = [
+const BENEFITS = [
   {
-    title: "VERIFIED BRANDED STOCK",
     icon: ShieldCheck,
-    description: "100% authentic surplus & production-overrun inventory verified with original supplier invoices.",
+    title: "VERIFIED STOCK",
+    text: "Audited availability",
   },
   {
-    title: "WORLDWIDE EXPORT DELIVERY",
     icon: Globe2,
-    description: "Door-to-port and air/sea freight logistics covering 80+ countries with custom clearance clearance support.",
+    title: "GLOBAL SHIPPING",
+    text: "Air & sea worldwide",
   },
   {
-    title: "CONSISTENT GRADING",
-    icon: Sparkles,
-    description: "Strict A-grade quality control protocols and standardized batch inspections before dispatch.",
+    icon: Factory,
+    title: "FACTORY DIRECT",
+    text: "Direct manufacturer sourcing",
   },
   {
-    title: "TRANSPARENT MOQS",
-    icon: Handshake,
-    description: "Flexible wholesale tiers and transparent minimum order quantities tailored for small & enterprise buyers.",
-  },
-  {
-    title: "EXPORT-READY PACKING",
-    icon: PackageCheck,
-    description: "Heavy-duty carton packing, barcode labelling, and moisture-sealed protection for long-haul shipping.",
+    icon: Package,
+    title: "EXPORT READY",
+    text: "Export-standard packing",
   },
 ];
 
 export default function ServiceStrip() {
-  const [activeTooltip, setActiveTooltip] = useState<number | null>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isMobileExpanded, setIsMobileExpanded] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  // Listen for global expand event (e.g. from footer About Us click)
   useEffect(() => {
     const handleExpandAboutUs = () => {
-      setIsExpanded(true);
+      setIsMobileExpanded(true);
       setTimeout(() => {
         sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 100);
     };
-
     window.addEventListener("expand-about-us", handleExpandAboutUs);
     return () => window.removeEventListener("expand-about-us", handleExpandAboutUs);
   }, []);
 
   return (
-    <section id="built-for-international-buyers" className="w-full bg-background pt-2 pb-2" ref={sectionRef}>
+    <section
+      id="built-for-international-buyers"
+      className="w-full bg-background py-2"
+      ref={sectionRef}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        
-        {/* Main Card Container */}
-        <div className="bg-white border border-border/40 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden transition-all duration-300">
+        <div className="bg-white dark:bg-[#0f172a] border border-border/60 rounded-2xl shadow-xs overflow-hidden">
           
-          {/* Header Row with Title & Expand Toggle */}
-          <div className="px-4 py-3 sm:px-6 sm:py-3.5 border-b border-border/20 flex items-center justify-between bg-[#fbfbfa]">
-            <div className="flex items-center gap-2">
-              <Building2 size={16} className="text-primary hidden sm:inline-block" />
-              <h2 className="text-xs sm:text-sm font-display font-bold uppercase tracking-wider text-foreground">
-                BUILT FOR INTERNATIONAL BUYERS
-              </h2>
-            </div>
+          {/* ── MOBILE VIEW (md:hidden) — Compact Collapsible Strip ── */}
+          <div className="md:hidden">
+            {/* Mobile Header Row / Accordion Trigger */}
             <button
               type="button"
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="inline-flex items-center gap-1 text-[0.6875rem] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-              aria-expanded={isExpanded}
+              onClick={() => setIsMobileExpanded((prev) => !prev)}
+              aria-expanded={isMobileExpanded}
+              aria-controls="mobile-service-strip-body"
+              aria-label={isMobileExpanded ? "Collapse Built for International Buyers section" : "Expand Built for International Buyers section"}
+              className="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 sm:px-4 sm:py-3 text-left hover:bg-secondary/20 active:bg-secondary/30 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset cursor-pointer group"
             >
-              <span>{isExpanded ? "Show Less" : "About Ayaan & Capabilities"}</span>
-              {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-            </button>
-          </div>
+              {/* Left: Leading Icon + Section Title */}
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="flex items-center justify-center w-6 h-6 rounded-md bg-primary/10 text-primary shrink-0" aria-hidden="true">
+                  <Globe2 size={14} strokeWidth={2} />
+                </span>
+                <span className="text-xs font-display font-bold uppercase tracking-tight text-foreground truncate">
+                  Built for International Buyers
+                </span>
+              </div>
 
-          {/* 5 Core Feature Strip */}
-          <div className="flex w-full justify-between overflow-x-auto no-scrollbar md:grid md:grid-cols-5 md:divide-x md:divide-border/25 px-2 md:px-0 bg-white">
-            {FEATURES.map((feature, index) => {
-              const Icon = feature.icon;
-              return (
+              {/* Right: 4 Compact Feature Icons + Expand/Collapse Chevron */}
+              <div className="flex items-center gap-2 shrink-0">
                 <div 
-                  key={index} 
-                  className="relative flex items-center justify-center md:justify-start gap-2.5 flex-1 min-w-max py-3.5 md:py-4 px-3 md:px-5 cursor-pointer md:cursor-default hover:bg-secondary/30 transition-colors"
-                  onClick={() => setActiveTooltip(activeTooltip === index ? null : index)}
+                  className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-secondary/70 text-muted-foreground border border-border/40" 
+                  aria-hidden="true"
+                  title="Verified Stock, Global Shipping, Factory Direct, Export Ready"
                 >
-                  <Icon size={18} className="text-muted-foreground shrink-0 md:w-[18px] md:h-[18px] transition-colors duration-200" strokeWidth={1.5} />
-                  
-                  {/* Desktop Text */}
-                  <span className="hidden md:block text-[0.75rem] font-bold uppercase tracking-wider text-foreground leading-tight">
-                    {feature.title}
-                  </span>
+                  <ShieldCheck size={12} strokeWidth={2} />
+                  <Globe2 size={12} strokeWidth={2} />
+                  <Factory size={12} strokeWidth={2} />
+                  <Package size={12} strokeWidth={2} />
+                </div>
+                <span className="text-muted-foreground group-hover:text-foreground transition-colors duration-200 shrink-0" aria-hidden="true">
+                  {isMobileExpanded ? (
+                    <ChevronUp size={16} strokeWidth={2.25} />
+                  ) : (
+                    <ChevronDown size={16} strokeWidth={2.25} />
+                  )}
+                </span>
+              </div>
+            </button>
 
-                  {/* Mobile Tooltip */}
-                  <div 
-                    className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 w-max max-w-[200px] bg-[#111827] text-white px-2.5 py-1.5 rounded-lg shadow-lg text-[9px] font-bold tracking-wider uppercase text-center transition-all duration-200 z-10 md:hidden ${
-                      activeTooltip === index 
-                        ? "opacity-100 translate-y-0 visible" 
-                        : "opacity-0 translate-y-2 invisible"
-                    }`}
-                  >
-                    {feature.title}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-4 border-transparent border-t-[#111827]" />
+            {/* Mobile Expanded Cards — Horizontal Flex Layout */}
+            <div
+              id="mobile-service-strip-body"
+              className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+                isMobileExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0 pointer-events-none"
+              }`}
+            >
+              <div className="overflow-hidden">
+                <div className="border-t border-border/40 px-3.5 pt-3 pb-3.5 sm:px-4 sm:pt-3.5 sm:pb-4 bg-secondary/15">
+                  <p className="text-[0.68rem] font-sans text-muted-foreground mb-2.5 leading-none">
+                    140+ Countries · Factory Direct · Export Ready
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
+                    {BENEFITS.map(({ icon: Icon, title, text }) => (
+                      <div
+                        key={title}
+                        className="flex items-center gap-2.5 p-2.5 rounded-xl bg-background border border-border/50 shadow-2xs min-w-0"
+                      >
+                        <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-secondary/60 border border-border/40 text-primary shadow-xs shrink-0" aria-hidden="true">
+                          <Icon size={16} strokeWidth={1.75} />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-display font-bold uppercase tracking-wide text-foreground leading-tight truncate">
+                            {title}
+                          </p>
+                          <p className="text-[0.68rem] sm:text-xs font-sans text-muted-foreground mt-0.5 leading-snug truncate">
+                            {text}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              );
-            })}
-          </div>
-
-          {/* Expandable About Us Details Section */}
-          <div
-            className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${
-              isExpanded ? "grid-rows-[1fr] opacity-100 border-t border-border/30" : "grid-rows-[0fr] opacity-0"
-            }`}
-          >
-            <div className="overflow-hidden bg-[#faf9f6]">
-              <div className="p-5 sm:p-8 space-y-6">
-                
-                {/* Company Story & Mission */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                  <div className="lg:col-span-7 space-y-3">
-                    <span className="text-[0.6875rem] font-bold uppercase tracking-widest text-muted-foreground">
-                      Who We Are
-                    </span>
-                    <h3 className="text-xl sm:text-2xl font-display font-bold uppercase tracking-tight text-foreground">
-                      Pioneering Authentic Ready-Made Garments Export
-                    </h3>
-                    <p className="text-xs sm:text-sm text-foreground/80 leading-relaxed">
-                      Founded in Dhaka, Bangladesh—the world&apos;s second-largest apparel manufacturing hub—Ayaan Clothing bridges the gap between premier manufacturing facilities and international retail & wholesale buyers across North America, Europe, the Middle East, and Asia-Pacific.
-                    </p>
-                    <p className="text-xs sm:text-sm text-foreground/80 leading-relaxed">
-                      We specialize in sourcing, quality auditing, and worldwide distribution of verified brand-name apparel, luxury seasonal knitwear, and certified organic textiles with full export documentation and competitive factory-direct pricing.
-                    </p>
-                  </div>
-
-                  <div className="lg:col-span-5 bg-white border border-border/60 rounded-xl p-4 sm:p-5 space-y-3.5 shadow-sm">
-                    <span className="text-[0.6875rem] font-bold uppercase tracking-widest text-muted-foreground">
-                      Export Guarantee
-                    </span>
-                    <ul className="space-y-2.5 text-xs text-foreground/85">
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 size={15} className="text-emerald-600 shrink-0 mt-0.5" />
-                        <span><strong>BGMEA Registered:</strong> Full institutional compliance with standard international commercial trade practices.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 size={15} className="text-emerald-600 shrink-0 mt-0.5" />
-                        <span><strong>Multi-Currency Settlement:</strong> Invoicing available in USD, EUR, GBP, BDT, and major regional currencies.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 size={15} className="text-emerald-600 shrink-0 mt-0.5" />
-                        <span><strong>Inspection & Audits:</strong> Pre-shipment batch inspection reports provided for all commercial orders.</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                {/* 3 Pillars */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-border/40">
-                  <div className="flex gap-3 items-start p-3 bg-white rounded-lg border border-border/40">
-                    <Truck size={20} className="text-foreground shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">Global Freight</h4>
-                      <p className="text-[0.6875rem] text-muted-foreground mt-0.5">Air cargo dispatch within 48h and optimized container sea freight.</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3 items-start p-3 bg-white rounded-lg border border-border/40">
-                    <Award size={20} className="text-foreground shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">A-Grade Standards</h4>
-                      <p className="text-[0.6875rem] text-muted-foreground mt-0.5">Zero tolerance for defectives, accurate size charts & fabric specs.</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3 items-start p-3 bg-white rounded-lg border border-border/40">
-                    <ShieldCheck size={20} className="text-foreground shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">Buyer Protection</h4>
-                      <p className="text-[0.6875rem] text-muted-foreground mt-0.5">Escrow, Letter of Credit (L/C), and secure digital B2B payments.</p>
-                    </div>
-                  </div>
-                </div>
-
               </div>
             </div>
           </div>
 
-        </div>
+          {/* ── DESKTOP VIEW (hidden md:block) — Always Expanded, Horizontal Cards ── */}
+          <div className="hidden md:block p-5 sm:p-6">
+            {/* Desktop Header */}
+            <div className="mb-3.5">
+              <h2 className="text-sm sm:text-base font-display font-bold uppercase tracking-tight text-foreground leading-tight">
+                Built for International Buyers
+              </h2>
+              <p className="text-xs sm:text-sm font-sans text-muted-foreground mt-0.5 leading-none">
+                140+ Countries · Factory Direct · Export Ready
+              </p>
+            </div>
 
+            {/* 4 Feature Cards — Horizontal Layout */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-3.5">
+              {BENEFITS.map(({ icon: Icon, title, text }) => (
+                <div
+                  key={title}
+                  className="flex items-center gap-3 p-3 lg:p-3.5 rounded-xl bg-secondary/30 border border-border/40 hover:bg-secondary/50 transition-colors duration-150 min-w-0"
+                >
+                  <span className="flex items-center justify-center w-10 h-10 rounded-lg bg-background border border-border/50 text-primary shadow-xs shrink-0" aria-hidden="true">
+                    <Icon size={19} strokeWidth={1.75} />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm font-display font-bold uppercase tracking-wide text-foreground leading-tight truncate">
+                      {title}
+                    </p>
+                    <p className="text-[0.72rem] sm:text-xs font-sans text-muted-foreground mt-0.5 leading-snug truncate">
+                      {text}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
       </div>
     </section>
   );

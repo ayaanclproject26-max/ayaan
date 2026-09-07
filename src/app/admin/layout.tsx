@@ -4,26 +4,35 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
+  LayoutDashboard,
   Package, 
   Tag, 
   Layers, 
+  Warehouse,
+  ShoppingBag,
+  Users,
   FileText, 
   FileCheck, 
+  Percent,
   Store, 
   Menu, 
   X, 
   ShieldCheck,
   ChevronRight,
-  TrendingUp,
-  SlidersHorizontal
 } from "lucide-react";
+import BrandName from "@/components/common/BrandName";
 
 const NAV_ITEMS = [
+  { label: "Dashboard", href: "/admin", icon: LayoutDashboard, exact: true },
   { label: "Products Catalog", href: "/admin/products", icon: Package },
-  { label: "Brands Directory", href: "/admin/brands", icon: Tag },
   { label: "Category Taxonomy", href: "/admin/categories", icon: Layers },
+  { label: "Brands Directory", href: "/admin/brands", icon: Tag },
+  { label: "Inventory & Stock", href: "/admin/inventory", icon: Warehouse },
+  { label: "Orders & Fulfillment", href: "/admin/orders", icon: ShoppingBag },
+  { label: "Customer Accounts", href: "/admin/customers", icon: Users },
   { label: "B2B RFQs & Inquiries", href: "/admin/rfq", icon: FileText },
-  { label: "Commercial Quotations", href: "/admin/quotations", icon: FileCheck },
+  { label: "Commercial Quotes", href: "/admin/quotations", icon: FileCheck },
+  { label: "Promotions & Coupons", href: "/admin/promotions", icon: Percent },
 ];
 
 export default function AdminLayout({
@@ -49,11 +58,9 @@ export default function AdminLayout({
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
 
-          <Link href="/admin/products" className="flex items-center gap-2">
-            <span className="font-display font-bold text-lg uppercase tracking-wider text-foreground">
-              AYAAN
-            </span>
-            <span className="text-[10px] font-bold uppercase tracking-widest bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+          <Link href="/admin" className="flex items-center gap-2.5" aria-label="Ayaan Clothing Admin">
+            <BrandName className="font-bold text-base sm:text-lg uppercase tracking-wider text-foreground" />
+            <span className="text-xs font-bold uppercase tracking-widest bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
               B2B Admin
             </span>
           </Link>
@@ -81,13 +88,15 @@ export default function AdminLayout({
         {/* Desktop Left Sidebar */}
         <aside className="hidden md:flex flex-col w-64 border-r border-border/80 bg-card p-4 space-y-6 shrink-0">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-3 block mb-2">
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground px-3 block mb-2">
               Management Suite
             </span>
             <nav className="space-y-1">
               {NAV_ITEMS.map((item) => {
                 const Icon = item.icon;
-                const isActive = pathname.startsWith(item.href);
+                const isActive = item.exact 
+                  ? pathname === item.href
+                  : pathname === item.href || pathname.startsWith(item.href + "/");
 
                 return (
                   <Link
@@ -108,7 +117,7 @@ export default function AdminLayout({
           </div>
 
           <div className="pt-4 border-t border-border/60">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-3 block mb-2">
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground px-3 block mb-2">
               Quick Shortcuts
             </span>
             <div className="space-y-1">
@@ -120,10 +129,17 @@ export default function AdminLayout({
                 <ChevronRight size={13} />
               </Link>
               <Link
-                href="/admin/rfq"
+                href="/admin/inventory"
                 className="flex items-center justify-between px-3.5 py-2 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
               >
-                <span>Review Pending RFQs</span>
+                <span>Stock Adjustments</span>
+                <ChevronRight size={13} />
+              </Link>
+              <Link
+                href="/admin/orders"
+                className="flex items-center justify-between px-3.5 py-2 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              >
+                <span>Review Pending Orders</span>
                 <ChevronRight size={13} />
               </Link>
             </div>
@@ -135,7 +151,7 @@ export default function AdminLayout({
           <div className="fixed inset-0 z-50 md:hidden bg-ink/50 backdrop-blur-xs flex">
             <div className="w-64 bg-card h-full p-4 space-y-6 shadow-2xl flex flex-col">
               <div className="flex items-center justify-between pb-3 border-b border-border">
-                <span className="font-bold text-sm uppercase text-foreground">Admin Menu</span>
+                <BrandName className="font-bold text-sm uppercase tracking-wider text-foreground" />
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(false)}
@@ -145,10 +161,12 @@ export default function AdminLayout({
                 </button>
               </div>
 
-              <nav className="space-y-1 flex-1">
+              <nav className="space-y-1 flex-1 overflow-y-auto">
                 {NAV_ITEMS.map((item) => {
                   const Icon = item.icon;
-                  const isActive = pathname.startsWith(item.href);
+                  const isActive = item.exact 
+                    ? pathname === item.href
+                    : pathname === item.href || pathname.startsWith(item.href + "/");
 
                   return (
                     <Link

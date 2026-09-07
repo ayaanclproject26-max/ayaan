@@ -1,0 +1,207 @@
+import { OrderRecord } from "@/services/order.service";
+import BUSINESS_PROFILE from "@/config/business-profile";
+
+export function generateMockDocument(order: OrderRecord, docType: string, isAdmin: boolean = false): any {
+  const isPaid = order.payment_status === "paid" || order.payment_status === "completed";
+
+  // Security & Payment gating: Commercial Invoice and Packing List require payment
+  if (!isPaid && !isAdmin && (docType === "COMMERCIAL_INVOICE" || docType === "PACKING_LIST")) {
+    return {
+      error: "PAYMENT_REQUIRED",
+      message: "Commercial Invoice and Packing List are available after payment confirmation.",
+      document_type: docType,
+      order_number: order.order_number,
+      is_locked: true,
+    };
+  }
+
+  const items = order.items || [];
+  const totalPcs = items.reduce((sum, i) => sum + (i.quantity || 1), 0);
+  const cartonCount = Math.max(1, Math.ceil(totalPcs / 50));
+  const grossWeight = Math.round((totalPcs * 0.35 + cartonCount * 1.2) * 10) / 10;
+  const netWeight = Math.round((totalPcs * 0.32) * 10) / 10;
+  const totalCbm = Math.round((cartonCount * 0.084) * 1000) / 1000;
+
+  const header = {
+    company_name: BUSINESS_PROFILE.name,
+    business_subtitle: BUSINESS_PROFILE.description,
+    address: BUSINESS_PROFILE.address.formatted,
+    established_year: BUSINESS_PROFILE.establishedYear,
+    phone: BUSINESS_PROFILE.contact.whatsappDisplay,
+    email: BUSINESS_PROFILE.contact.email || "export@ayaanclothing.com",
+    whatsapp: BUSINESS_PROFILE.contact.whatsappDisplay,
+    country: "Bangladesh",
+  };
+
+  const buyer = {
+    name: order.shipping_name || "Valued Buyer",
+    company: order.shipping_company || order.shipping_name,
+    address: `${order.shipping_address1 || ""}, ${order.shipping_city || ""}, ${order.shipping_postal_code || ""}, ${order.shipping_country_code || "US"}`,
+    email: order.email,
+    phone: order.shipping_phone || "",
+  };
+
+  switch (docType) {
+    case "ORDER_SHEET":
+      // Offer Sheet NEVER contains shipping information — shipping is always negotiated separately
+      return {
+        document_type: "ORDER_SHEET",
+        title: "OFFICIAL EXPORT ORDER SHEET",
+        document_number: `OS-${order.order_number}`,
+        order_number: order.order_number,
+        date: order.created_at,
+        exporter: header,
+        buyer,
+        shipping_method: order.shipping_method || "To Be Confirmed",
+        carrier: null, // shipping not quoted on offer sheet
+        currency: "USD",
+        items: items.map((i, idx) => ({
+          serial: idx + 1,
+          product_name: i.product_name,
+          sku: i.sku || `AYN-${idx + 100}`,
+          size: i.size || "Standard Assorted",
+          quantity: i.quantity,
+          unit_price: i.unit_price,
+          line_total: i.line_total,
+        })),
+        summary: {
+          total_units: totalPcs,
+          // Offer Sheet shows goods value only — no shipping charge
+          subtotal: order.subtotal,
+          shipping_fee: null, // intentionally excluded
+          tax: order.tax_amount || 0,
+          grand_total: order.subtotal + (order.tax_amount || 0), // merchandise + tax only
+        },
+        terms: "Production and packing per Ayaan Clothing export standard AQL 2.5.",
+        shipping_note: "Shipping to be confirmed separately by AYAAN CLOTHING.",
+      };
+
+    case "PROFORMA_INVOICE": {
+      // Determine if shipping was auto-quoted (Aramex) or left for manual discussion
+      const isManualShipping =
+        order.shipping_snapshot?.provider === "manual" ||
+        order.shipping_snapshot?.mode === "manual" ||
+        order.shipping_snapshot?.quoted_shipping_charge === null ||
+        !order.shipping_cost;
+
+      const freightCharge = isManualShipping ? null : (order.shipping_cost || 0);
+      const piTotal = isManualShipping
+        ? order.subtotal + (order.tax_amount || 0)
+        : order.total_amount;
+
+      return {
+        document_type: "PROFORMA_INVOICE",
+        title: "PROFORMA INVOICE (P.I.)",
+        document_number: `PI-${order.order_number}`,
+        pi_number: `PI-${order.order_number}`,
+        order_number: order.order_number,
+        date: order.created_at,
+        validity: "30 Days from date of issuance",
+        exporter: header,
+        buyer,
+        payment_terms: "100% Advance T/T or Irrevocable Confirmed L/C at sight",
+        shipping_terms: "FOB Dhaka / CIF Destination",
+        carrier: isManualShipping ? null : (order.carrier || "Aramex Express Air"),
+        currency: "USD",
+        items: items.map((i, idx) => ({
+          serial: idx + 1,
+          description: `${i.product_name} (HS Code: 6109.10.00)`,
+          quantity: i.quantity,
+          unit_price: i.unit_price,
+          amount: i.line_total,
+        })),
+        summary: {
+          total_quantity: totalPcs,
+          fob_amount: order.subtotal,
+          // freight is null when shipping has not been quoted (manual arrangement)
+          freight: freightCharge,
+          insurance: 0,
+          total_cif_amount: piTotal,
+        },
+        ...(isManualShipping && {
+          shipping_note: "Freight not included. Shipping charges to be confirmed separately by AYAAN CLOTHING team.",
+        }),
+        bank_details: {
+          bank_name: "Standard Chartered Bank",
+          branch: "Gulshan Branch, Dhaka, Bangladesh",
+          account_name: "Ayaan Clothing Ltd",
+          account_number: "01-8829471-01",
+          swift_code: "SCBLBDDX",
+        },
+      };
+    }
+
+    case "COMMERCIAL_INVOICE":
+      return {
+        document_type: "COMMERCIAL_INVOICE",
+        title: "COMMERCIAL INVOICE",
+        document_number: `CI-${order.order_number}`,
+        order_number: order.order_number,
+        date: new Date().toISOString(),
+        payment_status: "PAID / CONFIRMED",
+        exporter: header,
+        buyer,
+        port_of_loading: "Hazrat Shahjalal Int Airport, Dhaka (or Port of Chittagong)",
+        destination_country: order.shipping_country_code || "USA",
+        currency: "USD",
+        items: items.map((i, idx) => ({
+          serial: idx + 1,
+          hs_code: "6109.10.00",
+          description: i.product_name,
+          quantity: i.quantity,
+          unit_price: i.unit_price,
+          total_usd: i.line_total,
+        })),
+        summary: {
+          total_quantity: totalPcs,
+          subtotal: order.subtotal,
+          freight_cost: order.shipping_cost,
+          invoice_total: order.total_amount,
+          amount_in_words: `US Dollars ${numberToWords(order.total_amount)} Only`,
+        },
+        declaration: "We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.",
+      };
+
+    case "PACKING_LIST":
+      return {
+        document_type: "PACKING_LIST",
+        title: "EXPORT PACKING LIST",
+        document_number: `PL-${order.order_number}`,
+        order_number: order.order_number,
+        date: new Date().toISOString(),
+        exporter: header,
+        buyer,
+        shipping_marks: `AYN / ${order.shipping_city || "USA"} / CTN 1-${cartonCount}`,
+        carton_summary: {
+          total_cartons: cartonCount,
+          total_pcs: totalPcs,
+          carton_dimensions: "60 x 40 x 35 cm",
+          gross_weight_kg: grossWeight,
+          net_weight_kg: netWeight,
+          total_cbm: totalCbm,
+        },
+        carton_breakdown: Array.from({ length: Math.min(cartonCount, 10) }, (_, i) => ({
+          carton_no: `CTN #${i + 1}`,
+          contents: `${Math.round(totalPcs / cartonCount)} pcs assorted sizes`,
+          gross_weight: Math.round((grossWeight / cartonCount) * 10) / 10,
+          net_weight: Math.round((netWeight / cartonCount) * 10) / 10,
+          dimensions: "60x40x35 cm",
+        })),
+      };
+
+    default:
+      return {
+        document_type: docType,
+        document_number: `DOC-${order.order_number}`,
+        order_number: order.order_number,
+        exporter: header,
+        buyer,
+      };
+  }
+}
+
+function numberToWords(amount: number): string {
+  const whole = Math.floor(amount);
+  const cents = Math.round((amount - whole) * 100);
+  return `${whole} and ${cents}/100`;
+}

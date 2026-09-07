@@ -1,19 +1,81 @@
 "use client";
 
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ProductCard from "../product/ProductCard";
+import { Product } from "@/types";
 import { getBestDeals, getNewArrivals } from "@/lib/promotions";
+import { getProducts, toStorefrontProduct } from "@/lib/services/products";
 
 type Tab = "best-deals" | "new-arrivals";
 
 export default function FeaturedProducts() {
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<Tab>("best-deals");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
 
-  // Data-driven product sources sharing promotional query service
-  const bestDeals = useMemo(() => getBestDeals(16), []);
-  const newArrivals = useMemo(() => getNewArrivals(16), []);
+  // Initial fallbacks
+  const initialBestDeals = useMemo(() => getBestDeals(16), []);
+  const initialNewArrivals = useMemo(() => getNewArrivals(16), []);
+
+  const [bestDeals, setBestDeals] = useState<Product[]>(initialBestDeals);
+  const [newArrivals, setNewArrivals] = useState<Product[]>(initialNewArrivals);
+
+  useEffect(() => {
+    async function loadDynamic() {
+      // Best Deals (is_best_deal=true or is_featured=true)
+      const dealsRes = await getProducts({ is_best_deal: true, per_page: 16 });
+      if (dealsRes && dealsRes.length > 0) {
+        setBestDeals(dealsRes.map(toStorefrontProduct));
+      } else {
+        const featRes = await getProducts({ is_featured: true, per_page: 16 });
+        if (featRes && featRes.length > 0) {
+          setBestDeals(featRes.map(toStorefrontProduct));
+        }
+      }
+
+      // New Arrivals (is_new=true or newest)
+      const newRes = await getProducts({ is_new: true, per_page: 16 });
+      if (newRes && newRes.length > 0) {
+        setNewArrivals(newRes.map(toStorefrontProduct));
+      } else {
+        const newestRes = await getProducts({ sort_by: "newest", per_page: 16 });
+        if (newestRes && newestRes.length > 0) {
+          setNewArrivals(newestRes.map(toStorefrontProduct));
+        }
+      }
+    }
+    loadDynamic();
+  }, []);
+
+  // Auto-activate tab from URL param (?tab=new-arrivals) or custom event and scroll into view
+  useEffect(() => {
+    const scrollToFeatured = () => {
+      requestAnimationFrame(() => {
+        if (sectionRef.current) {
+          sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    };
+
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "new-arrivals") {
+      setActiveTab("new-arrivals");
+      scrollToFeatured();
+    }
+
+    const handleActivateEvent = () => {
+      setActiveTab("new-arrivals");
+      scrollToFeatured();
+    };
+
+    window.addEventListener("activate-new-arrivals", handleActivateEvent);
+    return () => {
+      window.removeEventListener("activate-new-arrivals", handleActivateEvent);
+    };
+  }, [searchParams]);
 
   const displayProducts = activeTab === "best-deals" ? bestDeals : newArrivals;
 
@@ -37,19 +99,19 @@ export default function FeaturedProducts() {
   };
 
   return (
-    <section id="featured" className="pb-10 sm:pb-12 bg-background overflow-hidden">
+    <section id="featured" ref={sectionRef} className="pb-10 sm:pb-12 bg-background overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         
         {/* Header & Tabs */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 md:mb-8">
           <div>
-            <h2 className="text-fluid-h2 font-display uppercase tracking-tight mb-3 md:mb-4">FEATURED PRODUCTS</h2>
+            <h2 className="text-fluid-h2 font-display font-bold uppercase tracking-tight mb-3 md:mb-4">FEATURED PRODUCTS</h2>
             <div className="flex items-center gap-2">
               {/* Tab 1: BEST DEALS (Primary Default Tab) */}
               <button
                 type="button"
                 onClick={() => setActiveTab("best-deals")}
-                className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                className={`px-4 py-2 rounded-full text-xs font-sans font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
                   activeTab === "best-deals" 
                     ? "bg-foreground text-background shadow-sm" 
                     : "bg-secondary text-muted-foreground hover:text-foreground"
@@ -62,7 +124,7 @@ export default function FeaturedProducts() {
               <button
                 type="button"
                 onClick={() => setActiveTab("new-arrivals")}
-                className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+                className={`px-4 py-2 rounded-full text-xs font-sans font-semibold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
                   activeTab === "new-arrivals" 
                     ? "bg-foreground text-background shadow-[0_0_14px_rgba(255,255,255,0.22)] ring-1 ring-primary/40" 
                     : "bg-secondary text-muted-foreground hover:text-foreground"

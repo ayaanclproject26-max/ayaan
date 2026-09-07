@@ -82,7 +82,7 @@ export default function BuyerRfqDetailPage({
     if (updated) {
       setIsNegotiating(false);
       setRevisionNotes("");
-      setActionSuccessMsg("Revision request submitted to Ayaan export sales desk.");
+      setActionSuccessMsg("Revision request submitted to Ayaan Clothing export sales desk.");
       refreshData();
     }
   };
@@ -134,15 +134,15 @@ export default function BuyerRfqDetailPage({
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-border/70">
             <div>
-              <div className="flex items-center gap-3 flex-wrap">
-                <span className="font-mono text-xl sm:text-2xl font-bold text-foreground">
+              <div className="flex items-center gap-3 flex-wrap font-sans">
+                <span className="font-sans font-bold tabular-nums text-xl sm:text-2xl text-foreground">
                   {rfq.rfqNumber}
                 </span>
                 <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
                   {rfq.status.replace(/_/g, " ")}
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-sans">
                 {rfq.requestTitle || "Commercial Apparel Quote Request"} • Submitted on {new Date(rfq.createdAt).toLocaleDateString()}
               </p>
             </div>
@@ -175,7 +175,7 @@ export default function BuyerRfqDetailPage({
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400">
-              <span className="text-[10px] font-bold uppercase tracking-wider block">1. Submitted</span>
+              <span className="text-xs font-bold uppercase tracking-wider block">1. Submitted</span>
               <span className="text-xs font-bold">Request Received</span>
             </div>
 
@@ -184,7 +184,7 @@ export default function BuyerRfqDetailPage({
                 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400" 
                 : "bg-secondary border-border text-muted-foreground"
             }`}>
-              <span className="text-[10px] font-bold uppercase tracking-wider block">2. Review</span>
+              <span className="text-xs font-bold uppercase tracking-wider block">2. Review</span>
               <span className="text-xs font-bold">{rfq.status === "SUBMITTED" ? "Pending Review" : "Sales Verified"}</span>
             </div>
 
@@ -193,7 +193,7 @@ export default function BuyerRfqDetailPage({
                 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400" 
                 : "bg-secondary border-border text-muted-foreground"
             }`}>
-              <span className="text-[10px] font-bold uppercase tracking-wider block">3. Commercial Quote</span>
+              <span className="text-xs font-bold uppercase tracking-wider block">3. Commercial Quote</span>
               <span className="text-xs font-bold">{quotation ? `${quotation.quotationNumber} Issued` : "In Preparation"}</span>
             </div>
 
@@ -202,7 +202,7 @@ export default function BuyerRfqDetailPage({
                 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400" 
                 : "bg-secondary border-border text-muted-foreground"
             }`}>
-              <span className="text-[10px] font-bold uppercase tracking-wider block">4. Proforma Invoice</span>
+              <span className="text-xs font-bold uppercase tracking-wider block">4. Proforma Invoice</span>
               <span className="text-xs font-bold">{quotation?.status === "ACCEPTED" ? "PI Confirmed" : "Awaiting Acceptance"}</span>
             </div>
           </div>
@@ -214,11 +214,11 @@ export default function BuyerRfqDetailPage({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-border">
               <div>
                 <div className="flex items-center gap-2.5">
-                  <span className="text-[10px] font-bold uppercase tracking-widest bg-primary text-primary-foreground px-2.5 py-0.5 rounded-full">
+                  <span className="text-xs font-bold uppercase tracking-widest bg-primary text-primary-foreground px-2.5 py-0.5 rounded-full">
                     Official Commercial Offer
                   </span>
                   {quotation.revisionNumber > 1 && (
-                    <span className="text-[10px] font-bold uppercase tracking-widest bg-secondary text-foreground px-2.5 py-0.5 rounded-full border border-border">
+                    <span className="text-xs font-bold uppercase tracking-widest bg-secondary text-foreground px-2.5 py-0.5 rounded-full border border-border">
                       Revision {quotation.revisionNumber}
                     </span>
                   )}
@@ -239,19 +239,19 @@ export default function BuyerRfqDetailPage({
             {/* Commercial Terms & Specs */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-secondary/40 border border-border/60 text-xs">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Price Terms</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">Price Terms</span>
                 <span className="font-bold text-foreground">{quotation.incoterm || "FOB Chittagong"}</span>
               </div>
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Payment Terms</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">Payment Terms</span>
                 <span className="font-bold text-foreground">{quotation.paymentTerms}</span>
               </div>
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Delivery Lead Time</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">Delivery Lead Time</span>
                 <span className="font-bold text-foreground">{quotation.deliveryEstimate || "14-21 days"}</span>
               </div>
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Valid Until</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">Valid Until</span>
                 <span className="font-bold text-foreground">{quotation.validUntil}</span>
               </div>
             </div>
@@ -260,7 +260,7 @@ export default function BuyerRfqDetailPage({
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-border text-muted-foreground uppercase text-[10px] font-bold tracking-wider">
+                  <tr className="border-b border-border text-muted-foreground uppercase text-xs font-bold tracking-wider">
                     <th className="py-2.5">Item Description</th>
                     <th className="py-2.5">SKU</th>
                     <th className="py-2.5 text-right">Quantity</th>
@@ -274,7 +274,7 @@ export default function BuyerRfqDetailPage({
                       <td className="py-3 pr-2">
                         <span className="font-bold block">{item.productName}</span>
                         {item.variantTitle && (
-                          <span className="text-[11px] text-muted-foreground">{item.variantTitle}</span>
+                          <span className="text-xs text-muted-foreground">{item.variantTitle}</span>
                         )}
                       </td>
                       <td className="py-3 font-mono text-muted-foreground">{item.sku}</td>
@@ -399,13 +399,13 @@ export default function BuyerRfqDetailPage({
                         className="w-14 h-16 object-cover rounded-lg bg-secondary shrink-0 border border-border/40"
                       />
                       <div className="min-w-0">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-primary block">
+                        <span className="text-xs font-bold uppercase tracking-wider text-primary block">
                           {item.brand} • {item.sku}
                         </span>
                         <h4 className="text-xs font-bold text-foreground truncate max-w-[200px] sm:max-w-xs">
                           {item.productName}
                         </h4>
-                        <span className="text-[11px] text-muted-foreground block mt-0.5">
+                        <span className="text-xs text-muted-foreground block mt-0.5">
                           Color: {item.selectedColor} • Size: {item.selectedSize}
                         </span>
                       </div>
@@ -415,7 +415,7 @@ export default function BuyerRfqDetailPage({
                       <span className="text-xs font-bold text-foreground block">
                         {item.quantity.toLocaleString()} pcs
                       </span>
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         MOQ: {item.moq} pcs
                       </span>
                     </div>
@@ -431,17 +431,17 @@ export default function BuyerRfqDetailPage({
               </h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-[10px] font-bold uppercase text-muted-foreground block">Destination</span>
+                  <span className="text-xs font-bold uppercase text-muted-foreground block">Destination</span>
                   <span className="font-bold text-foreground">{rfq.destinationCity}, {rfq.destinationCountry}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold uppercase text-muted-foreground block">Target Delivery</span>
+                  <span className="text-xs font-bold uppercase text-muted-foreground block">Target Delivery</span>
                   <span className="font-bold text-foreground">{rfq.targetDeliveryDate || "Flexible"}</span>
                 </div>
               </div>
               {rfq.generalNotes && (
                 <div className="pt-2 border-t border-border/40">
-                  <span className="text-[10px] font-bold uppercase text-muted-foreground block">Instructions</span>
+                  <span className="text-xs font-bold uppercase text-muted-foreground block">Instructions</span>
                   <p className="text-muted-foreground mt-0.5">{rfq.generalNotes}</p>
                 </div>
               )}
@@ -469,7 +469,7 @@ export default function BuyerRfqDetailPage({
                         key={msg.id}
                         className={`flex flex-col ${isBuyer ? "items-end" : "items-start"}`}
                       >
-                        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-1">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
                           <span className="font-bold text-foreground">{msg.senderName}</span>
                           <span>•</span>
                           <span>{new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>

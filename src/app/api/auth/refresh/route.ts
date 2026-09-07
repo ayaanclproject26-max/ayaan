@@ -1,3 +1,14 @@
-import { createRefreshAuthRouter } from "@insforge/sdk/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
-export const { POST } = createRefreshAuthRouter();
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    return NextResponse.json({
+      success: true,
+      message: "Token refresh endpoint ready for Laravel Sanctum / JWT",
+      token: body?.refresh_token ? `refreshed_${Date.now()}` : null,
+    });
+  } catch {
+    return NextResponse.json({ success: false, message: "Invalid request" }, { status: 400 });
+  }
+}

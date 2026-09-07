@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Hero from "@/components/layout/Hero";
 import ServiceStrip from "@/components/home/ServiceStrip";
 import CategoryHighlights from "@/components/home/CategoryHighlights";
@@ -15,7 +16,9 @@ export default function Home() {
         <ServiceStrip />
         <CategoryHighlights />
         <HotSales />
-        <FeaturedProducts />
+        <Suspense fallback={<div className="h-64 bg-background" />}>
+          <FeaturedProducts />
+        </Suspense>
       </div>
       <ShopByBrand />
       <Testimonials />

@@ -19,9 +19,12 @@
     "sku": "LEVIS-TSH-M-BLK-M-PRD0001",
     "moq": 50,
     "quantityStep": 50,
-    "availableStock": 1500,
     "brand": "Levi's",
-    "colours": 1
+    "colours": 1,
+    "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "bulkThreshold": 200,
+    "bulkPrice": 8.00,
+    "fullStockPrice": 6.50
   },
   {
     "id": "prd0002",

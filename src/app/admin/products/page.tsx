@@ -58,8 +58,19 @@ export default function AdminProductsPage() {
     refreshProducts();
   }, [searchQuery, selectedBrand, selectedAudience, selectedStatus]);
 
-  const brands = getBrands();
-  const categories = getCategories();
+  const [brandsList, setBrandsList] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function loadBrandsList() {
+      try {
+        const data = await getBrands({ isAdmin: true, all: true });
+        setBrandsList(data);
+      } catch (err) {
+        console.error("Failed to load brands:", err);
+      }
+    }
+    loadBrandsList();
+  }, []);
 
   // Metrics
   const totalCount = products.length;
@@ -158,7 +169,7 @@ export default function AdminProductsPage() {
       {/* Stats Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="p-4 rounded-2xl bg-card border border-border/70 shadow-xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
             Total Catalog
           </span>
           <span className="text-2xl font-display font-bold text-foreground mt-1 block">
@@ -167,7 +178,7 @@ export default function AdminProductsPage() {
         </div>
 
         <div className="p-4 rounded-2xl bg-card border border-border/70 shadow-xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">
             Published (Live)
           </span>
           <span className="text-2xl font-display font-bold text-emerald-600 dark:text-emerald-400 mt-1 block">
@@ -176,7 +187,7 @@ export default function AdminProductsPage() {
         </div>
 
         <div className="p-4 rounded-2xl bg-card border border-border/70 shadow-xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block">
+          <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block">
             Drafts / Unpublished
           </span>
           <span className="text-2xl font-display font-bold text-amber-600 dark:text-amber-400 mt-1 block">
@@ -185,7 +196,7 @@ export default function AdminProductsPage() {
         </div>
 
         <div className="p-4 rounded-2xl bg-card border border-border/70 shadow-xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 block">
+          <span className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 block">
             Low Stock (&lt;100)
           </span>
           <span className="text-2xl font-display font-bold text-rose-600 dark:text-rose-400 mt-1 block">
@@ -214,7 +225,7 @@ export default function AdminProductsPage() {
             className="px-3 py-2 text-xs rounded-xl border border-border bg-card text-foreground focus:ring-1 focus:ring-primary outline-none"
           >
             <option value="all">All Brands</option>
-            {brands.map((b) => (
+            {brandsList.map((b) => (
               <option key={b.id} value={b.name}>
                 {b.name}
               </option>
@@ -277,7 +288,7 @@ export default function AdminProductsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-border bg-secondary/40 text-muted-foreground uppercase text-[10px] font-bold tracking-wider">
+              <tr className="border-b border-border bg-secondary/40 text-muted-foreground uppercase text-xs font-bold tracking-wider">
                 <th className="py-3 px-4 w-8">
                   <input
                     type="checkbox"
@@ -331,7 +342,7 @@ export default function AdminProductsPage() {
                           <span className="font-bold text-foreground block truncate max-w-[220px]">
                             {p.name}
                           </span>
-                          <span className="text-[10px] text-muted-foreground block truncate">
+                          <span className="text-xs text-muted-foreground block truncate">
                             {p.productType || "Apparel"} • {p.material || "100% Cotton"}
                           </span>
                         </div>
@@ -341,7 +352,7 @@ export default function AdminProductsPage() {
                     <td className="py-3 px-3 font-mono text-muted-foreground">{p.sku}</td>
                     <td className="py-3 px-3 font-bold text-foreground">{p.brand}</td>
                     <td className="py-3 px-3">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-secondary border border-border text-foreground">
+                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-secondary border border-border text-foreground">
                         {p.audience}
                       </span>
                     </td>
@@ -364,7 +375,7 @@ export default function AdminProductsPage() {
                       <button
                         type="button"
                         onClick={() => handleToggleStatus(p)}
-                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-opacity hover:opacity-80 ${
+                        className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider cursor-pointer transition-opacity hover:opacity-80 ${
                           p.status === "published"
                             ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
                             : "bg-amber-500/15 text-amber-600 dark:text-amber-400"

@@ -1,15 +1,18 @@
 "use client";
 
-import { X, ShoppingBag, FileText } from "lucide-react";
+import { useState } from "react";
+import { X, ShoppingBag, FileText, ArrowRight } from "lucide-react";
 import { useCart } from "@/lib/CartContext";
 import { useRfq } from "@/lib/RfqContext";
+import { formatPrice } from "@/lib/formatters";
 import { useRouter } from "next/navigation";
-import Button from "../ui/Button";
+import CheckoutModal from "./CheckoutModal";
 
 export default function MiniCart() {
   const { isCartOpen, setIsCartOpen, items, updateQuantity, removeFromCart, subtotal } = useCart();
   const { addToRfq } = useRfq();
   const router = useRouter();
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   const handleRequestQuoteFromCart = () => {
     for (const item of items) {
@@ -50,7 +53,7 @@ export default function MiniCart() {
         isCartOpen ? "translate-x-0" : "translate-x-full"
       }`}>
         <div className="flex items-center justify-between p-6 border-b border-border">
-          <h2 className="font-display text-xl uppercase tracking-wider">Shopping Cart</h2>
+          <h2 className="font-display font-bold text-xl uppercase tracking-wider">Shopping Cart</h2>
           <button 
             onClick={() => setIsCartOpen(false)}
             className="p-2 -mr-2 text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -60,84 +63,122 @@ export default function MiniCart() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 font-sans">
           {items.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground">
               <ShoppingBag className="w-12 h-12 mb-4 stroke-1" />
               <p className="text-sm font-medium">Your cart is empty</p>
-              <p className="text-xs mt-1">Add items or request a wholesale quote</p>
+              <p className="text-sm mt-1">Add items or request a wholesale quote</p>
             </div>
           ) : (
             <div className="flex flex-col gap-6">
-              {items.map((item) => (
-                <div key={`${item.product.id}-${item.size}`} className="flex gap-4 items-center">
-                  <img 
-                    src={item.product.images[0]} 
-                    alt={item.product.name} 
-                    className="w-20 h-24 object-cover rounded-md bg-secondary shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold truncate">{item.product.name}</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {item.size ? `Size: ${item.size}` : ""} {item.product.color ? `• Color: ${item.product.color}` : ""}
-                    </p>
-                    <p className="text-sm font-medium mt-1">${item.product.price.toFixed(2)}</p>
-                    
-                    <div className="flex items-center justify-between mt-3">
-                      <div className="flex items-center border border-border rounded-full h-8">
-                        <button 
-                          className="w-8 h-full flex items-center justify-center hover:bg-secondary rounded-l-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                          onClick={() => updateQuantity(item.product.id, item.size, item.quantity - 1)}
-                        >-</button>
-                        <span className="w-8 text-center text-sm font-semibold">{item.quantity}</span>
-                        <button 
-                          className="w-8 h-full flex items-center justify-center hover:bg-secondary rounded-r-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                          onClick={() => updateQuantity(item.product.id, item.size, item.quantity + 1)}
-                        >+</button>
+              {items.map((item) => {
+                const itemMoq = item.product.moq || 1;
+                const unitPrice = item.unitPrice || item.product.price;
+                const lineTotal = item.lineTotal || (unitPrice * item.quantity);
+
+                return (
+                  <div key={`${item.product.id}-${item.size || 'pkg'}`} className="flex gap-4 items-start p-3 rounded-xl bg-card border border-border/60 shadow-xs">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src={item.product.images[0]} 
+                      alt={item.product.name} 
+                      className="w-16 h-20 object-cover rounded-lg bg-secondary shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-body font-semibold text-[15px] uppercase tracking-tight truncate text-foreground">{item.product.name}</h3>
+                      <p className="text-xs text-muted-foreground mt-0.5 font-medium">
+                        {item.product.brand} Assortment Package
+                      </p>
+                      
+                      <div className="flex items-baseline justify-between mt-1 font-sans">
+                        <span className="text-sm font-bold text-foreground tabular-nums">
+                          {formatPrice(unitPrice)} <span className="text-xs text-muted-foreground font-medium">/ pc</span>
+                        </span>
+                        <span className="text-[13px] font-bold text-foreground tabular-nums">
+                          Subtotal: {formatPrice(lineTotal)}
+                        </span>
                       </div>
-                      <button 
-                        className="text-xs uppercase tracking-wider font-semibold text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        onClick={() => removeFromCart(item.product.id, item.size)}
-                      >
-                        Remove
-                      </button>
+
+                      {/* Package Breakdown Summary (Informational Only) */}
+                      {item.packageBreakdown && item.packageBreakdown.length > 0 && (
+                        <div className="mt-1.5 p-1.5 bg-secondary/40 rounded-lg text-xs text-muted-foreground border border-border/40 font-sans">
+                          <span className="font-semibold text-foreground block mb-0.5 text-xs uppercase tracking-wider">Package Allocation:</span>
+                          <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+                            {item.packageBreakdown.map((bd: any, idx: number) => (
+                              <span key={idx} className="tabular-nums">
+                                {bd.color ? `${bd.color} ` : ""}{bd.size ? `(${bd.size})` : ""}: <strong className="text-foreground">{bd.quantity}</strong>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-border/40 font-sans">
+                        <div className="flex items-center border border-border rounded-lg h-7 bg-background">
+                          <button 
+                            className="w-7 h-full flex items-center justify-center hover:bg-secondary rounded-l-lg transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-bold text-xs"
+                            onClick={() => updateQuantity(item.product.id, item.size, Math.max(itemMoq, item.quantity - itemMoq), item.id)}
+                            aria-label="Decrease quantity"
+                          >−</button>
+                          <span className="px-2 text-center text-xs font-bold tabular-nums">{item.quantity}</span>
+                          <button 
+                            className="w-7 h-full flex items-center justify-center hover:bg-secondary rounded-r-lg transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-bold text-xs"
+                            onClick={() => updateQuantity(item.product.id, item.size, item.quantity + itemMoq, item.id)}
+                            aria-label="Increase quantity"
+                          >+</button>
+                        </div>
+                        <button 
+                          className="text-xs uppercase tracking-wider font-semibold text-muted-foreground hover:text-rose-600 transition-colors cursor-pointer"
+                          onClick={() => removeFromCart(item.product.id, item.size, item.id)}
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
 
         {items.length > 0 && (
           <div className="p-6 border-t border-border bg-secondary/30 backdrop-blur-sm space-y-3">
-            <div className="flex items-center justify-between text-base font-semibold uppercase tracking-wider">
+            <div className="flex items-center justify-between text-[15px] font-body font-bold uppercase tracking-wider">
               <span>Estimated Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span className="text-lg tabular-nums">{formatPrice(subtotal)}</span>
             </div>
+
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsCartOpen(false);
+                setIsCheckoutOpen(true);
+              }}
+              className="w-full py-3.5 rounded-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>Proceed to Checkout</span>
+              <ArrowRight size={16} />
+            </button>
 
             <button
               type="button"
               onClick={handleRequestQuoteFromCart}
-              className="w-full py-3 rounded-full bg-foreground text-background font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+              className="w-full py-2.5 rounded-full bg-foreground text-background font-bold text-sm uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-sm"
             >
               <FileText size={15} />
               <span>Request Wholesale Quote (RFQ)</span>
             </button>
-
-            <button 
-              type="button"
-              className="w-full py-2.5 rounded-full border border-border hover:bg-secondary text-foreground text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer"
-              onClick={() => {
-                setIsCartOpen(false);
-                alert("Proceeding with sample retail checkout...");
-              }}
-            >
-              Sample Checkout
-            </button>
           </div>
         )}
       </div>
+
+      <CheckoutModal 
+        isOpen={isCheckoutOpen} 
+        onClose={() => setIsCheckoutOpen(false)} 
+      />
     </>
   );
 }

@@ -120,7 +120,7 @@ export default function LanguageCurrencyPopover({
         <div className="flex flex-col gap-4">
           {/* Language Selection */}
           <div>
-            <label className="block text-[11px] font-bold text-white/60 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-white/60 uppercase tracking-wider mb-2">
               Select Language
             </label>
             <div className="flex flex-col gap-1.5">
@@ -139,7 +139,7 @@ export default function LanguageCurrencyPopover({
                   >
                     <div className="flex items-center gap-2">
                       <span>{lang.native}</span>
-                      <span className="text-white/50 text-[11px]">({lang.label})</span>
+                      <span className="text-white/50 text-xs">({lang.label})</span>
                     </div>
                     {isSelected && <Check size={14} className="text-amber-400" />}
                   </button>
@@ -152,7 +152,7 @@ export default function LanguageCurrencyPopover({
           <div>
             <div className="flex items-center gap-1.5 mb-2">
               <Coins size={13} className="text-amber-400" />
-              <label className="block text-[11px] font-bold text-white/60 uppercase tracking-wider">
+              <label className="block text-xs font-bold text-white/60 uppercase tracking-wider">
                 Select Currency
               </label>
             </div>

@@ -1,43 +1,60 @@
 "use client";
 
 import { Suspense, useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { 
   Search, 
   ShoppingCart, 
   User, 
   Globe, 
-  Menu
+  Menu,
+  Package,
+  LogOut,
+  Heart,
+  MessageCircle,
+  ChevronDown
 } from "lucide-react";
 import LocationModal from "./LocationModal";
 import LanguageCurrencyModal from "./LanguageCurrencyModal";
 import AuthModal from "../auth/AuthModal";
 import SearchOverlay from "./SearchOverlay";
+import BrandName from "../common/BrandName";
 import { useCart } from "@/lib/CartContext";
+import { useWishlist } from "@/lib/WishlistContext";
 import { usePreferences } from "@/lib/PreferencesContext";
+import { useAuth } from "@/lib/AuthContext";
+import BUSINESS_PROFILE, { getWhatsAppUrl } from "@/config/business-profile";
 
-const NAV_LINKS = [
-  { label: "ALL", href: "/#categories" },
-  { label: "SWEATERS", href: "/#hot-sales" },
-  { label: "T-SHIRTS", href: "/#categories" },
-  { label: "HOODIES", href: "/#categories" },
-  { label: "TROUSERS", href: "/#categories" },
-  { label: "PANTS", href: "/#categories" },
-  { label: "SHORTS", href: "/#categories" },
-  { label: "SHIRTS", href: "/#categories" },
-  { label: "BEACHWEAR", href: "/#categories" },
-  { label: "SOCKS", href: "/#categories" },
-  { label: "BLOUSE", href: "/#categories" },
-  { label: "TANK TOP", href: "/#categories" },
-  { label: "TOPS", href: "/#categories" },
-  { label: "SPORTS", href: "/#categories" },
-  { label: "TOWELS", href: "/#hot-sales" },
-  { label: "HOT SALES", href: "/#hot-sales", special: "hot" },
+const AUDIENCE_MENU_ITEMS = [
+  { label: "MEN", href: "/search?audience=MEN" },
+  { label: "WOMEN", href: "/search?audience=WOMEN" },
+  { label: "BOYS", href: "/search?audience=BOYS" },
+  { label: "GIRLS", href: "/search?audience=GIRLS" },
+  { label: "UNISEX", href: "/search?audience=UNISEX" },
+];
+
+const PRODUCT_CATEGORY_MENU_ITEMS = [
+  { label: "ALL", href: "/search" },
+  { label: "SWEATERS", href: "/search?category=Sweaters" },
+  { label: "T-SHIRTS", href: "/search?category=T-Shirts" },
+  { label: "HOODIES", href: "/search?category=Hoodies" },
+  { label: "TROUSERS", href: "/search?category=Trousers" },
+  { label: "PANTS", href: "/search?category=Pants" },
+  { label: "SHORTS", href: "/search?category=Shorts" },
+  { label: "SHIRTS", href: "/search?category=Shirts" },
+  { label: "BEACHWEAR", href: "/search?category=Beachwear" },
+  { label: "SOCKS", href: "/search?category=Socks" },
+  { label: "BLOUSE", href: "/search?category=Blouse" },
+  { label: "TANK TOP", href: "/search?category=Tank%20Top" },
+  { label: "TOPS", href: "/search?category=Tops" },
+  { label: "SPORTS", href: "/search?category=Sports" },
+  { label: "TOWELS", href: "/search?category=Towels" },
 ];
 
 function HeaderContent() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get("query");
 
@@ -45,6 +62,8 @@ function HeaderContent() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAudienceOpen, setIsAudienceOpen] = useState(true);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(true);
   
   // Modals state
   const [isLocationOpen, setIsLocationOpen] = useState(false);
@@ -54,19 +73,47 @@ function HeaderContent() {
 
   // Contexts
   const { totalItems, setIsCartOpen } = useCart();
+  const { totalWishlistItems } = useWishlist();
   const { preferences } = usePreferences();
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const y = window.scrollY;
+          setIsScrolled((prev) => {
+            if (!prev && y > 45) return true;
+            if (prev && y < 20) return false;
+            return prev;
+          });
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [pathname]);
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+    if (pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (window.location.hash || window.location.search) {
+        router.push("/");
+      }
+    }
+  };
 
   const openSignIn = () => {
-    setAuthModalView("signin");
-    setIsAuthModalOpen(true);
+    if (user) {
+      router.push("/profile");
+    } else {
+      router.push("/login");
+    }
   };
 
   // Search execution handler -> Navigates to /search?query=...
@@ -99,64 +146,58 @@ function HeaderContent() {
   return (
     <>
       <header 
-        className={`sticky top-0 z-50 transition-all duration-300 w-full ${
+        role="banner"
+        className={`sticky top-0 z-50 transition-all duration-300 ${
           isScrolled 
-            ? "bg-[#0b1329]/95 backdrop-blur-md shadow-md border-b border-white/10" 
-            : "bg-[#0b1329] border-b border-white/10"
+            ? "bg-[#0b1329]/95 backdrop-blur-md shadow-lg border-b border-white/10" 
+            : "bg-[#0b1329] border-b border-white/5"
         }`}
       >
         {/* DESKTOP HEADER */}
-        <div className="hidden lg:flex mx-auto max-w-[1400px] px-4 sm:px-6 h-16 sm:h-[4.25rem] items-center gap-6 xl:gap-8 text-white w-full">
-          
+        <div className="hidden lg:flex items-center justify-between px-6 xl:px-12 py-3.5 gap-6 text-white max-w-[1920px] mx-auto">
           {/* Logo */}
-          <Link href="/" className="flex items-center shrink-0 press-feedback" aria-label="Ayaan Home">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Ayaan Logo" className="h-8 sm:h-9 w-auto brightness-0 invert" />
+          <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2 shrink-0 group" aria-label="Ayaan Clothing Home">
+            <BrandName className="font-black text-2xl xl:text-3xl tracking-widest text-white group-hover:text-white/90 transition-colors" />
           </Link>
 
-          {/* 
-            SEARCH BAR: Two clearly different states
-            - NORMAL: Dark navy pill, left search icon, minimal, placeholder "Search..."
-            - ACTIVE/PRESSED: White pill, subtle glow, dark input, right orange search action button with white icon
-          */}
+          {/* Search Bar */}
           <form 
             onSubmit={handleSearchSubmit}
-            className={`flex w-full max-w-[45%] mx-auto items-center rounded-full h-10 border transition-all duration-200 cursor-text ${
-              isSearchOpen 
-                ? "bg-white border-white text-slate-900 shadow-[0_0_20px_rgba(255,255,255,0.35)] ring-2 ring-white/30 pl-4 pr-1.5" 
-                : "bg-white/[0.08] border-white/15 text-white hover:bg-white/[0.12] hover:border-white/30 px-4"
-            }`}
+            className="flex-1 max-w-xl xl:max-w-2xl relative"
           >
-            {/* Normal State: Search Icon on the LEFT */}
-            {!isSearchOpen && (
-              <Search size={17} className="mr-2.5 shrink-0 text-white/50 transition-colors" />
-            )}
-
-            {/* Input Field */}
-            <input 
-              type="text"
-              className={`bg-transparent border-none outline-none w-full text-[0.875rem] focus:ring-0 transition-colors ${
+            <div 
+              className={`flex items-center w-full rounded-full h-11 border transition-all duration-200 cursor-text ${
                 isSearchOpen 
-                  ? "text-slate-900 placeholder:text-slate-400 font-medium pr-2" 
-                  : "text-white placeholder:text-white/50"
+                  ? "bg-white border-white text-slate-900 shadow-[0_0_20px_rgba(255,255,255,0.35)] ring-2 ring-white/30 pl-4 pr-1.5" 
+                  : "bg-white/[0.08] border-white/15 text-white hover:bg-white/[0.12] hover:border-white/30 px-4"
               }`}
-              placeholder={isSearchOpen ? "Search product, brand, and more..." : "Search..."}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setIsSearchOpen(true)}
-            />
-
-            {/* Active State: Orange Pill Search Action Button on the RIGHT */}
-            {isSearchOpen && (
-              <button 
-                type="submit"
-                className="shrink-0 h-7 px-3.5 rounded-full bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition-all duration-150 cursor-pointer animate-in fade-in zoom-in-90 duration-150"
-                aria-label="Search"
-                title="Search"
-              >
-                <Search size={14} className="text-white" strokeWidth={2.5} />
-              </button>
-            )}
+            >
+              {!isSearchOpen && (
+                <Search size={18} className="mr-3 shrink-0 text-white/50" />
+              )}
+              <input 
+                type="text"
+                className={`bg-transparent border-none outline-none w-full text-sm focus:ring-0 ${
+                  isSearchOpen 
+                    ? "text-slate-900 placeholder:text-slate-400 font-medium pr-2" 
+                    : "text-white placeholder:text-white/50"
+                }`}
+                placeholder={isSearchOpen ? "Search apparel, brand, or collection..." : "Search products..."}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchOpen(true)}
+              />
+              {isSearchOpen && (
+                <button 
+                  type="submit"
+                  className="shrink-0 h-8 px-4 rounded-full bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-sm flex items-center justify-center gap-1.5 shadow-sm transition-all"
+                  aria-label="Search"
+                >
+                  <Search size={14} className="text-white" strokeWidth={2.5} />
+                  <span>Search</span>
+                </button>
+              )}
+            </div>
           </form>
 
           {/* Desktop Utilities */}
@@ -171,43 +212,42 @@ function HeaderContent() {
             >
               <span className="text-xl leading-none">{preferences.flag}</span>
               <div className="flex flex-col leading-none justify-center text-left">
-                <span className="text-[0.6rem] text-white/50 mb-0.5 uppercase tracking-wide">Deliver to:</span>
+                <span className="text-xs text-white/50 mb-0.5 uppercase tracking-wide">Deliver to:</span>
                 <span className="font-bold tracking-wide text-sm truncate max-w-[90px]">
                   {preferences.countryCode}
                 </span>
               </div>
             </button>
 
-            {/* Language / Currency */}
+            {/* Language */}
             <button 
               type="button"
               className="flex items-center gap-2 text-white/85 hover:text-white cursor-pointer transition-colors press-feedback focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg p-1"
               onClick={() => setIsLanguageOpen(true)}
-              aria-label={`Language and Currency: ${preferences.language}-${preferences.currency}`}
+              aria-label={`Language: ${preferences.language}`}
             >
-              <Globe size={20} strokeWidth={1.5} />
-              <span className="font-bold tracking-wide text-sm">
-                {preferences.language}-{preferences.currency}
+              <Globe size={18} strokeWidth={1.5} />
+              <span className="font-bold tracking-wide text-sm uppercase">
+                {preferences.language}
               </span>
             </button>
 
-            {/* RFQ Portal */}
-            <Link
-              href="/dashboard/quotes"
-              className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold uppercase tracking-wider transition-colors"
-              title="My Wholesale Quote Requests"
-            >
-              <span>RFQs</span>
-            </Link>
 
-            {/* Admin Portal */}
-            <Link
-              href="/admin/products"
-              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold uppercase tracking-wider transition-colors shadow-xs"
-              title="Admin Dashboard"
-            >
-              <span>Admin</span>
-            </Link>
+            {/* Wishlist — only visible when authenticated */}
+            {user && (
+              <Link 
+                href="/profile"
+                className="relative flex items-center justify-center h-10 w-10 rounded-full border border-white/20 hover:bg-white/10 transition-colors press-feedback focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none cursor-pointer" 
+                aria-label="Wishlist"
+              >
+                <Heart size={18} strokeWidth={1.5} />
+                {totalWishlistItems > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[0.6rem] font-bold w-[1.125rem] h-[1.125rem] flex items-center justify-center rounded-full shadow-sm">
+                    {totalWishlistItems}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {/* Cart */}
             <button 
@@ -224,89 +264,205 @@ function HeaderContent() {
               )}
             </button>
 
-            {/* Account */}
-            <button 
-              type="button"
-              className="flex items-center justify-center h-10 w-10 rounded-full border border-white/20 hover:bg-white/10 transition-colors press-feedback focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none cursor-pointer" 
-              aria-label="Account / Sign In"
-              onClick={openSignIn}
-            >
-              <User size={18} strokeWidth={1.5} />
-            </button>
+            {/* Account / Profile — direct navigation, no popup */}
+            {user ? (
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 h-10 px-3 rounded-full border border-amber-500/50 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition-colors press-feedback focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none cursor-pointer"
+                aria-label={`My Profile: ${user.name || user.email}`}
+              >
+                <User size={18} strokeWidth={1.5} />
+                <span className="text-xs font-semibold max-w-[100px] truncate">
+                  {user.name?.split(" ")[0] || "Account"}
+                </span>
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="flex items-center gap-2 h-10 px-3 rounded-full border border-white/20 hover:bg-white/10 text-white transition-colors press-feedback focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none cursor-pointer"
+                aria-label="Sign In / Account"
+              >
+                <User size={18} strokeWidth={1.5} />
+              </Link>
+            )}
 
           </div>
         </div>
 
-        {/* MOBILE HEADER */}
-        <div className="lg:hidden flex flex-col w-full px-4 sm:px-6 py-3 gap-3 text-white">
-          <div className="flex items-center justify-between w-full">
-            <button 
-              type="button"
-              className="flex items-center justify-center h-10 w-10 -ml-2 rounded-full hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none" 
-              aria-label="Menu"
-              onClick={() => setIsMobileMenuOpen(true)}
+        {/* MOBILE HEADER (lg:hidden) — Two-State Scroll Transformation */}
+        <div
+          className={`lg:hidden flex flex-col w-full text-white transition-all duration-300 ease-out overflow-hidden relative ${
+            isScrolled ? "h-[52px] px-3 sm:px-4 py-1.5" : "h-[106px] px-4 sm:px-6 pt-3 pb-3.5"
+          }`}
+        >
+          {/* ROW 1: Action Strip */}
+          <div className="relative flex items-center justify-between w-full h-10 shrink-0">
+            
+            {/* Left Control Group */}
+            <div className="flex items-center shrink-0 z-20">
+              {/* Top-State Hamburger (Left) */}
+              <div
+                className={`transition-all duration-300 ease-out flex items-center overflow-hidden ${
+                  isScrolled
+                    ? "w-0 opacity-0 -translate-x-4 pointer-events-none"
+                    : "w-10 opacity-100 translate-x-0"
+                }`}
+              >
+                <button
+                  type="button"
+                  className="flex items-center justify-center h-10 w-10 -ml-1 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none cursor-pointer"
+                  aria-label="Open navigation menu"
+                  onClick={() => setIsMobileMenuOpen(true)}
+                >
+                  <Menu size={22} strokeWidth={1.75} />
+                </button>
+              </div>
+
+              {/* Scrolled-State Compact Logo: AYC (Left) */}
+              <div
+                className={`transition-all duration-300 ease-out flex items-center overflow-hidden ${
+                  isScrolled
+                    ? "w-[46px] opacity-100 translate-x-0 pointer-events-auto"
+                    : "w-0 opacity-0 -translate-x-4 pointer-events-none"
+                }`}
+              >
+                <Link
+                  href="/"
+                  onClick={handleLogoClick}
+                  className="font-brand font-black text-[1.25rem] tracking-tight select-none text-white leading-none shrink-0 flex items-center hover:opacity-90 transition-opacity"
+                  aria-label="Ayaan Clothing Home"
+                >
+                  <span className="text-[#EA580C]">A</span>
+                  <span>Y</span>
+                  <span className="text-[#EA580C]">C</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Top-State Full Brand Wordmark: AYAAN CLOTHING (Center & Large) */}
+            <div
+              className={`absolute inset-x-0 flex items-center justify-center pointer-events-none z-10 transition-all duration-300 ease-out ${
+                isScrolled
+                  ? "opacity-0 scale-90 -translate-y-2 pointer-events-none"
+                  : "opacity-100 scale-100 translate-y-0"
+              }`}
             >
-              <Menu size={22} strokeWidth={1.5} />
-            </button>
-            <Link href="/" className="flex items-center" aria-label="Ayaan Home">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="Ayaan Logo" className="h-7 sm:h-8 w-auto brightness-0 invert" />
-            </Link>
-            <button 
-              type="button"
-              className="relative flex items-center justify-center text-white/85 hover:text-white press-feedback focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-              onClick={() => setIsCartOpen(true)}
-              aria-label="Shopping Cart"
-            >
-              <ShoppingCart size={20} strokeWidth={1.5} />
-              {totalItems > 0 && (
-                <span className="absolute -top-1.5 -right-2 bg-amber-500 text-slate-900 text-[0.6rem] font-bold w-4 h-4 flex items-center justify-center rounded-full border border-slate-900">
-                  {totalItems}
-                </span>
+              <Link
+                href="/"
+                onClick={handleLogoClick}
+                className="pointer-events-auto flex items-center justify-center max-w-[70%]"
+                aria-label="Ayaan Clothing Home"
+              >
+                <BrandName className="font-black text-xl sm:text-2xl tracking-widest text-white leading-tight truncate" />
+              </Link>
+            </div>
+
+            {/* Right Control Group: Wishlist + Cart + Scrolled-State Hamburger */}
+            <div className="flex items-center gap-1 shrink-0 z-20">
+              {user && (
+                <Link
+                  href="/profile"
+                  className="relative flex items-center justify-center h-9 w-9 text-white/85 hover:text-white press-feedback focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                  aria-label="Wishlist"
+                >
+                  <Heart size={18} strokeWidth={1.5} />
+                  {totalWishlistItems > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[0.6rem] font-bold w-4 h-4 flex items-center justify-center rounded-full border border-slate-900">
+                      {totalWishlistItems}
+                    </span>
+                  )}
+                </Link>
               )}
-            </button>
+
+              {/* Cart Button */}
+              <button
+                type="button"
+                className="relative flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 text-white/90 hover:text-white active:bg-white/10 rounded-full press-feedback focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none cursor-pointer"
+                onClick={() => setIsCartOpen(true)}
+                aria-label="Shopping Cart"
+              >
+                <ShoppingCart size={19} strokeWidth={1.6} />
+                {totalItems > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-amber-500 text-slate-950 text-[0.6rem] font-extrabold w-4 h-4 flex items-center justify-center rounded-full border border-[#0b1329] shadow-sm leading-none">
+                    {totalItems}
+                  </span>
+                )}
+              </button>
+
+              {/* Scrolled-State Hamburger (Right-most) */}
+              <div
+                className={`transition-all duration-300 ease-out flex items-center overflow-hidden ${
+                  isScrolled
+                    ? "w-9 sm:w-10 opacity-100 translate-x-0 pointer-events-auto"
+                    : "w-0 opacity-0 translate-x-4 pointer-events-none"
+                }`}
+              >
+                <button
+                  type="button"
+                  className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none cursor-pointer"
+                  aria-label="Open navigation menu"
+                  onClick={() => setIsMobileMenuOpen(true)}
+                >
+                  <Menu size={20} strokeWidth={1.75} />
+                </button>
+              </div>
+            </div>
+
           </div>
-          
-          {/* Mobile Search Bar: Normal vs Active State */}
-          <form 
-            onSubmit={handleSearchSubmit}
-            className={`flex w-full items-center rounded-full h-10 border transition-all duration-200 cursor-text ${
-              isSearchOpen 
-                ? "bg-white border-white text-slate-900 shadow-[0_0_20px_rgba(255,255,255,0.35)] ring-2 ring-white/30 pl-4 pr-1.5" 
-                : "bg-white/[0.08] border-white/15 text-white hover:bg-white/[0.12] hover:border-white/30 px-4"
+
+          {/* ROW 2: Mobile Search Bar with Upward Physical Glide into Row 1 */}
+          <div
+            className={`w-full transition-all duration-300 ease-out ${
+              isScrolled
+                ? `-translate-y-[37px] pl-[54px] ${user ? "pr-[122px]" : "pr-[82px]"} h-[34px] pointer-events-auto z-30`
+                : "translate-y-0 mt-2.5 h-10 z-10"
             }`}
           >
-            {/* Normal State: Search Icon on the LEFT */}
-            {!isSearchOpen && (
-              <Search size={16} className="mr-2.5 shrink-0 text-white/50 transition-colors" />
-            )}
-
-            {/* Input Field */}
-            <input 
-              type="text"
-              className={`bg-transparent border-none outline-none w-full text-[0.8125rem] focus:ring-0 transition-colors ${
-                isSearchOpen 
-                  ? "text-slate-900 placeholder:text-slate-400 font-medium pr-2" 
-                  : "text-white placeholder:text-white/50"
+            <form
+              onSubmit={handleSearchSubmit}
+              className={`flex w-full items-center rounded-full border transition-all duration-200 cursor-text ${
+                isScrolled ? "h-[34px] text-xs" : "h-10 text-sm"
+              } ${
+                isSearchOpen
+                  ? "bg-white border-white text-slate-900 shadow-[0_0_16px_rgba(255,255,255,0.3)] ring-1.5 ring-white/30 pl-3 pr-1"
+                  : isScrolled
+                    ? "bg-white/[0.07] border-white/12 text-white hover:bg-white/[0.11] hover:border-white/25 pl-2.5 pr-2"
+                    : "bg-white/[0.08] border-white/15 text-white hover:bg-white/[0.12] hover:border-white/30 px-3.5"
               }`}
-              placeholder={isSearchOpen ? "Search product, brand, and more..." : "Search..."}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setIsSearchOpen(true)}
-            />
+            >
+              {!isSearchOpen && (
+                <Search size={isScrolled ? 13 : 16} className={`${isScrolled ? "mr-1.5" : "mr-2"} shrink-0 text-white/45 transition-colors`} />
+              )}
 
-            {/* Active State: Orange Pill Search Action Button on the RIGHT */}
-            {isSearchOpen && (
-              <button 
-                type="submit"
-                className="shrink-0 h-7 px-3.5 rounded-full bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition-all duration-150 cursor-pointer animate-in fade-in zoom-in-90 duration-150"
-                aria-label="Search"
-                title="Search"
-              >
-                <Search size={14} className="text-white" strokeWidth={2.5} />
-              </button>
-            )}
-          </form>
+              <input
+                type="text"
+                className={`bg-transparent border-none outline-none w-full focus:ring-0 transition-colors ${
+                  isScrolled ? "text-xs placeholder:text-white/40" : "text-[0.8125rem] placeholder:text-white/50"
+                } ${
+                  isSearchOpen
+                    ? "text-slate-900 placeholder:text-slate-400 font-medium pr-1"
+                    : "text-white"
+                }`}
+                placeholder={isSearchOpen ? "Search apparel, brand..." : "Search products..."}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchOpen(true)}
+              />
+
+              {isSearchOpen && (
+                <button
+                  type="submit"
+                  className={`shrink-0 rounded-full bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold flex items-center justify-center shadow-sm transition-all duration-150 cursor-pointer animate-in fade-in zoom-in-90 ${
+                    isScrolled ? "h-6 px-2.5 text-[0.6875rem] gap-0.5" : "h-7 px-3 text-xs gap-1"
+                  }`}
+                  aria-label="Search"
+                  title="Search"
+                >
+                  <Search size={isScrolled ? 11 : 13} className="text-white" strokeWidth={2.5} />
+                </button>
+              )}
+            </form>
+          </div>
         </div>
 
       </header>
@@ -318,9 +474,8 @@ function HeaderContent() {
         }`}
       >
         <div className="flex items-center justify-between p-4 border-b border-white/10">
-          <Link href="/" className="flex items-center" onClick={() => setIsMobileMenuOpen(false)}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Ayaan Logo" className="h-8 w-auto brightness-0 invert" />
+          <Link href="/" className="flex items-center" onClick={(e) => { setIsMobileMenuOpen(false); handleLogoClick(e); }} aria-label="Ayaan Clothing Home">
+            <BrandName className="font-bold text-xl tracking-widest text-white" />
           </Link>
           <button 
             type="button"
@@ -334,53 +489,100 @@ function HeaderContent() {
             </div>
           </button>
         </div>
-        <nav className="flex flex-col p-4 overflow-y-auto max-h-[calc(100vh-64px)]">
-          {/* Main Nav Links */}
-          <div className="flex flex-col">
-            {NAV_LINKS.map((link) => (
-              <a 
-                key={link.label} 
-                href={link.href}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`py-4 text-base font-bold uppercase tracking-widest border-b border-white/10 ${
-                  link.special === "hot" ? "text-red-400" : "text-white"
+        <nav className="flex flex-col p-4 overflow-y-auto max-h-[calc(100vh-64px)] divide-y divide-white/10 text-white">
+          
+          {/* Section 1: AUDIENCE / DEPARTMENT */}
+          <div className="py-3">
+            <button
+              type="button"
+              onClick={() => setIsAudienceOpen(!isAudienceOpen)}
+              className="w-full flex items-center justify-between py-2 text-xs font-display font-extrabold uppercase tracking-widest text-white/70 hover:text-white transition-colors cursor-pointer group"
+            >
+              <span>AUDIENCE</span>
+              <ChevronDown
+                size={16}
+                className={`transition-transform duration-200 text-white/50 group-hover:text-white ${
+                  isAudienceOpen ? "rotate-0" : "-rotate-90"
                 }`}
-              >
-                {link.label}
-              </a>
-            ))}
+              />
+            </button>
+
+            {isAudienceOpen && (
+              <div className="flex flex-col pl-3 pt-1 space-y-0.5 animate-in fade-in duration-200">
+                {AUDIENCE_MENU_ITEMS.map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="py-2.5 text-sm font-display font-bold uppercase tracking-wider text-white hover:text-amber-400 transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Section 2: PRODUCT CATEGORY */}
+          <div className="py-3">
+            <button
+              type="button"
+              onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+              className="w-full flex items-center justify-between py-2 text-xs font-display font-extrabold uppercase tracking-widest text-white/70 hover:text-white transition-colors cursor-pointer group"
+            >
+              <span>PRODUCT CATEGORY</span>
+              <ChevronDown
+                size={16}
+                className={`transition-transform duration-200 text-white/50 group-hover:text-white ${
+                  isCategoryOpen ? "rotate-0" : "-rotate-90"
+                }`}
+              />
+            </button>
+
+            {isCategoryOpen && (
+              <div className="flex flex-col pl-3 pt-1 space-y-0.5 max-h-[280px] overflow-y-auto animate-in fade-in duration-200 no-scrollbar">
+                {PRODUCT_CATEGORY_MENU_ITEMS.map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="py-2 text-xs font-display font-semibold uppercase tracking-wider text-white/90 hover:text-amber-400 transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Section 3: Highlights / Specials */}
+          <div className="py-3 flex flex-col">
+            <Link
+              href="/#hot-sales"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="py-2.5 text-sm font-display font-bold uppercase tracking-wider text-red-400 hover:text-red-300 transition-colors"
+            >
+              HOT SALES
+            </Link>
+            <Link
+              href="/?tab=new-arrivals#featured"
+              onClick={(e) => {
+                setIsMobileMenuOpen(false);
+                if (pathname === "/") {
+                  e.preventDefault();
+                  window.dispatchEvent(new CustomEvent("activate-new-arrivals"));
+                  const featEl = document.getElementById("featured");
+                  if (featEl) featEl.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+              }}
+              className="py-2.5 text-sm font-display font-bold uppercase tracking-wider text-amber-400 hover:text-amber-300 transition-colors"
+            >
+              NEW ARRIVALS
+            </Link>
           </div>
 
           {/* Mobile Utilities */}
           <div className="mt-8 flex flex-col gap-5 pt-4">
-            <Link
-              href="/admin/products"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30"
-            >
-              <div className="flex items-center gap-3">
-                <span className="font-bold text-sm">B2B Admin Dashboard</span>
-              </div>
-              <span className="text-[10px] uppercase font-bold tracking-wider bg-amber-500 text-slate-950 px-2 py-0.5 rounded">Admin</span>
-            </Link>
-
-            <Link
-              href="/rfq"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center justify-between py-2 text-white/90 hover:text-white"
-            >
-              <span className="font-semibold text-sm">Request Wholesale Quote (RFQ)</span>
-              <span className="text-xs text-white/50 uppercase font-bold tracking-wider">New</span>
-            </Link>
-
-            <Link
-              href="/dashboard/quotes"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center justify-between py-2 text-white/90 hover:text-white"
-            >
-              <span className="font-semibold text-sm">My Quote Requests</span>
-              <span className="text-xs text-white/50 uppercase font-bold tracking-wider">Track</span>
-            </Link>
 
             <button 
               type="button"
@@ -407,25 +609,79 @@ function HeaderContent() {
             >
               <div className="flex items-center gap-3">
                 <Globe size={18} strokeWidth={1.5} />
-                <span className="font-semibold text-sm">Currency: {preferences.currency} ({preferences.currencySymbol})</span>
+                <span className="font-semibold text-sm">Language: {preferences.language}</span>
               </div>
+
               <span className="text-xs text-white/50 uppercase font-bold tracking-wider">Change</span>
             </button>
 
-            <button 
-              type="button"
-              className="flex items-center justify-between py-2 text-white/90"
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                openSignIn();
-              }}
+            {user ? (
+              <>
+                <Link 
+                  href="/profile"
+                  className="flex items-center justify-between py-2 text-amber-400"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <div className="flex items-center gap-3">
+                    <User size={18} strokeWidth={1.5} />
+                    <span className="font-semibold text-sm">My Profile ({user.name || user.email})</span>
+                  </div>
+                  <span className="text-xs uppercase font-bold tracking-wider">View</span>
+                </Link>
+                <Link 
+                  href="/profile/orders"
+                  className="flex items-center justify-between py-2 text-white/90"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <div className="flex items-center gap-3">
+                    <Package size={18} strokeWidth={1.5} />
+                    <span className="font-semibold text-sm">My Orders & Tracking</span>
+                  </div>
+                  <span className="text-xs text-white/50 uppercase font-bold tracking-wider">Orders</span>
+                </Link>
+                <button 
+                  type="button"
+                  className="flex items-center justify-between py-2 text-red-400"
+                  onClick={async () => {
+                    setIsMobileMenuOpen(false);
+                    await signOut();
+                    router.push("/");
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <LogOut size={18} strokeWidth={1.5} />
+                    <span className="font-semibold text-sm">Sign Out</span>
+                  </div>
+                </button>
+              </>
+            ) : (
+              <Link 
+                href="/login"
+                className="flex items-center justify-between py-2 text-white/90"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <div className="flex items-center gap-3">
+                  <User size={18} strokeWidth={1.5} />
+                  <span className="font-semibold text-sm">Sign In / Register</span>
+                </div>
+                <span className="text-xs text-white/50 uppercase font-bold tracking-wider">Account</span>
+              </Link>
+            )}
+
+            {/* Official WhatsApp Help Contact */}
+            <a 
+              href={getWhatsAppUrl(`Hi ${BUSINESS_PROFILE.name}, I need assistance with customer support.`)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between py-2 text-[#25D366]"
+              onClick={() => setIsMobileMenuOpen(false)}
             >
               <div className="flex items-center gap-3">
-                <User size={18} strokeWidth={1.5} />
-                <span className="font-semibold text-sm">Sign In / Register</span>
+                <MessageCircle size={18} strokeWidth={1.5} />
+                <span className="font-semibold text-sm">WhatsApp Help</span>
               </div>
-              <span className="text-xs text-white/50 uppercase font-bold tracking-wider">Account</span>
-            </button>
+              <span className="text-xs text-[#25D366]/70 uppercase font-bold tracking-wider">Chat Now</span>
+            </a>
           </div>
         </nav>
       </div>

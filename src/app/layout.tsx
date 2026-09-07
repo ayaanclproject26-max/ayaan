@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { Manrope, Inter } from "next/font/google";
+import { AuthProvider } from "@/lib/AuthContext";
 import { CartProvider } from "@/lib/CartContext";
+import { WishlistProvider } from "@/lib/WishlistContext";
 import { RfqProvider } from "@/lib/RfqContext";
 import { ProductModalProvider } from "@/lib/ProductModalContext";
 import { PreferencesProvider } from "@/lib/PreferencesContext";
@@ -7,11 +10,89 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import MiniCart from "@/components/cart/MiniCart";
 import ProductQuickAddModal from "@/components/product/ProductQuickAddModal";
+import DevToolbar from "@/components/common/DevToolbar";
 import "./globals.css";
 
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ayaan-clothing.vercel.app";
+
 export const metadata: Metadata = {
-  title: "Ayaan Clothing",
-  description: "Modern, premium, mobile-first fashion eCommerce",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "AYAAN CLOTHING | Ready-made Garments Manufacturer & Exporter",
+    template: "%s | AYAAN CLOTHING",
+  },
+  description:
+    "AYAAN CLOTHING is a Ready-made Garments Manufacturer & Exporter based in Uttara, Dhaka, Bangladesh (Est. 2010). Offering direct wholesale export sourcing and custom apparel manufacturing.",
+  keywords: [
+    "AYAAN CLOTHING",
+    "Ready-made Garments Manufacturer",
+    "Garments Exporter",
+    "wholesale apparel",
+    "clothing manufacturer",
+    "bulk fashion",
+    "RMG Bangladesh",
+    "B2B fashion sourcing",
+    "custom apparel OEM",
+    "Uttara Dhaka",
+  ],
+  authors: [{ name: "AYAAN CLOTHING" }],
+  creator: "AYAAN CLOTHING",
+  publisher: "AYAAN CLOTHING",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  alternates: {
+    canonical: "./",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteUrl,
+    siteName: "AYAAN CLOTHING",
+    title: "AYAAN CLOTHING | Ready-made Garments Manufacturer & Exporter",
+    description:
+      "Ready-made Garments Manufacturer & Exporter based in Uttara, Dhaka, Bangladesh. Established 2010.",
+    images: [
+      {
+        url: "/all_brand.jpeg",
+        width: 1200,
+        height: 630,
+        alt: "AYAAN CLOTHING Ready-made Garments Manufacturer & Exporter",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AYAAN CLOTHING | Ready-made Garments Manufacturer & Exporter",
+    description:
+      "Ready-made Garments Manufacturer & Exporter based in Uttara, Dhaka, Bangladesh. Established 2010.",
+    images: ["/all_brand.jpeg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({
@@ -19,32 +100,71 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLdOrg = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "AYAAN CLOTHING",
+    alternateName: "AYC",
+    url: siteUrl,
+    logo: `${siteUrl}/logo.png`,
+    description: "Ready-made Garments Manufacturer & Exporter",
+    foundingDate: "2010",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "House #33 (2nd floor), Road #12, Sector #11",
+      addressLocality: "Uttara, Dhaka",
+      postalCode: "1230",
+      addressCountry: "BD",
+    },
+  };
+
+  const jsonLdWebSite = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "AYAAN CLOTHING",
+    url: siteUrl,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${siteUrl}/search?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <html lang="en">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap"
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdOrg) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebSite) }}
         />
       </head>
-      <body className="bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground">
-        <PreferencesProvider>
-          <CartProvider>
-            <RfqProvider>
-              <ProductModalProvider>
-                <Header />
-                <MiniCart />
-                <ProductQuickAddModal />
-                <main className="min-h-screen pb-safe">{children}</main>
-                <Footer />
-              </ProductModalProvider>
-            </RfqProvider>
-          </CartProvider>
-        </PreferencesProvider>
+      <body className={`${inter.variable} ${manrope.variable} font-sans bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground`}>
+        <AuthProvider>
+          <PreferencesProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <RfqProvider>
+                  <ProductModalProvider>
+                    <Header />
+                    <MiniCart />
+                    <ProductQuickAddModal />
+                    <main className="min-h-screen pb-safe">{children}</main>
+                    <Footer />
+                    <DevToolbar />
+                  </ProductModalProvider>
+                </RfqProvider>
+              </WishlistProvider>
+            </CartProvider>
+          </PreferencesProvider>
+        </AuthProvider>
       </body>
     </html>
   );
 }
-

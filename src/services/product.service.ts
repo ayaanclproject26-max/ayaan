@@ -1,0 +1,639 @@
+import { apiClient } from "./api-client";
+import { Product } from "@/types";
+import { B2BProductInput } from "@/types/b2b";
+import { isFrontendOnly } from "@/lib/frontend-mode";
+import { mockStore } from "@/lib/mock-data/mock-store";
+import { findMatchingShippingProfile, calculateTotalCbm } from "@/lib/services/shipping-package";
+
+export interface ProductQueryParams {
+  page?: number;
+  per_page?: number;
+  search?: string;
+  q?: string;
+  category?: string;
+  brand?: string;
+  audience?: string;
+  price_min?: number;
+  price_max?: number;
+  color?: string;
+  size?: string;
+  status?: string;
+  is_featured?: boolean;
+  is_hot?: boolean;
+  is_new?: boolean;
+  is_best_deal?: boolean;
+  is_limited_deal?: boolean;
+  in_stock?: boolean;
+  sort?: string;
+  sort_by?: "price_asc" | "price_desc" | "newest" | "popular" | "hot" | "featured" | "name_asc" | "name_desc";
+  isAdmin?: boolean;
+}
+
+/** Shape returned by the paginated endpoint */
+export interface PaginatedProductsResult {
+  data: B2BProductInput[];
+  meta: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+  };
+}
+
+export interface SearchSuggestionsResult {
+  products: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    sku: string;
+    brand: string;
+    price: number;
+    image: string;
+  }>;
+  categories: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    image_url?: string;
+  }>;
+  brands: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    logo_url?: string;
+  }>;
+}
+
+/**
+ * Normalizes raw product object into B2BProductInput
+ */
+export function normalizeToB2BProduct(p: any): B2BProductInput {
+  const images = Array.isArray(p.images) && p.images.length > 0 
+    ? p.images 
+    : [p.image_url || p.image || "/placeholder.jpg"];
+
+  let audienceVal: "MEN" | "WOMEN" | "BOYS" | "GIRLS" | "UNISEX" = "UNISEX";
+  const catId = (p.categoryId || p.category_id || (p.category?.name) || "").toLowerCase();
+  if (catId.includes("men") && !catId.includes("women")) audienceVal = "MEN";
+  else if (catId.includes("women")) audienceVal = "WOMEN";
+  else if (catId.includes("boys")) audienceVal = "BOYS";
+  else if (catId.includes("girls")) audienceVal = "GIRLS";
+  else if (p.audience) audienceVal = p.audience;
+
+  const wholesalePrice = p.wholesalePrice !== undefined
+    ? Number(p.wholesalePrice)
+    : p.wholesale_price !== undefined
+    ? Number(p.wholesale_price)
+    : p.price_cents !== undefined
+    ? p.price_cents / 100
+    : Number(p.price) || 15;
+
+  const msrpPrice = p.msrpPrice !== undefined && p.msrpPrice !== null
+    ? Number(p.msrpPrice)
+    : p.msrp_price !== undefined && p.msrp_price !== null
+    ? Number(p.msrp_price)
+    : p.compare_at_price_cents !== undefined && p.compare_at_price_cents !== null
+    ? p.compare_at_price_cents / 100
+    : p.oldPrice !== undefined && p.oldPrice !== null
+    ? Number(p.oldPrice)
+    : Math.round(wholesalePrice * 1.6 * 100) / 100;
+
+  const stock = p.stock !== undefined
+    ? Number(p.stock)
+    : p.inventory_count !== undefined
+    ? Number(p.inventory_count)
+    : p.availableStock !== undefined
+    ? Number(p.availableStock)
+    : 500;
+
+  const isHot = Boolean(p.isHot || p.is_hot || p.badge === "Hot");
+  const isNew = Boolean(p.isNew || p.is_new || p.badge === "New");
+  const isFeatured = Boolean(p.isFeatured || p.is_featured || p.featured);
+  const isLimitedDeal = Boolean(p.isLimitedDeal || p.is_limited_deal || p.isLimitedTimeOffer);
+  const isBestDeal = Boolean(p.isBestDeal || p.is_best_deal);
+
+  let status: "published" | "draft" | "unpublished" = "published";
+  if (p.status === "draft") status = "draft";
+  else if (p.status === "archived" || p.status === "unpublished") status = "unpublished";
+
+  const pricingTiers = p.pricingTiers || p.pricing_tiers || [];
+  const packageAllocations = p.packageAllocations || p.package_allocations || [];
+  const isPackageAssortment = p.isPackageAssortment ?? p.is_package_assortment ?? true;
+  const variants = p.variants || [];
+  const fullStockQuantity = p.fullStockQuantity ?? p.full_stock_quantity ?? (variants.length > 0 ? variants.reduce((acc: number, v: any) => acc + Number(v.stock || 0), 0) : stock);
+
+  const bulkThreshold = p.bulkThreshold !== undefined && p.bulkThreshold !== null
+    ? Number(p.bulkThreshold)
+    : p.bulk_threshold !== undefined && p.bulk_threshold !== null
+    ? Number(p.bulk_threshold)
+    : 200;
+
+  const bulkPrice = p.bulkPrice !== undefined && p.bulkPrice !== null
+    ? Number(p.bulkPrice)
+    : p.bulk_price !== undefined && p.bulk_price !== null
+    ? Number(p.bulk_price)
+    : Math.round(wholesalePrice * 0.8 * 100) / 100;
+
+  const fullStockPrice = p.fullStockPrice !== undefined && p.fullStockPrice !== null
+    ? Number(p.fullStockPrice)
+    : p.full_stock_price !== undefined && p.full_stock_price !== null
+    ? Number(p.full_stock_price)
+    : Math.round(wholesalePrice * 0.7 * 100) / 100;
+
+  const brandName = typeof p.brand === "string" ? p.brand : p.brand?.name || "Ayaan";
+  const brandLogo = p.brandLogo || p.brand_logo || p.brand_data?.logo_url || p.brand?.logo_url || (brandName.toLowerCase().includes("nike")
+    ? "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=200"
+    : brandName.toLowerCase().includes("adidas")
+    ? "https://images.unsplash.com/photo-1518002171953-a080ee817e1f?auto=format&fit=crop&q=80&w=200"
+    : brandName.toLowerCase().includes("levi")
+    ? "https://images.unsplash.com/photo-1582552938357-32b906df40cb?auto=format&fit=crop&q=80&w=200"
+    : "/brands/ayaan.png");
+
+  const youtubeVideoId = p.youtubeVideoId || p.youtube_video_id || "dQw4w9WgXcQ";
+  const youtubeEmbedUrl = p.youtubeEmbedUrl || p.youtube_embed_url || "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ";
+  const rawShippingProfiles = p.shipping_package_profiles || p.shippingPackageProfiles;
+  const shippingPackageProfiles = Array.isArray(rawShippingProfiles) && rawShippingProfiles.length > 0
+    ? rawShippingProfiles.map((sp: any) => ({
+        id: sp.id ? String(sp.id) : undefined,
+        product_id: sp.product_id ? String(sp.product_id) : undefined,
+        package_quantity: Number(sp.package_quantity || sp.min_quantity || 0),
+        quantity_max: sp.quantity_max !== undefined && sp.quantity_max !== null ? Number(sp.quantity_max) : null,
+        carton_count: Number(sp.carton_count || 1),
+        carton_length: Number(sp.carton_length || 60),
+        carton_width: Number(sp.carton_width || 40),
+        carton_height: Number(sp.carton_height || 35),
+        dimension_unit: (sp.dimension_unit || "cm") as "cm" | "in" | "m",
+        gross_weight: Number(sp.gross_weight || 15),
+        net_weight: sp.net_weight !== undefined && sp.net_weight !== null ? Number(sp.net_weight) : 13.5,
+        weight_unit: (sp.weight_unit || "kg") as "kg" | "lbs" | "g",
+        notes: sp.notes || null,
+        is_active: sp.is_active !== undefined ? Boolean(sp.is_active) : true,
+        total_cbm: sp.total_cbm !== undefined ? Number(sp.total_cbm) : 0.084,
+      }))
+    : undefined;
+
+  return {
+    id: String(p.id || `prod_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`),
+    name: p.name || "Untitled Product",
+    slug: p.slug || (p.name || "prod").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+    sku: p.sku || `AYN-${Date.now().toString(36).toUpperCase()}`,
+    brand: brandName,
+    brandLogo: brandLogo,
+    brand_id: p.brand_id ? String(p.brand_id) : undefined,
+    categoryId: p.categoryId || p.category_id || p.category?.id || "c_sweaters",
+    categoryName: p.categoryName || p.category_name || p.category?.name || p.category || "Apparel",
+    audience: audienceVal,
+    productType: p.productType || p.product_type || "Ready-Made Garments",
+    collectionSeason: p.collectionSeason || p.collection_season || "2026 Core Collection",
+    shortDescription: p.shortDescription || p.short_description || `Premium quality ${p.name} direct from Dhaka export facilities.`,
+    description: p.description || `Premium apparel manufactured with high-tensile combed yarn and reactive dye technology. Compliant with international export standards (AQL 2.5).`,
+    material: p.material || "100% Cotton",
+    colorName: p.colorName || p.color_name || p.color || "Black",
+    colorHex: p.colorHex || p.color_hex || "#111827",
+    weightGrams: p.weightGrams || p.weight_grams || 250,
+    videoUrl: p.videoUrl || p.video_url || "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    youtubeVideoId: youtubeVideoId,
+    youtubeEmbedUrl: youtubeEmbedUrl,
+    images: images,
+    costPrice: p.costPrice !== undefined ? Number(p.costPrice) : p.cost_price !== undefined ? Number(p.cost_price) : Math.round(wholesalePrice * 0.55 * 100) / 100,
+    wholesalePrice: wholesalePrice,
+    standardPrice: wholesalePrice,
+    bulkThreshold: bulkThreshold,
+    bulkPrice: bulkPrice,
+    fullStockPrice: fullStockPrice,
+    msrpPrice: msrpPrice,
+    moq: p.moq ? Number(p.moq) : 10,
+    stock: stock,
+    status: status,
+    isFeatured: isFeatured,
+    isNew: isNew,
+    isHot: isHot,
+    isLimitedDeal: isLimitedDeal,
+    isBestDeal: isBestDeal,
+    sizes: p.sizes || ["S", "M", "L", "XL", "2XL"],
+    colors: p.colors || [p.color_name || p.color || "Black"],
+    variants: variants,
+    pricingTiers: pricingTiers.length > 0 ? pricingTiers : [
+      { min_quantity: p.moq ? Number(p.moq) : 10, max_quantity: bulkThreshold - 1, unit_price: wholesalePrice },
+      { min_quantity: bulkThreshold, max_quantity: stock - 1, unit_price: bulkPrice },
+      { min_quantity: stock, max_quantity: null, unit_price: fullStockPrice },
+    ],
+    packageAllocations: packageAllocations,
+    shippingPackageProfiles: shippingPackageProfiles,
+    shipping_package_profiles: shippingPackageProfiles,
+    isPackageAssortment: isPackageAssortment,
+    fullStockQuantity: fullStockQuantity,
+  };
+}
+
+/**
+ * Maps B2B product to standard Storefront Product interface
+ */
+export function toStorefrontProduct(p: B2BProductInput): Product {
+  return {
+    id: p.id,
+    name: p.name,
+    slug: p.slug,
+    price: p.wholesalePrice,
+    oldPrice: p.msrpPrice,
+    wholesalePrice: p.wholesalePrice,
+    standardPrice: p.standardPrice || p.wholesalePrice,
+    bulkThreshold: p.bulkThreshold,
+    bulkPrice: p.bulkPrice,
+    fullStockPrice: p.fullStockPrice,
+    categoryId: p.categoryId || "c_sweaters",
+    categoryName: p.categoryName,
+    images: p.images,
+    isNew: p.isNew,
+    isHot: p.isHot,
+    isLimitedTimeOffer: p.isLimitedDeal,
+    sizes: p.sizes || ["S", "M", "L", "XL", "2XL"],
+    sku: p.sku,
+    moq: p.moq,
+    availableStock: p.stock,
+    brand: p.brand,
+    brandLogo: p.brandLogo,
+    color: p.colorName,
+    description: p.description || p.shortDescription,
+    pricingTiers: p.pricingTiers,
+    packageAllocations: p.packageAllocations,
+    shippingPackageProfiles: p.shippingPackageProfiles,
+    shipping_package_profiles: p.shipping_package_profiles,
+    isPackageAssortment: p.isPackageAssortment,
+    fullStockQuantity: p.fullStockQuantity,
+    videoUrl: p.videoUrl,
+    youtubeVideoId: p.youtubeVideoId,
+    youtubeEmbedUrl: p.youtubeEmbedUrl,
+  };
+}
+
+/**
+ * Generate a clean standard B2B SKU
+ */
+export function generateProductSku(brand: string, category: string, name: string): string {
+  const b = (brand || "AYN").replace(/[^a-zA-Z0-9]/g, "").substring(0, 3).toUpperCase();
+  const c = (category || "GEN").replace(/[^a-zA-Z0-9]/g, "").substring(0, 3).toUpperCase();
+  const n = (name || "PRD").replace(/[^a-zA-Z0-9]/g, "").substring(0, 3).toUpperCase();
+  const rand = Math.floor(1000 + Math.random() * 9000);
+  return `${b}-${c}-${n}-${rand}`;
+}
+
+export class ProductService {
+  /**
+   * Fetch products with query parameters
+   */
+  async getProducts(params?: ProductQueryParams): Promise<B2BProductInput[]> {
+    if (!isFrontendOnly()) {
+      try {
+        const res = await apiClient.get<any>("/products", {
+          params: params as Record<string, string | number | boolean | undefined>,
+        });
+        const items = Array.isArray(res) ? res : res?.data;
+        if (Array.isArray(items) && items.length > 0) {
+          return items.map(normalizeToB2BProduct);
+        }
+      } catch {
+        // Fallback to local store
+      }
+    }
+
+    const all = mockStore.getProducts();
+    return this.filterLocalProducts(all, params);
+  }
+
+  /**
+   * Fetch a single server-paginated page of products
+   */
+  async getProductsPaginated(
+    params: ProductQueryParams,
+    signal?: AbortSignal
+  ): Promise<PaginatedProductsResult> {
+    const defaultMeta = {
+      current_page: params.page ?? 1,
+      last_page: 1,
+      per_page: params.per_page ?? 24,
+      total: 0,
+      from: null,
+      to: null,
+    };
+
+    if (!isFrontendOnly()) {
+      try {
+        const res = await apiClient.get<any>("/products", {
+          params: params as Record<string, string | number | boolean | undefined>,
+          signal,
+        } as any);
+
+        const rawData = res?.data;
+        const rawMeta = res?.meta;
+
+        if (Array.isArray(rawData)) {
+          return {
+            data: rawData.map(normalizeToB2BProduct),
+            meta: rawMeta
+              ? {
+                  current_page: Number(rawMeta.current_page ?? defaultMeta.current_page),
+                  last_page: Number(rawMeta.last_page ?? 1),
+                  per_page: Number(rawMeta.per_page ?? defaultMeta.per_page),
+                  total: Number(rawMeta.total ?? 0),
+                  from: rawMeta.from != null ? Number(rawMeta.from) : null,
+                  to: rawMeta.to != null ? Number(rawMeta.to) : null,
+                }
+              : defaultMeta,
+          };
+        }
+      } catch (err: any) {
+        if (err?.name === "AbortError" || err?.message === "AbortError") {
+          throw err;
+        }
+      }
+    }
+
+    // Frontend-only pagination & filtering from mockStore
+    const all = mockStore.getProducts();
+    const filtered = this.filterLocalProducts(all, params);
+    const page = params.page ?? 1;
+    const perPage = params.per_page ?? 24;
+    const start = (page - 1) * perPage;
+    const sliced = filtered.slice(start, start + perPage);
+
+    return {
+      data: sliced,
+      meta: {
+        current_page: page,
+        last_page: Math.max(1, Math.ceil(filtered.length / perPage)),
+        per_page: perPage,
+        total: filtered.length,
+        from: filtered.length > 0 ? start + 1 : null,
+        to: filtered.length > 0 ? Math.min(start + perPage, filtered.length) : null,
+      },
+    };
+  }
+
+  /**
+   * Fetch single product by Slug or ID
+   */
+  async getProductBySlugOrId(slugOrId: string): Promise<B2BProductInput | null> {
+    if (!isFrontendOnly()) {
+      try {
+        const res = await apiClient.get<any>(`/products/${slugOrId}`);
+        const item = res?.data || res;
+        if (item && item.id) {
+          return normalizeToB2BProduct(item);
+        }
+      } catch {
+        // Fallback to local store
+      }
+    }
+
+    return mockStore.getProductByIdOrSlug(slugOrId);
+  }
+
+  /**
+   * Fetch search suggestions (quick autocomplete)
+   */
+  async getSearchSuggestions(query: string): Promise<SearchSuggestionsResult> {
+    if (!isFrontendOnly()) {
+      try {
+        const res = await apiClient.get<any>("/search/suggestions", {
+          params: { q: query },
+        });
+        const data = res?.data || res;
+        if (data && (data.products || data.categories || data.brands)) {
+          return {
+            products: data.products || [],
+            categories: data.categories || [],
+            brands: data.brands || [],
+          };
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    const q = query.toLowerCase().trim();
+    if (!q) {
+      return { products: [], categories: [], brands: [] };
+    }
+
+    const allProducts = mockStore.getProducts();
+    const allCategories = mockStore.getCategories();
+    const allBrands = mockStore.getBrands();
+
+    const matchedProducts = allProducts
+      .filter((p) => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q))
+      .slice(0, 5)
+      .map((p) => ({
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        sku: p.sku,
+        brand: p.brand,
+        price: p.wholesalePrice,
+        image: p.images[0] || "/placeholder.jpg",
+      }));
+
+    const matchedCategories = allCategories
+      .filter((c) => c.name.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q))
+      .slice(0, 4)
+      .map((c) => ({
+        id: String(c.id),
+        name: c.name,
+        slug: c.slug,
+        image_url: c.image_url || c.image,
+      }));
+
+    const matchedBrands = allBrands
+      .filter((b) => b.name.toLowerCase().includes(q) || b.slug.toLowerCase().includes(q))
+      .slice(0, 4)
+      .map((b) => ({
+        id: String(b.id),
+        name: b.name,
+        slug: b.slug,
+        logo_url: b.logo_url || b.logo,
+      }));
+
+    return {
+      products: matchedProducts,
+      categories: matchedCategories,
+      brands: matchedBrands,
+    };
+  }
+
+  /**
+   * Create a product
+   */
+  async createProduct(input: Partial<B2BProductInput>): Promise<B2BProductInput> {
+    const slug = input.slug || (input.name || "apparel").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const sku = input.sku || generateProductSku(input.brand || "AYN", input.categoryName || "APP", input.name || "PRD");
+
+    if (!isFrontendOnly()) {
+      try {
+        const res = await apiClient.post<any>("/products", { ...input, slug, sku });
+        const item = res?.data || res;
+        if (item) return normalizeToB2BProduct(item);
+      } catch {
+        // Fallback to local store
+      }
+    }
+
+    return mockStore.saveProduct({ ...input, slug, sku });
+  }
+
+  /**
+   * Update product
+   */
+  async updateProduct(id: string, updates: Partial<B2BProductInput>): Promise<B2BProductInput | null> {
+    if (!isFrontendOnly()) {
+      try {
+        const res = await apiClient.put<any>(`/products/${id}`, updates);
+        const item = res?.data || res;
+        if (item) return normalizeToB2BProduct(item);
+      } catch {
+        // Fallback to local store
+      }
+    }
+
+    return mockStore.saveProduct({ ...updates, id });
+  }
+
+  /**
+   * Delete product
+   */
+  async deleteProduct(id: string): Promise<boolean> {
+    if (!isFrontendOnly()) {
+      try {
+        await apiClient.delete(`/products/${id}`);
+      } catch {
+        // Fallback
+      }
+    }
+
+    return mockStore.deleteProduct(id);
+  }
+
+  /**
+   * Duplicate product
+   */
+  async duplicateProduct(id: string): Promise<B2BProductInput | null> {
+    return mockStore.duplicateProduct(id);
+  }
+
+  /**
+   * Fetch calculated shipping physical package specs for a product quantity
+   */
+  async getProductShippingSpecs(slugOrId: string, quantity: number, isFullStock: boolean = false): Promise<any> {
+    if (!isFrontendOnly()) {
+      try {
+        const res = await apiClient.get<any>(`/products/${slugOrId}/shipping-specs`, {
+          params: { quantity, full_stock: isFullStock ? 1 : 0 },
+        });
+        return res?.data || res;
+      } catch {
+        // Local calculation fallback
+      }
+    }
+
+    const prod = mockStore.getProductByIdOrSlug(slugOrId);
+    if (!prod) {
+      return { status: "unavailable", message: "Product not found" };
+    }
+
+    const profiles = prod.shippingPackageProfiles || [];
+    const matchedProfile = findMatchingShippingProfile(profiles, quantity);
+
+    const cartonCount = matchedProfile?.carton_count || Math.max(1, Math.ceil(quantity / 50));
+    const grossWeight = matchedProfile?.gross_weight || Math.round((quantity * 0.35 + cartonCount * 1.2) * 10) / 10;
+    const netWeight = matchedProfile?.net_weight || Math.round((quantity * 0.32) * 10) / 10;
+    const cartonLength = matchedProfile?.carton_length || 60;
+    const cartonWidth = matchedProfile?.carton_width || 40;
+    const cartonHeight = matchedProfile?.carton_height || 35;
+    const totalCbm = calculateTotalCbm(cartonLength, cartonWidth, cartonHeight, cartonCount, "cm");
+
+    return {
+      status: "available",
+      package_quantity: quantity,
+      carton_count: cartonCount,
+      carton_dimensions: { length: cartonLength, width: cartonWidth, height: cartonHeight, unit: "cm" },
+      gross_weight: grossWeight,
+      net_weight: netWeight,
+      weight_unit: "kg",
+      total_cbm: totalCbm,
+      profile_matched: Boolean(matchedProfile),
+    };
+  }
+
+  private filterLocalProducts(list: B2BProductInput[], options?: ProductQueryParams): B2BProductInput[] {
+    const result = list.filter((p) => {
+      if (!options?.isAdmin && p.status !== "published") {
+        return false;
+      }
+      if (options?.status && options.status !== "all" && p.status !== options.status) {
+        return false;
+      }
+      if (options?.brand && options.brand !== "all") {
+        if (p.brand.toLowerCase() !== options.brand.toLowerCase()) return false;
+      }
+      if (options?.audience && options.audience !== "all") {
+        if (p.audience.toUpperCase() !== options.audience.toUpperCase()) return false;
+      }
+      if (options?.category && options.category !== "all") {
+        const pCat = (p.categoryName || p.categoryId || "").toLowerCase();
+        if (!pCat.includes(options.category.toLowerCase())) return false;
+      }
+      if (options?.search || options?.q) {
+        const q = (options.search || options.q || "").toLowerCase().trim();
+        const match =
+          p.name.toLowerCase().includes(q) ||
+          p.brand.toLowerCase().includes(q) ||
+          p.sku.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q);
+        if (!match) return false;
+      }
+      if (options?.price_min !== undefined && p.wholesalePrice < options.price_min) {
+        return false;
+      }
+      if (options?.price_max !== undefined && p.wholesalePrice > options.price_max) {
+        return false;
+      }
+      if (options?.color && options.color !== "all") {
+        const hasColor = p.colors?.some((c) => c.toLowerCase() === options.color!.toLowerCase()) || p.colorName?.toLowerCase() === options.color.toLowerCase();
+        if (!hasColor) return false;
+      }
+      if (options?.size && options.size !== "all") {
+        if (!p.sizes?.includes(options.size)) return false;
+      }
+      if (options?.in_stock && p.stock <= 0) return false;
+      if (options?.is_featured && !p.isFeatured) return false;
+      if (options?.is_hot && !p.isHot) return false;
+      if (options?.is_new && !p.isNew) return false;
+      if (options?.is_best_deal && !p.isBestDeal) return false;
+      if (options?.is_limited_deal && !p.isLimitedDeal) return false;
+      return true;
+    });
+
+    // Sorting
+    const sort = options?.sort_by || options?.sort;
+    if (sort) {
+      if (sort === "price_asc") {
+        result.sort((a, b) => a.wholesalePrice - b.wholesalePrice);
+      } else if (sort === "price_desc") {
+        result.sort((a, b) => b.wholesalePrice - a.wholesalePrice);
+      } else if (sort === "newest") {
+        result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+      } else if (sort === "popular" || sort === "hot") {
+        result.sort((a, b) => (b.isHot ? 1 : 0) - (a.isHot ? 1 : 0));
+      } else if (sort === "name_asc") {
+        result.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (sort === "name_desc") {
+        result.sort((a, b) => b.name.localeCompare(a.name));
+      }
+    }
+
+    return result;
+  }
+}
+
+export const productService = new ProductService();

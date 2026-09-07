@@ -1,94 +1,146 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { Product } from "@/types";
+import { cartService, CartItemData } from "@/services/cart.service";
+import { useAuth } from "./AuthContext";
 
-interface CartItem {
+export interface CartItem {
+  id?: string;
   product: Product;
   size: string;
+  color?: string;
   quantity: number;
+  unitPrice?: number;
+  lineTotal?: number;
+  packageBreakdown?: import("@/types").PackageBreakdown[];
 }
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (product: Product, size: string, quantity?: number) => void;
-  removeFromCart: (productId: string, size: string) => void;
-  updateQuantity: (productId: string, size: string, quantity: number) => void;
-  clearCart: () => void;
+  addToCart: (product: Product, size: string, quantity?: number, variantId?: string, packageBreakdown?: import("@/types").PackageBreakdown[]) => Promise<void>;
+  removeFromCart: (productId: string, size: string, itemId?: string) => Promise<void>;
+  updateQuantity: (productId: string, size: string, quantity: number, itemId?: string) => Promise<void>;
+  clearCart: () => Promise<void>;
   isCartOpen: boolean;
   setIsCartOpen: (isOpen: boolean) => void;
   totalItems: number;
   subtotal: number;
+  loading: boolean;
+  error: string | null;
+  refreshCart: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
+  const [subtotal, setSubtotal] = useState<number>(0);
+  const [totalItems, setTotalItems] = useState<number>(0);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load from local storage
-  useEffect(() => {
-    const saved = localStorage.getItem("ayaan_cart");
-    if (saved) {
-      try {
-        setItems(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse cart");
-      }
+  const applyCartData = (data: { items: CartItemData[]; total_items: number; subtotal: number }) => {
+    const formatted: CartItem[] = data.items.map((i) => ({
+      id: i.id,
+      product: i.product,
+      size: i.size,
+      color: i.color,
+      quantity: i.quantity,
+      unitPrice: i.unit_price,
+      lineTotal: i.line_total,
+      packageBreakdown: i.package_breakdown,
+    }));
+    setItems(formatted);
+    setTotalItems(data.total_items);
+    setSubtotal(data.subtotal);
+  };
+
+  const refreshCart = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await cartService.getCart();
+      applyCartData(data);
+    } catch (err: any) {
+      setError(err?.message || "Failed to load cart");
+    } finally {
+      setLoading(false);
     }
   }, []);
 
-  // Save to local storage
+  // Initial load
   useEffect(() => {
-    localStorage.setItem("ayaan_cart", JSON.stringify(items));
-  }, [items]);
+    refreshCart();
+  }, [refreshCart]);
 
-  const addToCart = (product: Product, size: string, quantity: number = 1) => {
-    setItems((prev) => {
-      const existing = prev.find(
-        (item) => item.product.id === product.id && item.size === size
-      );
-      if (existing) {
-        return prev.map((item) =>
-          item.product.id === product.id && item.size === size
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
-      }
-      return [...prev, { product, size, quantity }];
-    });
-  };
-
-  const removeFromCart = (productId: string, size: string) => {
-    setItems((prev) =>
-      prev.filter((item) => !(item.product.id === productId && item.size === size))
-    );
-  };
-
-  const updateQuantity = (productId: string, size: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(productId, size);
-      return;
+  // When user logs in, merge guest cart
+  useEffect(() => {
+    if (user) {
+      cartService.mergeGuestCart().then((merged) => {
+        if (merged) {
+          applyCartData(merged);
+        } else {
+          refreshCart();
+        }
+      });
     }
-    setItems((prev) =>
-      prev.map((item) =>
-        item.product.id === productId && item.size === size
-          ? { ...item, quantity }
-          : item
-      )
-    );
+  }, [user, refreshCart]);
+
+  const addToCart = async (
+    product: Product,
+    size: string,
+    quantity: number = 1,
+    variantId?: string,
+    packageBreakdown?: import("@/types").PackageBreakdown[]
+  ) => {
+    try {
+      setError(null);
+      const data = await cartService.addToCart(product, size, quantity, variantId, packageBreakdown);
+      applyCartData(data);
+    } catch (err: any) {
+      setError(err?.message || "Failed to add item to cart");
+    }
   };
 
-  const clearCart = () => {
-    setItems([]);
+  const removeFromCart = async (productId: string, size: string, itemId?: string) => {
+    try {
+      setError(null);
+      const data = await cartService.removeFromCart(productId, size, itemId);
+      applyCartData(data);
+    } catch (err: any) {
+      setError(err?.message || "Failed to remove item");
+    }
   };
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const subtotal = items.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0
-  );
+  const updateQuantity = async (
+    productId: string,
+    size: string,
+    quantity: number,
+    itemId?: string
+  ) => {
+    try {
+      setError(null);
+      const data = await cartService.updateQuantity(productId, size, quantity, itemId);
+      applyCartData(data);
+    } catch (err: any) {
+      setError(err?.message || "Failed to update quantity");
+    }
+  };
+
+  const clearCart = async () => {
+    try {
+      setError(null);
+      await cartService.clearCart();
+      setItems([]);
+      setTotalItems(0);
+      setSubtotal(0);
+    } catch (err: any) {
+      setError(err?.message || "Failed to clear cart");
+    }
+  };
 
   return (
     <CartContext.Provider
@@ -102,6 +154,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setIsCartOpen,
         totalItems,
         subtotal,
+        loading,
+        error,
+        refreshCart,
       }}
     >
       {children}

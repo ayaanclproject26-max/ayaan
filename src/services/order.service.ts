@@ -1,0 +1,477 @@
+import { apiClient } from "./api-client";
+import { isFrontendOnly } from "@/lib/frontend-mode";
+import { mockStore } from "@/lib/mock-data/mock-store";
+import { generateMockDocument } from "@/lib/mock-data/mock-documents";
+import { getWhatsAppUrl } from "@/config/business-profile";
+
+export interface OrderItemRecord {
+  id?: string;
+  order_id?: string;
+  user_id?: string | number;
+  product_id?: string;
+  product_variant_id?: string;
+  product_name: string;
+  product_slug?: string;
+  product_image_url?: string;
+  sku?: string;
+  variant_title?: string;
+  variant_summary?: string;
+  size?: string;
+  color?: string;
+  package_breakdown?: any;
+  unit_price: number;
+  unit_price_cents: number;
+  quantity: number;
+  line_total: number;
+  line_total_cents: number;
+}
+
+export interface OrderStatusEvent {
+  id: string;
+  order_id: string;
+  user_id?: string | number | null;
+  event_type: 
+    | "order_placed"
+    | "payment_succeeded"
+    | "payment_failed"
+    | "payment_proof_uploaded"
+    | "fulfillment_processing"
+    | "fulfillment_shipped"
+    | "fulfillment_delivered"
+    | "order_cancelled"
+    | "order_refunded"
+    | string;
+  message?: string;
+  created_at: string;
+}
+
+export interface OrderRecord {
+  id: string;
+  order_number: string;
+  user_id?: string | number | null;
+  status: "pending" | "processing" | "confirmed" | "fulfilled" | "cancelled" | "shipped" | "delivered" | string;
+  payment_status: "pending" | "paid" | "failed" | "refunded" | string;
+  fulfillment_status: "unfulfilled" | "processing" | "shipped" | "delivered" | "returned" | string;
+  currency: string;
+  email: string;
+  shipping_name: string;
+  shipping_phone?: string;
+  shipping_company?: string;
+  shipping_address1: string;
+  shipping_address2?: string;
+  shipping_city: string;
+  shipping_region?: string;
+  shipping_postal_code: string;
+  shipping_country_code: string;
+  shipping_method?: string;
+  carrier?: string;
+  tracking_number?: string;
+  shipment_id?: string;
+  shipment_reference?: string;
+  shipment_label_url?: string;
+  carrier_status?: string;
+  last_carrier_update?: string;
+  last_shipment_error?: string;
+  shipping_quote_id?: string;
+  shipping_snapshot?: import("@/types/b2b").OrderShippingSnapshot;
+  direct_tracking_url?: string;
+  can_create_aramex_shipment?: boolean;
+  payment_method: string;
+  notes?: string;
+  subtotal: number;
+  subtotal_cents: number;
+  shipping_cost: number;
+  shipping_cents: number;
+  tax_amount: number;
+  tax_cents: number;
+  other_charges?: number;
+  other_charges_cents?: number;
+  discount_amount: number;
+  discount_cents: number;
+  total_amount: number;
+  total_cents: number;
+  payment_proof_url?: string;
+  placed_at: string;
+  created_at: string;
+  updated_at: string;
+  items?: OrderItemRecord[];
+  status_events?: OrderStatusEvent[];
+  user?: {
+    id?: number | string;
+    name?: string;
+    email?: string;
+    company_name?: string;
+  };
+}
+
+export interface CreateOrderInput {
+  userId?: string | number;
+  email: string;
+  shippingName: string;
+  shippingCompany?: string;
+  shippingPhone?: string;
+  shippingAddress: string;
+  shippingAddress2?: string;
+  shippingCity: string;
+  shippingRegion?: string;
+  shippingPostalCode: string;
+  shippingCountryCode: string;
+  shippingMethod?: string;
+  carrier?: string;
+  shippingCost: number;
+  shippingQuoteId?: string;
+  shippingSnapshot?: any;
+  otherCharges?: number;
+  paymentMethod?: string;
+  notes?: string;
+  items: Array<{
+    productId?: string;
+    variantId?: string;
+    name?: string;
+    image?: string;
+    size?: string;
+    color?: string;
+    quantity: number;
+    unitPrice?: number;
+    packageBreakdown?: any;
+  }>;
+}
+
+export class OrderService {
+  /**
+   * Fetch all orders for a user
+   */
+  async getUserOrders(userId?: string | number): Promise<OrderRecord[]> {
+    if (!isFrontendOnly() && userId) {
+      try {
+        const res = await apiClient.get<any>("/orders");
+        const raw = Array.isArray(res) ? res : res?.data;
+        if (Array.isArray(raw) && raw.length > 0) {
+          return raw.map((r: any) => this.normalizeOrderRecord(r));
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    if (userId) {
+      return mockStore.getUserOrders(userId);
+    }
+    return mockStore.getOrders();
+  }
+
+  /**
+   * Fetch single order by ID or order_number
+   */
+  async getOrderById(id: string): Promise<OrderRecord | null> {
+    if (!isFrontendOnly()) {
+      try {
+        const res = await apiClient.get<any>(`/orders/${id}`);
+        const raw = res?.data || res;
+        if (raw && raw.id) {
+          return this.normalizeOrderRecord(raw);
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    return mockStore.getOrderById(id);
+  }
+
+  /**
+   * Create an order
+   */
+  async createOrder(input: CreateOrderInput): Promise<OrderRecord> {
+    const totalUnits = input.items.reduce((sum, i) => sum + (i.quantity || 1), 0);
+    const subtotal = input.items.reduce((sum, i) => sum + (i.unitPrice || 15) * (i.quantity || 1), 0);
+    const shipping = input.shippingCost || 0;
+    const grandTotal = subtotal + shipping;
+
+    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    const randNum = Math.floor(100000 + Math.random() * 900000);
+    const orderNumber = `AYN-${dateStr}-${randNum}`;
+    const orderId = `ord_${Date.now()}`;
+
+    const newOrder: OrderRecord = {
+      id: orderId,
+      order_number: orderNumber,
+      user_id: input.userId || null,
+      status: "processing",
+      payment_status: input.paymentMethod === "bank_transfer" ? "pending" : "paid",
+      fulfillment_status: "processing",
+      currency: "USD",
+      email: input.email,
+      shipping_name: input.shippingName,
+      shipping_company: input.shippingCompany,
+      shipping_phone: input.shippingPhone,
+      shipping_address1: input.shippingAddress,
+      shipping_address2: input.shippingAddress2,
+      shipping_city: input.shippingCity,
+      shipping_region: input.shippingRegion || "Default Region",
+      shipping_postal_code: input.shippingPostalCode,
+      shipping_country_code: input.shippingCountryCode || "US",
+      shipping_method: input.shippingMethod || "Aramex Priority Air Express",
+      carrier: input.carrier || "Aramex Express Air",
+      tracking_number: `AWB-${Math.floor(1000000000 + Math.random() * 9000000000)}`,
+      shipment_id: `SHP-${Math.floor(10000 + Math.random() * 90000)}`,
+      direct_tracking_url: getWhatsAppUrl(`Track Order ${orderNumber}`),
+      carrier_status: "Processing at Export Facility",
+      payment_method: input.paymentMethod || "card",
+      subtotal,
+      subtotal_cents: Math.round(subtotal * 100),
+      shipping_cost: shipping,
+      shipping_cents: Math.round(shipping * 100),
+      tax_amount: 0,
+      tax_cents: 0,
+      discount_amount: 0,
+      discount_cents: 0,
+      total_amount: grandTotal,
+      total_cents: Math.round(grandTotal * 100),
+      placed_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      items: input.items.map((item, idx) => ({
+        id: `item_${orderId}_${idx + 1}`,
+        order_id: orderId,
+        product_id: item.productId,
+        product_variant_id: item.variantId,
+        product_name: item.name || "Export Garment Item",
+        product_slug: (item.name || "garment").toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        product_image_url: item.image || "/placeholder.jpg",
+        sku: `AYN-EXP-${idx + 101}`,
+        size: item.size || "Standard Assorted",
+        color: item.color || "Black",
+        quantity: item.quantity,
+        unit_price: item.unitPrice || 15,
+        unit_price_cents: Math.round((item.unitPrice || 15) * 100),
+        line_total: (item.unitPrice || 15) * item.quantity,
+        line_total_cents: Math.round((item.unitPrice || 15) * item.quantity * 100),
+        package_breakdown: item.packageBreakdown,
+      })),
+      status_events: [
+        {
+          id: `ev_${Date.now()}_1`,
+          order_id: orderId,
+          event_type: "order_placed",
+          message: `Order placed online (${totalUnits} pcs total).`,
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: `ev_${Date.now()}_2`,
+          order_id: orderId,
+          event_type: input.paymentMethod === "bank_transfer" ? "payment_proof_uploaded" : "payment_succeeded",
+          message: input.paymentMethod === "bank_transfer"
+            ? "Awaiting Proforma Invoice (P.I.) bank wire remittance."
+            : "Payment verified via secure online gateway.",
+          created_at: new Date().toISOString(),
+        },
+      ],
+    };
+
+    if (!isFrontendOnly()) {
+      try {
+        const res = await apiClient.post<any>("/orders", newOrder);
+        const raw = res?.data || res;
+        if (raw && raw.id) {
+          const norm = this.normalizeOrderRecord(raw);
+          mockStore.saveOrder(norm);
+          return norm;
+        }
+      } catch {
+        // Fallback to local store
+      }
+    }
+
+    mockStore.saveOrder(newOrder);
+    return newOrder;
+  }
+
+  /**
+   * Fetch official commercial document for an order
+   */
+  async getOrderCommercialDocument(orderId: string, docType: string): Promise<any> {
+    if (!isFrontendOnly()) {
+      try {
+        const res = await apiClient.get<any>(`/orders/${orderId}/documents/${docType}`);
+        return res?.data || res;
+      } catch {
+        // Fallback to local document generation
+      }
+    }
+
+    const order = mockStore.getOrderById(orderId);
+    if (!order) {
+      throw new Error("Order not found");
+    }
+
+    const activeUser = mockStore.getActiveUser();
+    const isAdmin = activeUser?.role === "admin";
+    return generateMockDocument(order, docType, isAdmin);
+  }
+
+  /**
+   * Fetch live carrier tracking status for an order
+   */
+  async getOrderTracking(orderId: string): Promise<any> {
+    if (!isFrontendOnly()) {
+      try {
+        const res = await apiClient.get<any>(`/orders/${orderId}/tracking`);
+        return res?.data || res;
+      } catch {
+        // Fallback
+      }
+    }
+
+    const order = mockStore.getOrderById(orderId);
+    return {
+      order_number: order?.order_number || orderId,
+      carrier: order?.carrier || "Aramex Express Air",
+      tracking_number: order?.tracking_number || "AWB-8801928374",
+      status: order?.carrier_status || "In Transit to Destination Airport",
+      last_updated: order?.last_carrier_update || "Cleared Export Customs at Dhaka (DAC)",
+      direct_url: order?.direct_tracking_url || getWhatsAppUrl(`Track Order ${order?.order_number}`),
+    };
+  }
+
+  /**
+   * Cancel order
+   */
+  async cancelOrder(orderId: string, userId: string | number, reason?: string): Promise<boolean> {
+    if (!isFrontendOnly()) {
+      try {
+        await apiClient.post(`/orders/${orderId}/cancel`, { reason });
+      } catch {
+        // Fallback
+      }
+    }
+
+    const order = mockStore.getOrderById(orderId);
+    if (order) {
+      order.status = "cancelled";
+      order.status_events?.push({
+        id: `ev_${Date.now()}`,
+        order_id: order.id,
+        event_type: "order_cancelled",
+        message: `Order cancelled by user. Reason: ${reason || "Customer request"}`,
+        created_at: new Date().toISOString(),
+      });
+      mockStore.saveOrder(order);
+    }
+    return true;
+  }
+
+  private normalizeOrderRecord(raw: any): OrderRecord {
+    const subtotal = raw.subtotal !== undefined
+      ? Number(raw.subtotal)
+      : raw.subtotal_cents !== undefined
+      ? Number(raw.subtotal_cents) / 100
+      : 0;
+
+    const shipping = raw.shipping_cost !== undefined
+      ? Number(raw.shipping_cost)
+      : raw.shipping_cents !== undefined
+      ? Number(raw.shipping_cents) / 100
+      : 0;
+
+    const tax = raw.tax_amount !== undefined
+      ? Number(raw.tax_amount)
+      : raw.tax_cents !== undefined
+      ? Number(raw.tax_cents) / 100
+      : 0;
+
+    const total = raw.total_amount !== undefined
+      ? Number(raw.total_amount)
+      : raw.total_cents !== undefined
+      ? Number(raw.total_cents) / 100
+      : subtotal + shipping + tax;
+
+    const items: OrderItemRecord[] = Array.isArray(raw.items)
+      ? raw.items.map((i: any) => {
+          const unitPrice = i.unit_price !== undefined
+            ? Number(i.unit_price)
+            : i.unit_price_cents !== undefined
+            ? Number(i.unit_price_cents) / 100
+            : 0;
+          const lineTotal = i.line_total !== undefined
+            ? Number(i.line_total)
+            : i.line_total_cents !== undefined
+            ? Number(i.line_total_cents) / 100
+            : unitPrice * (i.quantity || 1);
+
+          return {
+            id: String(i.id || ""),
+            order_id: String(i.order_id || raw.id || ""),
+            product_id: i.product_id ? String(i.product_id) : undefined,
+            product_variant_id: i.product_variant_id ? String(i.product_variant_id) : undefined,
+            product_name: i.product_name || "Product",
+            product_slug: i.product_slug,
+            product_image_url: i.product_image_url || "/placeholder.jpg",
+            sku: i.sku,
+            variant_title: i.variant_title || (i.size ? `Size: ${i.size}` : undefined),
+            size: i.size,
+            color: i.color,
+            package_breakdown: i.package_breakdown,
+            unit_price: unitPrice,
+            unit_price_cents: Math.round(unitPrice * 100),
+            quantity: Number(i.quantity) || 1,
+            line_total: lineTotal,
+            line_total_cents: Math.round(lineTotal * 100),
+          };
+        })
+      : [];
+
+    return {
+      id: String(raw.id || ""),
+      order_number: raw.order_number || `AYN-${raw.id || "000"}`,
+      user_id: raw.user_id,
+      status: raw.status || "pending",
+      payment_status: raw.payment_status || "pending",
+      fulfillment_status: raw.fulfillment_status || "unfulfilled",
+      currency: raw.currency || "USD",
+      email: raw.email || "",
+      shipping_name: raw.shipping_name || "",
+      shipping_phone: raw.shipping_phone || "",
+      shipping_company: raw.shipping_company,
+      shipping_address1: raw.shipping_address1 || "",
+      shipping_address2: raw.shipping_address2,
+      shipping_city: raw.shipping_city || "",
+      shipping_region: raw.shipping_region || "",
+      shipping_postal_code: raw.shipping_postal_code || "",
+      shipping_country_code: raw.shipping_country_code || "US",
+      shipping_method: raw.shipping_method,
+      carrier: raw.carrier,
+      tracking_number: raw.tracking_number,
+      shipment_id: raw.shipment_id,
+      shipment_reference: raw.shipment_reference,
+      shipment_label_url: raw.shipment_label_url,
+      carrier_status: raw.carrier_status,
+      last_carrier_update: raw.last_carrier_update,
+      last_shipment_error: raw.last_shipment_error,
+      shipping_quote_id: raw.shipping_quote_id,
+      shipping_snapshot: raw.shipping_snapshot,
+      direct_tracking_url: raw.direct_tracking_url,
+      can_create_aramex_shipment: raw.can_create_aramex_shipment,
+      payment_method: raw.payment_method || "card",
+      payment_proof_url: raw.payment_proof_url,
+      notes: raw.notes,
+      subtotal,
+      subtotal_cents: Math.round(subtotal * 100),
+      shipping_cost: shipping,
+      shipping_cents: Math.round(shipping * 100),
+      tax_amount: tax,
+      tax_cents: Math.round(tax * 100),
+      discount_amount: Number(raw.discount_amount || 0),
+      discount_cents: Math.round(Number(raw.discount_amount || 0) * 100),
+      total_amount: total,
+      total_cents: Math.round(total * 100),
+      placed_at: raw.placed_at || raw.created_at || new Date().toISOString(),
+      created_at: raw.created_at || new Date().toISOString(),
+      updated_at: raw.updated_at || new Date().toISOString(),
+      items,
+      status_events: raw.status_events || [],
+    };
+  }
+}
+
+export const orderService = new OrderService();

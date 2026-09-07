@@ -75,7 +75,7 @@ export default function AdminRfqDetailPage({
     if (!newMessage.trim() || !rfq) return;
 
     setIsSending(true);
-    await addRfqMessage(rfq.id, "sales", "Ayaan Export Sales", newMessage.trim());
+    await addRfqMessage(rfq.id, "sales", "Ayaan Clothing Export Sales", newMessage.trim());
     setNewMessage("");
     setIsSending(false);
     refresh();
@@ -112,9 +112,10 @@ export default function AdminRfqDetailPage({
       companyName: rfq.companyName,
       destinationCountry: rfq.destinationCountry,
       destinationCity: rfq.destinationCity,
-      currency,
-      currencySymbol: currency === "USD" ? "$" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "৳",
+      currency: "USD",
+      currencySymbol: "$",
       items: quoteItems,
+
       subtotal,
       discountTotal,
       shippingFee,
@@ -216,33 +217,33 @@ export default function AdminRfqDetailPage({
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <div>
-                <span className="font-bold text-muted-foreground uppercase text-[10px] block">Company</span>
+                <span className="font-bold text-muted-foreground uppercase text-xs block">Company</span>
                 <span className="font-bold text-foreground">{rfq.companyName}</span>
               </div>
               <div>
-                <span className="font-bold text-muted-foreground uppercase text-[10px] block">Business Type</span>
+                <span className="font-bold text-muted-foreground uppercase text-xs block">Business Type</span>
                 <span className="text-foreground">{rfq.businessType || "Wholesale"}</span>
               </div>
               <div>
-                <span className="font-bold text-muted-foreground uppercase text-[10px] block">Contact</span>
+                <span className="font-bold text-muted-foreground uppercase text-xs block">Contact</span>
                 <span className="text-foreground">{rfq.buyerEmail}</span>
               </div>
               <div>
-                <span className="font-bold text-muted-foreground uppercase text-[10px] block">Destination</span>
+                <span className="font-bold text-muted-foreground uppercase text-xs block">Destination</span>
                 <span className="font-bold text-foreground">{rfq.destinationCity}, {rfq.destinationCountry}</span>
               </div>
               <div>
-                <span className="font-bold text-muted-foreground uppercase text-[10px] block">Target Delivery</span>
+                <span className="font-bold text-muted-foreground uppercase text-xs block">Target Delivery</span>
                 <span className="text-foreground">{rfq.targetDeliveryDate || "Flexible"}</span>
               </div>
               <div>
-                <span className="font-bold text-muted-foreground uppercase text-[10px] block">Discharge Port</span>
+                <span className="font-bold text-muted-foreground uppercase text-xs block">Discharge Port</span>
                 <span className="text-foreground">{rfq.shippingPort || "Not Specified"}</span>
               </div>
             </div>
             {rfq.generalNotes && (
               <div className="pt-3 border-t border-border/40">
-                <span className="font-bold text-muted-foreground uppercase text-[10px] block">Buyer Instructions</span>
+                <span className="font-bold text-muted-foreground uppercase text-xs block">Buyer Instructions</span>
                 <p className="text-foreground mt-0.5 leading-relaxed">{rfq.generalNotes}</p>
               </div>
             )}
@@ -268,13 +269,13 @@ export default function AdminRfqDetailPage({
                       className="w-14 h-16 object-cover rounded-lg bg-secondary shrink-0 border border-border/50"
                     />
                     <div className="min-w-0">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-primary block">
+                      <span className="text-xs font-bold uppercase tracking-wider text-primary block">
                         {item.brand} • SKU: {item.sku}
                       </span>
                       <h3 className="text-xs font-bold text-foreground truncate max-w-xs">
                         {item.productName}
                       </h3>
-                      <span className="text-[11px] text-muted-foreground block mt-0.5">
+                      <span className="text-xs text-muted-foreground block mt-0.5">
                         Color: {item.selectedColor} • Size: {item.selectedSize}
                       </span>
                     </div>
@@ -284,7 +285,7 @@ export default function AdminRfqDetailPage({
                     <span className="text-xs font-bold text-foreground block">
                       {item.quantity.toLocaleString()} pcs
                     </span>
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="text-xs text-muted-foreground">
                       MOQ: {item.moq} pcs
                     </span>
                   </div>
@@ -314,7 +315,7 @@ export default function AdminRfqDetailPage({
                       key={msg.id}
                       className={`flex flex-col ${isSales ? "items-end" : "items-start"}`}
                     >
-                      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-1">
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
                         <span className="font-bold text-foreground">{msg.senderName}</span>
                         <span>•</span>
                         <span>{new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
@@ -388,19 +389,13 @@ export default function AdminRfqDetailPage({
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div className="space-y-1">
                   <label className="font-bold uppercase tracking-wider text-muted-foreground">
-                    Currency
+                    Commercial Currency
                   </label>
-                  <select
-                    value={currency}
-                    onChange={(e) => setCurrency(e.target.value as any)}
-                    className="w-full px-3 py-2 rounded-xl border border-border bg-secondary/30 text-foreground font-bold"
-                  >
-                    <option value="USD">USD ($)</option>
-                    <option value="EUR">EUR (€)</option>
-                    <option value="GBP">GBP (£)</option>
-                    <option value="BDT">BDT (৳)</option>
-                  </select>
+                  <div className="w-full px-3 py-2 rounded-xl border border-border bg-secondary/50 text-foreground font-bold font-mono">
+                    USD ($)
+                  </div>
                 </div>
+
 
                 <div className="space-y-1">
                   <label className="font-bold uppercase tracking-wider text-muted-foreground">
@@ -448,7 +443,7 @@ export default function AdminRfqDetailPage({
                         <span className="font-bold text-foreground block truncate max-w-xs">
                           {item.productName}
                         </span>
-                        <span className="text-[10px] text-muted-foreground">
+                        <span className="text-xs text-muted-foreground">
                           {item.quantity.toLocaleString()} pcs • SKU: {item.sku}
                         </span>
                       </div>
@@ -468,7 +463,7 @@ export default function AdminRfqDetailPage({
                           }
                           className="w-24 px-2 py-1 rounded-lg border border-border bg-card font-bold text-right"
                         />
-                        <span className="text-[10px] text-muted-foreground">/ pc</span>
+                        <span className="text-xs text-muted-foreground">/ pc</span>
                       </div>
                     </div>
                   ))}

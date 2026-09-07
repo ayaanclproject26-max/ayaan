@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { X, Eye, EyeOff, Lock, Mail, User as UserIcon, AlertCircle, CheckCircle2, ShieldCheck } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
+import { authService } from "@/services/auth.service";
+import BrandName from "@/components/common/BrandName";
 
 export type AuthView = "signin" | "signup" | "forgot-password";
 
@@ -16,6 +19,7 @@ export default function AuthModal({
   onClose,
   initialView = "signin",
 }: AuthModalProps) {
+  const { signIn, signUp } = useAuth();
   const [view, setView] = useState<AuthView>(initialView);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -70,13 +74,11 @@ export default function AuthModal({
     const newErrors: { [key: string]: string } = {};
 
     if (!identifier.trim()) {
-      newErrors.identifier = "Email or phone number is required";
+      newErrors.identifier = "Email address is required";
     } else {
-      // Basic check: either valid email or at least 8 digits
       const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier.trim());
-      const isPhone = /^[0-9+\-\s()]{8,}$/.test(identifier.trim());
-      if (!isEmail && !isPhone) {
-        newErrors.identifier = "Please enter a valid email address or phone number";
+      if (!isEmail) {
+        newErrors.identifier = "Please enter a valid email address";
       }
     }
 
@@ -96,7 +98,7 @@ export default function AuthModal({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatusMessage(null);
 
@@ -106,29 +108,62 @@ export default function AuthModal({
 
     setIsLoading(true);
 
-    // Simulate authenticating/connecting
-    setTimeout(() => {
-      setIsLoading(false);
-      if (view === "forgot-password") {
+    try {
+      if (view === "signin") {
+        const res = await signIn(identifier.trim(), password);
+        if (res.error) {
+          const errMsg = typeof res.error === "string" ? res.error : res.error.message || "Invalid credentials. Please check and try again.";
+          setStatusMessage({
+            type: "error",
+            text: errMsg,
+          });
+        } else {
+          setStatusMessage({
+            type: "success",
+            text: "Signed in successfully!",
+          });
+          setTimeout(() => {
+            onClose();
+          }, 600);
+        }
+      } else if (view === "signup") {
+        const res = await signUp(identifier.trim(), password, fullName.trim());
+        if (res.error) {
+          const errMsg = typeof res.error === "string" ? res.error : res.error.message || "Could not complete registration. Please try again.";
+          setStatusMessage({
+            type: "error",
+            text: errMsg,
+          });
+        } else {
+          setStatusMessage({
+            type: "success",
+            text: "Account created successfully! Welcome to AYAAN CLOTHING.",
+          });
+          setTimeout(() => {
+            onClose();
+          }, 800);
+        }
+      } else if (view === "forgot-password") {
+        await authService.forgotPassword(identifier.trim());
         setStatusMessage({
           type: "success",
-          text: `A password reset link has been sent to ${identifier}. (Demo mode: no real email sent).`,
-        });
-      } else {
-        // As per instruction 24: Do not fake successful authentication if backend is not connected.
-        // Show clear, realistic notice that backend authentication service is ready for integration.
-        setStatusMessage({
-          type: "info",
-          text: "Authentication service is in preview mode. Backend authentication endpoint is not currently configured.",
+          text: `A password reset link has been dispatched to ${identifier.trim()}.`,
         });
       }
-    }, 1000);
+    } catch (err: any) {
+      setStatusMessage({
+        type: "error",
+        text: err?.message || "An unexpected error occurred. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleAuth = () => {
     setStatusMessage({
       type: "info",
-      text: "Google Sign-In is ready for OAuth credentials configuration.",
+      text: "Google OAuth will be available once the Laravel Socialite backend is connected.",
     });
   };
 
@@ -155,8 +190,11 @@ export default function AuthModal({
           aria-labelledby="auth-modal-title"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 pt-6 pb-2">
+          <div className="flex items-start justify-between px-6 pt-6 pb-2">
             <div>
+              <div className="mb-2">
+                <BrandName className="text-xl font-bold tracking-wider text-foreground" />
+              </div>
               <h2
                 id="auth-modal-title"
                 className="text-2xl font-bold font-display text-slate-900 dark:text-white tracking-tight"
@@ -165,15 +203,15 @@ export default function AuthModal({
                 {view === "signup" && "Create Account"}
                 {view === "forgot-password" && "Reset Password"}
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {view === "signin" && "Welcome back to Ayaan Clothing"}
-                {view === "signup" && "Join Ayaan for an exclusive fashion experience"}
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-sans">
+                {view === "signin" && "Welcome back to your sourcing account"}
+                {view === "signup" && "Join for direct apparel sourcing & wholesale pricing"}
                 {view === "forgot-password" && "Enter your email or phone to reset password"}
               </p>
             </div>
             <button
               onClick={onClose}
-              className="w-9 h-9 -mr-2 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="w-9 h-9 -mr-2 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
               aria-label="Close modal"
             >
               <X size={20} strokeWidth={2} />
@@ -372,15 +410,15 @@ export default function AuthModal({
                 <div className="flex flex-col gap-2 mt-1">
                   <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                     <ShieldCheck size={14} className="text-emerald-500 shrink-0" />
-                    <span>Protected by Ayaan 256-bit secure customer privacy</span>
+                    <span>Protected by AYAAN CLOTHING 256-bit secure customer privacy</span>
                   </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                    By clicking Get Started, you agree to Ayaan Clothing&apos;s{" "}
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                    By clicking Get Started, you agree to AYAAN CLOTHING&apos;s{" "}
                     <a
                       href="#privacy"
                       onClick={(e) => {
                         e.preventDefault();
-                        alert("Ayaan Clothing Privacy Policy: We respect your data and never sell personal information.");
+                        alert("AYAAN CLOTHING Privacy Policy: We respect your data and never sell personal information.");
                       }}
                       className="text-amber-600 dark:text-amber-400 underline underline-offset-2 hover:text-amber-700"
                     >
@@ -391,7 +429,7 @@ export default function AuthModal({
                       href="#privacy"
                       onClick={(e) => {
                         e.preventDefault();
-                        alert("Ayaan Clothing Privacy Policy: We respect your data and never sell personal information.");
+                        alert("AYAAN CLOTHING Privacy Policy: We respect your data and never sell personal information.");
                       }}
                       className="text-amber-600 dark:text-amber-400 underline underline-offset-2 hover:text-amber-700"
                     >

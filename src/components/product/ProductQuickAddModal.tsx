@@ -1,9 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { X, Minus, Plus, ShoppingBag, Check, Share2, Copy, MessageCircle, Phone } from "lucide-react";
+import Link from "next/link";
+import { X, Minus, Plus, ShoppingCart, ShoppingBag, Check, Share2, Copy, MessageCircle, Phone, Globe2, FileText } from "lucide-react";
 import { useProductModal } from "@/lib/ProductModalContext";
 import { useCart } from "@/lib/CartContext";
+import BUSINESS_PROFILE, { getWhatsAppUrl } from "@/config/business-profile";
+import ProductBrandLogoOverlay from "@/components/common/ProductBrandLogoOverlay";
+import ProductPromotionBadges from "@/components/common/ProductPromotionBadges";
 
 export default function ProductQuickAddModal() {
   const { selectedProduct: product, closeProductModal } = useProductModal();
@@ -86,8 +90,8 @@ export default function ProductQuickAddModal() {
 
   const handleSendToAYC = useCallback(() => {
     if (!product) return;
-    const text = `Hi AYC, I'm interested in:\n\nProduct: ${product.name}\nSKU: ${product.sku ?? "N/A"}\nQuantity: ${quantity} pcs\n\n${productUrl}`;
-    window.open(`https://wa.me/8801XXXXXXXXX?text=${encodeURIComponent(text)}`, "_blank");
+    const text = `Hello ${BUSINESS_PROFILE.name},\n\nI am interested in:\nProduct: ${product.name}\nSKU: ${product.sku ?? "N/A"}\nQuantity: ${quantity} pcs\nLink: ${productUrl}`;
+    window.open(getWhatsAppUrl(text), "_blank");
   }, [product, quantity, productUrl]);
 
   if (!product) return null;
@@ -121,13 +125,13 @@ export default function ProductQuickAddModal() {
               <h2 className="text-lg sm:text-xl font-display font-semibold text-foreground tracking-tight truncate">
                 {product.name}
               </h2>
-              <p className="text-xs sm:text-sm text-muted-foreground font-mono tracking-wider mt-0.5">
+              <p className="text-xs sm:text-sm text-muted-foreground font-sans font-medium mt-0.5">
                 {product.sku ?? "—"}
               </p>
             </div>
             <button
               onClick={closeProductModal}
-              className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center hover:bg-secondary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
               aria-label="Close product modal"
             >
               <X size={20} strokeWidth={1.5} />
@@ -136,30 +140,30 @@ export default function ProductQuickAddModal() {
 
           {/* ─── Scrollable Content ─── */}
           <div className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar">
-            {/* Desktop: two-column | Mobile: single-column */}
             <div className="flex flex-col md:flex-row">
               {/* ═══ LEFT: Image Gallery ═══ */}
               <div className="md:w-[45%] md:shrink-0 p-4 sm:p-6">
-                {/* Primary Image */}
                 <div className="relative aspect-[3/4] bg-secondary rounded-xl overflow-hidden mb-3">
                   <img
                     src={product.images[activeImageIndex]}
                     alt={product.name}
                     className="w-full h-full object-cover transition-opacity duration-300"
                   />
-                  {/* Stock Badge */}
-                  <span className="absolute top-3 left-3 bg-emerald-600/90 text-white text-[0.625rem] font-bold uppercase py-1 px-2.5 tracking-widest rounded-md backdrop-blur-sm">
-                    In Stock
-                  </span>
+                  <ProductPromotionBadges product={product} variant="modal" />
+                  <ProductBrandLogoOverlay
+                    brandName={product.brand}
+                    brandLogo={product.brandLogo}
+                    size="modal"
+                    className="top-3 right-3"
+                  />
                 </div>
-                {/* Thumbnails */}
                 {product.images.length > 1 && (
                   <div className="flex gap-2 overflow-x-auto no-scrollbar">
                     {product.images.map((img, i) => (
                       <button
                         key={i}
                         onClick={() => setActiveImageIndex(i)}
-                        className={`shrink-0 w-16 h-20 sm:w-[72px] sm:h-[90px] rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                        className={`shrink-0 w-16 h-20 sm:w-[72px] sm:h-[90px] rounded-lg overflow-hidden border-2 transition-all ${
                           i === activeImageIndex
                             ? "border-foreground/80 ring-1 ring-foreground/20"
                             : "border-border/50 opacity-60 hover:opacity-100"
@@ -174,9 +178,8 @@ export default function ProductQuickAddModal() {
 
               {/* ═══ RIGHT: Product Info + Order Config ═══ */}
               <div className="md:w-[55%] p-4 sm:p-6 md:pl-0 flex flex-col gap-5">
-                {/* Product Info Grid */}
-                <div className="grid grid-cols-2 gap-x-4 gap-y-3 p-4 sm:p-5 bg-secondary/50 rounded-xl border border-border/40">
-                  <InfoItem label="SKU" value={product.sku ?? "—"} mono />
+                <div className="grid grid-cols-2 gap-x-4 gap-y-3 p-4 sm:p-5 bg-secondary/50 rounded-xl border border-border/40 font-sans">
+                  <InfoItem label="SKU" value={product.sku ?? "—"} />
                   <InfoItem label="MOQ" value={`${moq} pcs`} />
                   <InfoItem label="Available Stock" value={`${stock} pcs`} />
                   <InfoItem label="Brand" value={product.brand ?? "—"} />
@@ -185,25 +188,25 @@ export default function ProductQuickAddModal() {
                 </div>
 
                 {/* ─── Order Configuration Card ─── */}
-                <div className="bg-background border border-border/60 rounded-xl p-4 sm:p-5 shadow-sm">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">
+                <div className="bg-background border border-border/60 rounded-xl p-4 sm:p-5 shadow-sm font-sans">
+                  <h3 className="text-xs font-display font-semibold uppercase tracking-wider text-muted-foreground mb-4">
                     Order Configuration
                   </h3>
 
                   <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="text-xs text-muted-foreground">
-                      <span className="block font-semibold text-foreground text-sm">{moq} pcs</span>
+                    <div className="text-xs text-muted-foreground font-sans">
+                      <span className="block font-semibold text-foreground text-sm tabular-nums">{moq} pcs</span>
                       Min. Order Qty
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      <span className="block font-semibold text-foreground text-sm">{stock} pcs</span>
+                    <div className="text-xs text-muted-foreground font-sans">
+                      <span className="block font-semibold text-foreground text-sm tabular-nums">{stock} pcs</span>
                       Available Stock
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-muted-foreground font-sans">
                       <span className="block font-semibold text-foreground text-sm">{product.sizes?.join(", ") ?? "—"}</span>
                       Sizes
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-muted-foreground font-sans">
                       <span className="block font-semibold text-foreground text-sm">{product.colours ?? 1}</span>
                       Colours
                     </div>
@@ -211,7 +214,7 @@ export default function ProductQuickAddModal() {
 
                   {/* Quantity Selector */}
                   <div className="mb-2">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">
+                    <label className="text-xs font-sans font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">
                       Requested Quantity
                     </label>
                     <div className="flex items-center gap-3">
@@ -219,26 +222,24 @@ export default function ProductQuickAddModal() {
                         <button
                           onClick={decreaseQty}
                           disabled={quantity <= moq}
-                          className="w-12 h-full flex items-center justify-center hover:bg-secondary rounded-l-xl transition-colors disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                          aria-label="Decrease quantity"
+                          className="w-12 h-full flex items-center justify-center hover:bg-secondary rounded-l-xl transition-colors disabled:opacity-30"
                         >
                           <Minus size={16} strokeWidth={2} />
                         </button>
-                        <span className="w-16 text-center text-base font-bold tabular-nums">
+                        <span className="w-16 text-center text-base font-bold tabular-nums font-sans">
                           {quantity}
                         </span>
                         <button
                           onClick={increaseQty}
                           disabled={quantity >= stock}
-                          className="w-12 h-full flex items-center justify-center hover:bg-secondary rounded-r-xl transition-colors disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                          aria-label="Increase quantity"
+                          className="w-12 h-full flex items-center justify-center hover:bg-secondary rounded-r-xl transition-colors disabled:opacity-30"
                         >
                           <Plus size={16} strokeWidth={2} />
                         </button>
                       </div>
                       <span className="text-sm font-medium text-muted-foreground">pcs</span>
                     </div>
-                    <p className="text-[0.6875rem] text-muted-foreground mt-2">
+                    <p className="text-[0.6875rem] text-muted-foreground mt-2 font-sans">
                       Quantity changes in multiples of {step}
                     </p>
                   </div>
@@ -247,7 +248,7 @@ export default function ProductQuickAddModal() {
                   <button
                     onClick={handleAddToCart}
                     disabled={addedSuccess}
-                    className={`w-full mt-4 h-12 sm:h-[3.25rem] rounded-xl text-sm font-bold uppercase tracking-widest flex items-center justify-center gap-2.5 transition-all duration-300 press-feedback focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    className={`w-full mt-4 h-12 sm:h-[3.25rem] rounded-xl text-sm font-sans font-semibold uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all ${
                       addedSuccess
                         ? "bg-emerald-600 text-white cursor-default"
                         : "bg-primary text-primary-foreground hover:bg-primary/90"
@@ -260,58 +261,53 @@ export default function ProductQuickAddModal() {
                       </>
                     ) : (
                       <>
-                        <ShoppingBag size={18} strokeWidth={1.5} />
+                        <ShoppingCart size={18} />
                         Add to Cart
                       </>
                     )}
                   </button>
                 </div>
 
-                {/* ─── Share Product ─── */}
-                <div className="pt-2">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-2">
-                    <Share2 size={14} />
-                    Share Product
+                {/* ─── Export Inquiries Strip ─── */}
+                <div className="p-4 sm:p-5 rounded-xl bg-secondary/40 border border-border/40 font-sans">
+                  <h3 className="text-xs font-display font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
+                    <Globe2 size={15} />
+                    <span>Global Wholesale & Custom OEM</span>
                   </h3>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={handleShareWhatsApp}
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366]/10 text-[#25D366] text-xs font-semibold uppercase tracking-wider hover:bg-[#25D366]/20 transition-colors press-feedback focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  <div className="flex flex-wrap gap-2.5">
+                    <a
+                      href={getWhatsAppUrl(`Hi ${BUSINESS_PROFILE.name}, I have an inquiry regarding wholesale apparel.`)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366]/10 text-[#25D366] text-xs font-sans font-semibold uppercase tracking-wider hover:bg-[#25D366]/20 transition-colors"
                     >
                       <MessageCircle size={15} />
-                      WhatsApp
-                    </button>
-                    <button
-                      onClick={handleCopyLink}
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary text-foreground text-xs font-semibold uppercase tracking-wider hover:bg-secondary/80 transition-colors press-feedback focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      WhatsApp Desk
+                    </a>
+                    <Link
+                      href="/rfq"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary text-foreground text-xs font-sans font-semibold uppercase tracking-wider hover:bg-secondary/80 transition-colors"
                     >
-                      <Copy size={15} />
-                      Copy Link
-                    </button>
-                    <button
-                      onClick={handleSendToAYC}
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366]/10 text-[#25D366] text-xs font-semibold uppercase tracking-wider hover:bg-[#25D366]/20 transition-colors press-feedback focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <Phone size={15} />
-                      Send to AYC
-                    </button>
+                      <FileText size={15} />
+                      Request Commercial Quote
+                    </Link>
                   </div>
-                  <p className="text-[0.6875rem] text-muted-foreground mt-2.5 font-mono break-all">
-                    {productUrl}
+                  <p className="text-[0.6875rem] text-muted-foreground mt-2.5 font-sans break-all">
+                    Direct manufacturer pricing for B2B container and pallet shipments.
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ─── Mobile bottom close ─── */}
-          <div className="md:hidden border-t border-border/60 p-4">
-            <button
-              onClick={closeProductModal}
-              className="w-full py-3 rounded-xl border border-border text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:bg-secondary transition-colors press-feedback focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          {/* ─── Footer: View Details Link ─── */}
+          <div className="p-4 sm:p-5 bg-secondary/30 border-t border-border/60 flex justify-end">
+            <Link
+              href={`/products/${product.slug}`}
+              className="w-full py-3 rounded-xl border border-border text-sm font-sans font-semibold uppercase tracking-wider text-muted-foreground hover:bg-secondary transition-colors text-center"
             >
-              Close
-            </button>
+              View Full Product Specifications →
+            </Link>
           </div>
         </div>
       </div>
@@ -319,14 +315,11 @@ export default function ProductQuickAddModal() {
   );
 }
 
-/* ─── Small helper component ─── */
-function InfoItem({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+function InfoItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[0.6875rem] text-muted-foreground uppercase tracking-wider font-medium">{label}</dt>
-      <dd className={`text-sm font-semibold text-foreground mt-0.5 ${mono ? "font-mono tracking-wider" : ""}`}>
-        {value}
-      </dd>
+      <dt className="text-[0.6875rem] text-muted-foreground uppercase tracking-wider font-sans font-medium">{label}</dt>
+      <dd className="text-sm font-sans font-semibold text-foreground mt-0.5">{value}</dd>
     </div>
   );
 }

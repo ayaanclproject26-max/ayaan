@@ -75,15 +75,15 @@ export default function Hero({
                   <div className="absolute inset-0 bg-gradient-to-r from-ink/55 via-ink/15 to-transparent" />
                   
                   <div className="absolute inset-0 flex flex-col justify-center p-6 sm:p-10 md:p-14 text-white max-w-2xl">
-                    <span className="text-[0.625rem] sm:text-xs font-bold tracking-[0.2em] uppercase mb-2 sm:mb-3 opacity-90">
+                    <span className="text-[0.625rem] sm:text-xs font-sans font-semibold tracking-[0.2em] uppercase mb-2 sm:mb-3 opacity-90">
                       {banner.eyebrow || banner.title}
                     </span>
                     {/* Consistent title height across slides so CTA buttons align vertically */}
-                    <h2 className="text-3xl sm:text-5xl md:text-6xl font-display leading-[1.1] tracking-tight mb-3 sm:mb-4 drop-shadow-sm min-h-[2.2em] sm:min-h-[2.25em] flex items-end">
+                    <h2 className="text-3xl sm:text-5xl md:text-6xl font-display font-bold leading-[1.1] tracking-tight mb-3 sm:mb-4 drop-shadow-sm min-h-[2.2em] sm:min-h-[2.25em] flex items-end">
                       {banner.subtitle}
                     </h2>
                     {banner.description && (
-                      <p className="text-sm sm:text-lg opacity-90 mb-5 sm:mb-7 max-w-sm md:max-w-md leading-relaxed hidden sm:block drop-shadow-sm min-h-[1.5em]">
+                      <p className="text-sm sm:text-lg font-sans font-normal opacity-90 mb-5 sm:mb-7 max-w-sm md:max-w-md leading-relaxed hidden sm:block drop-shadow-sm min-h-[1.5em]">
                         {banner.description}
                       </p>
                     )}
@@ -93,7 +93,7 @@ export default function Hero({
                         href={banner.buttonTarget || "#featured"}
                         onClick={(e) => handlePromotionalClick(e, banner.buttonAction, banner.buttonTarget)}
                       >
-                        <button className="inline-flex items-center justify-center bg-[#111827] text-white hover:bg-[#1f2937] border border-white/20 px-7 sm:px-10 py-3 sm:py-3.5 text-[0.6875rem] sm:text-sm uppercase tracking-[0.15em] font-bold rounded-lg transition-all duration-200 press-feedback focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                        <button className="inline-flex items-center justify-center bg-[#111827] text-white hover:bg-[#1f2937] border border-white/20 px-7 sm:px-10 py-3 sm:py-3.5 text-[0.6875rem] sm:text-sm uppercase tracking-[0.15em] font-sans font-semibold rounded-lg transition-all duration-200 press-feedback focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                           {banner.buttonText}
                         </button>
                       </Link>

@@ -35,15 +35,15 @@ export default function AdminQuotationsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "READY":
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/15 text-blue-600 dark:text-blue-400">ISSUED</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-500/15 text-blue-600 dark:text-blue-400">ISSUED</span>;
       case "ACCEPTED":
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">ACCEPTED</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">ACCEPTED</span>;
       case "NEGOTIATION":
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-500/15 text-indigo-600 dark:text-indigo-400">REVISING</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-500/15 text-indigo-600 dark:text-indigo-400">REVISING</span>;
       case "REJECTED":
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-destructive/15 text-destructive">REJECTED</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-destructive/15 text-destructive">REJECTED</span>;
       default:
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-secondary text-foreground">{status}</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-secondary text-foreground">{status}</span>;
     }
   };
 
@@ -91,7 +91,7 @@ export default function AdminQuotationsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-border bg-secondary/40 text-muted-foreground uppercase text-[10px] font-bold tracking-wider">
+              <tr className="border-b border-border bg-secondary/40 text-muted-foreground uppercase text-xs font-bold tracking-wider">
                 <th className="py-3 px-4">Quote Ref</th>
                 <th className="py-3 px-3">Buyer & Company</th>
                 <th className="py-3 px-3">Destination</th>
@@ -119,12 +119,12 @@ export default function AdminQuotationsPage() {
                           {q.quotationNumber}
                         </span>
                         {q.revisionNumber > 1 && (
-                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-secondary border border-border">
+                          <span className="px-1.5 py-0.5 rounded text-xs font-bold bg-secondary border border-border">
                             Rev.{q.revisionNumber}
                           </span>
                         )}
                       </div>
-                      <span className="text-[10px] text-muted-foreground font-mono block mt-0.5">
+                      <span className="text-xs text-muted-foreground font-mono block mt-0.5">
                         Ref: {q.rfqNumber}
                       </span>
                     </td>
@@ -133,7 +133,7 @@ export default function AdminQuotationsPage() {
                       <span className="font-bold text-foreground block">
                         {q.buyerName}
                       </span>
-                      <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <Building2 size={11} />
                         {q.companyName}
                       </span>
@@ -143,7 +143,7 @@ export default function AdminQuotationsPage() {
                       <span className="font-bold text-foreground block">
                         {q.destinationCity}, {q.destinationCountry}
                       </span>
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         {q.incoterm || "FOB"} Terms
                       </span>
                     </td>
@@ -152,7 +152,7 @@ export default function AdminQuotationsPage() {
                       <span className="font-bold text-foreground text-sm block">
                         ${q.grandTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </span>
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         {q.currency}
                       </span>
                     </td>

@@ -1,75 +1,66 @@
-import { BRANDS, Brand } from "@/components/home/ShopByBrand";
+import { brandService, BrandModel } from "@/services/brand.service";
 
-// In-memory / persistent registry for brands (canonical 43 brands + admin created brands)
-let customBrands: Brand[] = [];
-
-export function getBrands(): Brand[] {
-  try {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("ayaan_custom_brands");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          customBrands = parsed;
-        }
-      }
-    }
-  } catch {
-    // Ignore storage error
-  }
-
-  // Combine canonical brands + custom brands (no duplicate IDs)
-  const combined = [...BRANDS];
-  for (const cb of customBrands) {
-    if (!combined.some((b) => b.id === cb.id || b.slug === cb.slug)) {
-      combined.push(cb);
-    }
-  }
-  return combined;
+export interface Brand {
+  id: string;
+  name: string;
+  slug: string;
+  logo: string;
+  logo_url?: string;
+  website?: string | null;
+  sort_order?: number;
+  is_active?: boolean;
+  products_count?: number;
 }
 
-export function createBrand(name: string, logo?: string, slug?: string): Brand {
-  const generatedSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  const id = generatedSlug;
-  const newBrand: Brand = {
-    id,
-    name,
-    slug: generatedSlug,
-    logo: logo || "/brands/generic.png",
+/**
+ * Fetch dynamic brands from the Laravel REST API
+ */
+export async function getBrands(options?: { all?: boolean; isAdmin?: boolean; search?: string }): Promise<Brand[]> {
+  const list = await brandService.getBrands(options);
+  return list.map((b) => ({
+    id: String(b.id),
+    name: b.name,
+    slug: b.slug,
+    logo: b.logo_url || b.logo || "/brands/generic.png",
+    logo_url: b.logo_url,
+    website: b.website,
+    sort_order: b.sort_order,
+    is_active: b.is_active,
+    products_count: b.products_count,
+  }));
+}
+
+export async function createBrand(name: string, logo?: string, slug?: string): Promise<Brand> {
+  const b = await brandService.createBrand({ name, logo, slug });
+  return {
+    id: String(b.id),
+    name: b.name,
+    slug: b.slug,
+    logo: b.logo_url || b.logo || "/brands/generic.png",
+    logo_url: b.logo_url,
+    website: b.website,
+    sort_order: b.sort_order,
+    is_active: b.is_active,
+    products_count: b.products_count,
   };
-
-  const existing = getBrands();
-  if (!existing.some((b) => b.id === id)) {
-    customBrands.push(newBrand);
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem("ayaan_custom_brands", JSON.stringify(customBrands));
-      } catch {
-        // Ignore storage error
-      }
-    }
-  }
-  return newBrand;
 }
 
-export function updateBrand(id: string, updates: Partial<Brand>): Brand | null {
-  const all = getBrands();
-  const target = all.find((b) => b.id === id);
-  if (!target) return null;
+export async function updateBrand(id: string, updates: Partial<Brand>): Promise<Brand | null> {
+  const b = await brandService.updateBrand(id, updates);
+  if (!b) return null;
+  return {
+    id: String(b.id),
+    name: b.name,
+    slug: b.slug,
+    logo: b.logo_url || b.logo || "/brands/generic.png",
+    logo_url: b.logo_url,
+    website: b.website,
+    sort_order: b.sort_order,
+    is_active: b.is_active,
+    products_count: b.products_count,
+  };
+}
 
-  Object.assign(target, updates);
-  if (!customBrands.some((b) => b.id === id)) {
-    customBrands.push(target);
-  } else {
-    customBrands = customBrands.map((b) => (b.id === id ? { ...b, ...updates } : b));
-  }
-
-  if (typeof window !== "undefined") {
-    try {
-      localStorage.setItem("ayaan_custom_brands", JSON.stringify(customBrands));
-    } catch {
-      // Ignore
-    }
-  }
-  return target;
+export async function deleteBrand(id: string): Promise<boolean> {
+  return brandService.deleteBrand(id);
 }

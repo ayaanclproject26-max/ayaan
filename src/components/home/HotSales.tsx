@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { CategoryCard } from "./CategoryHighlights";
 import ProductCard from "../product/ProductCard";
-import productsData from "@/data/products.json";
+import initialProductsData from "@/data/products.json";
 import { Product } from "@/types";
+import { getProducts, toStorefrontProduct } from "@/lib/services/products";
 import {
   AUDIENCE_CATEGORIES,
   filterProducts,
@@ -49,7 +50,17 @@ export default function HotSales() {
   const [towelColors, setTowelColors] = useState<string[]>(["ALL"]);
 
   const collectionSectionRef = useRef<HTMLDivElement>(null);
-  const allProducts = productsData as Product[];
+  const [allProducts, setAllProducts] = useState<Product[]>(() => (initialProductsData as Product[]));
+
+  useEffect(() => {
+    async function load() {
+      const dbList = await getProducts();
+      if (dbList && dbList.length > 0) {
+        setAllProducts(dbList.map(toStorefrontProduct));
+      }
+    }
+    load();
+  }, []);
 
   // All towel products to extract available real colors
   const allTowelProducts = useMemo(() => {
@@ -173,21 +184,21 @@ export default function HotSales() {
     (activeCategory === "towels" && !towelColors.includes("ALL") && towelColors.length > 0);
 
   return (
-    <section id="hot-sales" className="pb-10 sm:pb-12 bg-background">
+    <section id="hot-sales" className="pb-7 sm:pb-9 bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         
         {/* Section Heading */}
-        <div className="mb-6 md:mb-8 text-center md:text-left flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+        <div className="mb-3.5 sm:mb-5 text-center md:text-left flex flex-col sm:flex-row sm:items-end justify-between gap-2">
           <div>
-            <h2 className="text-fluid-h2 font-display uppercase tracking-tight">HOT SALES</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+            <h2 className="text-fluid-h2 font-display font-bold uppercase tracking-tight">HOT SALES</h2>
+            <p className="text-xs sm:text-sm font-sans text-muted-foreground mt-0.5 sm:mt-1">
               Limited-run deals on seasonal knitwear and luxury textiles
             </p>
           </div>
           {activeCategory && (
             <button
               onClick={() => setActiveCategory(null)}
-              className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors self-center sm:self-auto"
+              className="inline-flex items-center gap-1 text-xs font-sans font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors self-center sm:self-auto cursor-pointer"
             >
               <X size={13} />
               Close View
@@ -196,19 +207,18 @@ export default function HotSales() {
         </div>
         
         {/* 
-          Hot Sales Tiles (exact match to Shop by Category tile geometry, 
-          leaving remaining desktop space intentionally empty)
+          Hot Sales Tiles (exact compact category tile geometry matching expanded category grid)
         */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2.5 sm:gap-3.5">
           <CategoryCard
             category={hotSalesCategories[0]}
-            variant="primary"
+            variant="compact"
             isActive={activeCategory === "sweaters"}
             onClick={() => handleTileClick("sweaters")}
           />
           <CategoryCard
             category={hotSalesCategories[1]}
-            variant="primary"
+            variant="compact"
             isActive={activeCategory === "towels"}
             onClick={() => handleTileClick("towels")}
           />

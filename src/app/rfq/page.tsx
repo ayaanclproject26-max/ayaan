@@ -16,8 +16,10 @@ import {
   Calendar, 
   Package, 
   Sparkles,
-  ShoppingBag
+  ShoppingBag,
+  MessageCircle
 } from "lucide-react";
+import BUSINESS_PROFILE, { getWhatsAppUrl } from "@/config/business-profile";
 
 const COUNTRIES = [
   "United Arab Emirates",
@@ -121,29 +123,38 @@ export default function RfqPage() {
             Your wholesale inquiry has been registered in our export sales system. Reference Number:
           </p>
 
-          <div className="bg-secondary/60 border border-border/60 rounded-2xl p-4 mb-8">
+          <div className="bg-secondary/60 border border-border/60 rounded-2xl p-4 mb-8 font-sans">
             <span className="text-xs uppercase font-bold text-muted-foreground tracking-wider block mb-1">
               Official Reference
             </span>
-            <span className="text-2xl font-mono font-bold tracking-wider text-foreground">
+            <span className="text-2xl font-sans font-bold tabular-nums tracking-wider text-foreground">
               {submittedRfqNumber}
             </span>
           </div>
 
-          <p className="text-xs text-muted-foreground leading-relaxed mb-8">
+          <p className="text-xs font-sans text-muted-foreground leading-relaxed mb-8">
             Our international sales desk is reviewing your order specifications, MOQ compliance, and destination freight requirements. An official commercial quotation will be issued to your account.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 font-sans">
+            <a
+              href={getWhatsAppUrl(`Hello ${BUSINESS_PROFILE.name},\n\nI have submitted RFQ #${submittedRfqNumber}.\nPlease review our request.`)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto px-6 py-3 rounded-full bg-[#25D366]/15 text-[#25D366] hover:bg-[#25D366]/25 border border-[#25D366]/30 font-semibold text-xs uppercase tracking-wider transition-colors inline-flex items-center justify-center gap-2"
+            >
+              <MessageCircle size={15} />
+              <span>Connect on WhatsApp</span>
+            </a>
             <Link
               href={`/dashboard/quotes/${submittedRfqId}`}
-              className="w-full sm:w-auto px-6 py-3 rounded-full bg-foreground text-background font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-opacity"
+              className="w-full sm:w-auto px-6 py-3 rounded-full bg-foreground text-background font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition-opacity"
             >
               Track Request Status
             </Link>
             <Link
               href="/search"
-              className="w-full sm:w-auto px-6 py-3 rounded-full border border-border text-foreground font-bold text-xs uppercase tracking-wider hover:bg-secondary transition-colors"
+              className="w-full sm:w-auto px-6 py-3 rounded-full border border-border text-foreground font-semibold text-xs uppercase tracking-wider hover:bg-secondary transition-colors"
             >
               Browse Catalog
             </Link>
@@ -166,14 +177,14 @@ export default function RfqPage() {
                 Request For Quotation (RFQ)
               </h1>
             </div>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+            <p className="text-xs sm:text-sm font-sans text-muted-foreground mt-1">
               Direct commercial quote for bulk apparel export, custom manufacturing, and wholesale distribution.
             </p>
           </div>
 
           <Link
             href="/dashboard/quotes"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-foreground hover:underline uppercase tracking-wider"
+            className="inline-flex items-center gap-1.5 text-xs font-sans font-semibold text-foreground hover:underline uppercase tracking-wider"
           >
             <span>My Quote Requests</span>
             <ArrowRight size={13} />
@@ -181,13 +192,13 @@ export default function RfqPage() {
         </div>
 
         {errorMsg && (
-          <div className="mb-6 p-4 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium flex items-center gap-2">
+          <div className="mb-6 p-4 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-sm font-sans font-medium flex items-center gap-2">
             <AlertTriangle size={18} className="shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start font-sans">
           
           {/* LEFT COLUMN: MULTI-PRODUCT LINE ITEMS (7 Cols) */}
           <div className="lg:col-span-7 space-y-6">
@@ -196,7 +207,7 @@ export default function RfqPage() {
               <div className="flex items-center justify-between pb-4 border-b border-border/60 mb-5">
                 <div className="flex items-center gap-2">
                   <Package size={18} className="text-foreground" />
-                  <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
+                  <h2 className="text-sm font-display font-semibold uppercase tracking-wider text-foreground">
                     Selected Products ({rfqItems.length})
                   </h2>
                 </div>
@@ -230,7 +241,7 @@ export default function RfqPage() {
                             className="w-16 h-20 object-cover rounded-lg bg-secondary shrink-0 border border-border/50"
                           />
                           <div className="min-w-0">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-primary block">
+                            <span className="text-xs font-bold uppercase tracking-wider text-primary block">
                               {item.brand} • SKU: {item.sku}
                             </span>
                             <h3 className="text-sm font-bold text-foreground truncate max-w-[220px] sm:max-w-xs">
@@ -241,7 +252,7 @@ export default function RfqPage() {
                               <span>•</span>
                               <span>Size: <strong className="text-foreground">{item.selectedSize}</strong></span>
                             </div>
-                            <span className="text-[11px] text-muted-foreground block mt-0.5">
+                            <span className="text-xs text-muted-foreground block mt-0.5">
                               Wholesale Est: ${item.unitPrice?.toFixed(2)}/pc • MOQ: {item.moq} pcs
                             </span>
                           </div>
@@ -262,7 +273,7 @@ export default function RfqPage() {
                           </div>
 
                           {isBelowMoq && (
-                            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                            <span className="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
                               <AlertTriangle size={11} />
                               Below MOQ ({item.moq})
                             </span>
@@ -288,7 +299,7 @@ export default function RfqPage() {
                     Your RFQ Cart is Empty
                   </h3>
                   <p className="text-xs text-muted-foreground max-w-xs mx-auto mb-4">
-                    Browse our clothing catalog and click &ldquo;Request a Quote&rdquo; on any product to add line items.
+                    Submit your custom manufacturing specifications and export inquiry details in the form below.
                   </p>
                   <Link
                     href="/search"
@@ -511,8 +522,8 @@ export default function RfqPage() {
                   <FileText size={16} />
                   <span>{isSubmitting ? "Submitting Inquiry..." : "Submit Quotation Request"}</span>
                 </button>
-                <p className="text-[11px] text-muted-foreground text-center mt-2.5">
-                  Free non-binding B2B quote. Official commercial invoice prepared by Ayaan exports.
+                <p className="text-xs text-muted-foreground text-center mt-2.5">
+                  Free non-binding B2B quote. Official commercial invoice prepared by {BUSINESS_PROFILE.name} exports.
                 </p>
               </div>
             </div>
