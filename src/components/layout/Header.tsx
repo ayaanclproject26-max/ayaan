@@ -491,7 +491,7 @@ function HeaderContent() {
         </div>
         <nav className="flex flex-col p-4 overflow-y-auto max-h-[calc(100vh-64px)] divide-y divide-white/10 text-white">
           
-          {/* Section 1: AUDIENCE / DEPARTMENT */}
+          {/* Section 1: AUDIENCE */}
           <div className="py-3">
             <button
               type="button"

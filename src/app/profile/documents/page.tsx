@@ -22,8 +22,8 @@ interface DocumentEntry {
 }
 
 const DOC_META: Record<DocType, { label: string; alwaysAvailable: boolean }> = {
-  ORDER_SHEET: { label: "Order Sheet", alwaysAvailable: true },
-  PROFORMA_INVOICE: { label: "Proforma Invoice", alwaysAvailable: true },
+  ORDER_SHEET: { label: "Commercial Offer Sheet", alwaysAvailable: true },
+  PROFORMA_INVOICE: { label: "Proforma Invoice (P.I.)", alwaysAvailable: true },
   COMMERCIAL_INVOICE: { label: "Commercial Invoice", alwaysAvailable: false },
   PACKING_LIST: { label: "Packing List", alwaysAvailable: false },
 };

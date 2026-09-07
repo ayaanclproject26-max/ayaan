@@ -1,11 +1,20 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+/**
+ * Proxy (formerly Middleware) — Next.js 16+
+ *
+ * Handles subdomain-based admin routing:
+ *   admin.localhost  →  /admin/*
+ *   admin.*          →  /admin/*
+ *
+ * The function MUST be named `proxy` (or be the default export)
+ * per the Next.js 16 file convention.
+ */
+export function proxy(request: NextRequest) {
   const url = request.nextUrl;
   const hostname = request.headers.get('host') || '';
 
-  // Support localhost and custom domains
   // Remove port if present for consistent checking
   const currentHost = hostname.replace(`:${url.port}`, '');
 

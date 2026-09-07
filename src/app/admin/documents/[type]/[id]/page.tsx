@@ -15,11 +15,13 @@ import {
   Lock,
   FileCheck,
   CheckCircle2,
-  ExternalLink
+  ExternalLink,
+  Download,
 } from "lucide-react";
 import Link from "next/link";
 import BrandName from "@/components/common/BrandName";
 import BUSINESS_PROFILE from "@/config/business-profile";
+import { downloadCommercialDocumentPDF } from "@/lib/pdf-generator";
 
 export default function CommercialDocumentPage({
   params,
@@ -47,6 +49,12 @@ export default function CommercialDocumentPage({
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadPDF = () => {
+    if (doc) {
+      downloadCommercialDocumentPDF(doc);
+    }
   };
 
   if (loading) {
@@ -103,11 +111,20 @@ export default function CommercialDocumentPage({
 
           <button
             type="button"
-            onClick={handlePrint}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-foreground text-background font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-opacity shadow-md cursor-pointer"
+            onClick={handleDownloadPDF}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-opacity shadow-md cursor-pointer"
           >
-            <Printer size={15} />
-            <span>Print / Save PDF (A4)</span>
+            <Download size={14} />
+            <span>Download PDF (A4)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handlePrint}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-foreground text-background font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-opacity shadow-md cursor-pointer"
+          >
+            <Printer size={14} />
+            <span>Print</span>
           </button>
         </div>
       </div>
@@ -569,11 +586,11 @@ export default function CommercialDocumentPage({
               </div>
             </div>
 
-            {/* Bill To & Shipment Snapshot */}
+            {/* Bill To & Logistics Snapshot */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="p-4 rounded-2xl bg-secondary/30 border border-border/60 space-y-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
-                  Commercial Buyer / Consignee
+                  {isOrderSheet ? "Offered To / Consignee" : "Commercial Buyer / Consignee"}
                 </span>
                 <span className="font-bold text-sm text-foreground block">
                   {doc.companyName}
@@ -586,29 +603,53 @@ export default function CommercialDocumentPage({
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-secondary/30 border border-border/60 space-y-1.5">
-                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
-                  <span>Physical Shipment & Logistics</span>
-                  {snapshot?.is_provisional && (
-                    <span className="text-[10px] uppercase font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded">
-                      Estimated Shipping
-                    </span>
-                  )}
-                </span>
-                
-                <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-muted-foreground">
-                  <div><strong className="text-foreground">Carrier:</strong> {snapshot?.carrier || "Aramex"}</div>
-                  <div><strong className="text-foreground">Cartons:</strong> {snapshot?.carton_count || 1} ctn</div>
-                  <div><strong className="text-foreground">Gross Wt:</strong> {snapshot?.gross_weight ? `${snapshot.gross_weight} kg` : "N/A"}</div>
-                  <div><strong className="text-foreground">Volume:</strong> {snapshot?.cbm ? `${snapshot.cbm} m³` : "0.072 m³"}</div>
-                  <div className="col-span-2"><strong className="text-foreground">Terms:</strong> {doc.incoterm || "DAP"}</div>
-                  {snapshot?.tracking_number && (
-                    <div className="col-span-2 text-primary font-mono font-bold">
-                      AWB Tracking: {snapshot.tracking_number}
+              {isOrderSheet ? (
+                /* Strictly ZERO shipping information on Offer Sheet */
+                <div className="p-4 rounded-2xl bg-secondary/30 border border-border/60 space-y-1.5">
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
+                    Offer Terms &amp; Production Standards
+                  </span>
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-muted-foreground">
+                    <div><strong className="text-foreground">Quality Standard:</strong> AQL 2.5 Major</div>
+                    <div><strong className="text-foreground">Terms:</strong> FOB Dhaka (Export)</div>
+                    <div><strong className="text-foreground">Validity:</strong> 30 Days</div>
+                    <div><strong className="text-foreground">Inspection:</strong> Pre-dispatch Welcome</div>
+                    <div className="col-span-2 text-amber-700 dark:text-amber-400 font-medium pt-1">
+                      Commercial Offer only — Not an invoice. Shipping arranged separately.
                     </div>
-                  )}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                /* Proforma Invoice Logistics Snapshot */
+                <div className="p-4 rounded-2xl bg-secondary/30 border border-border/60 space-y-1.5">
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
+                    <span>Physical Shipment &amp; Logistics</span>
+                    {snapshot?.is_provisional && (
+                      <span className="text-[10px] uppercase font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded">
+                        Estimated Shipping
+                      </span>
+                    )}
+                  </span>
+                  
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-muted-foreground">
+                    <div><strong className="text-foreground">Carrier:</strong> {snapshot?.carrier || (doc.shipping > 0 ? "Aramex Express Air" : "To be confirmed")}</div>
+                    <div><strong className="text-foreground">Cartons:</strong> {snapshot?.carton_count || 1} ctn</div>
+                    <div><strong className="text-foreground">Gross Wt:</strong> {snapshot?.gross_weight ? `${snapshot.gross_weight} kg` : "N/A"}</div>
+                    <div><strong className="text-foreground">Volume:</strong> {snapshot?.cbm ? `${snapshot.cbm} m³` : "0.072 m³"}</div>
+                    <div className="col-span-2"><strong className="text-foreground">Terms:</strong> {doc.incoterm || "FOB Dhaka / CIF"}</div>
+                    {snapshot?.tracking_number && (
+                      <div className="col-span-2 text-primary font-mono font-bold">
+                        AWB Tracking: {snapshot.tracking_number}
+                      </div>
+                    )}
+                    {!doc.shipping && (
+                      <div className="col-span-2 text-amber-600 dark:text-amber-400 font-semibold pt-1">
+                        Freight charges to be confirmed directly by export desk.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Items Table */}
@@ -616,7 +657,7 @@ export default function CommercialDocumentPage({
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b-2 border-foreground bg-secondary/50 uppercase text-xs font-bold tracking-wider text-foreground">
-                    <th className="py-3 px-3">Item & Specifications</th>
+                    <th className="py-3 px-3">Item &amp; Specifications</th>
                     <th className="py-3 px-3">SKU</th>
                     <th className="py-3 px-3 text-right">Quantity</th>
                     <th className="py-3 px-3 text-right">Unit Price ({doc.currency})</th>
@@ -676,12 +717,17 @@ export default function CommercialDocumentPage({
             <div className="flex flex-col sm:flex-row justify-between gap-8 pt-4 border-t border-border">
               <div className="flex-1 space-y-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
-                  Commercial Terms & Notes
+                  Commercial Terms &amp; Notes
                 </span>
                 <p className="text-muted-foreground text-xs leading-relaxed">
                   1. Goods manufactured in compliance with ISO 9001 and OEKO-TEX Standard 100 quality standards.<br />
                   2. Official export documentation package includes Commercial Invoice, Packing List, and Certificate of Origin.<br />
-                  3. Payment Terms: {doc.paymentTerms || "30% Advance T/T, 70% against B/L or Commercial Terms"}.
+                  3. Payment Terms: {doc.paymentTerms || "100% Advance T/T or L/C at sight"}.<br />
+                  {isOrderSheet && (
+                    <strong className="text-amber-700 dark:text-amber-400 block mt-1">
+                      4. Offer Sheet note: Strictly FOB Dhaka basis. Freight charges to be negotiated separately.
+                    </strong>
+                  )}
                 </p>
               </div>
 
@@ -691,17 +737,23 @@ export default function CommercialDocumentPage({
                   <span className="font-bold text-foreground">${(doc.goods_value ?? doc.subtotal).toFixed(2)}</span>
                 </div>
 
-                <div className="flex justify-between text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <span>Shipping / Freight:</span>
-                    {snapshot?.is_provisional && (
-                      <span className="text-[9px] uppercase font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1 rounded">Est</span>
-                    )}
-                  </span>
-                  <span className="font-bold text-foreground">
-                    {doc.shipping === 0 ? "FREE" : `$${doc.shipping.toFixed(2)}`}
-                  </span>
-                </div>
+                {!isOrderSheet && (
+                  <div className="flex justify-between text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <span>Shipping / Freight:</span>
+                      {snapshot?.is_provisional && (
+                        <span className="text-[9px] uppercase font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1 rounded">Est</span>
+                      )}
+                    </span>
+                    <span className="font-bold text-foreground">
+                      {doc.shipping && doc.shipping > 0 ? (
+                        `$${doc.shipping.toFixed(2)}`
+                      ) : (
+                        <span className="text-amber-600 dark:text-amber-400 font-semibold">To be confirmed</span>
+                      )}
+                    </span>
+                  </div>
+                )}
 
                 {Number(doc.other_charges || 0) > 0 && (
                   <div className="flex justify-between text-muted-foreground">
@@ -710,16 +762,22 @@ export default function CommercialDocumentPage({
                   </div>
                 )}
 
-                {Number(doc.tax || 0) > 0 && (
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>Tax / VAT:</span>
-                    <span className="font-bold text-foreground">${Number(doc.tax).toFixed(2)}</span>
-                  </div>
-                )}
-
                 <div className="flex justify-between text-base font-bold text-foreground pt-2.5 border-t-2 border-foreground">
-                  <span>TOTAL PAYABLE:</span>
-                  <span>${(doc.total_payable ?? doc.grandTotal).toFixed(2)} {doc.currency}</span>
+                  <span>
+                    {isOrderSheet
+                      ? "OFFER VALUE (USD):"
+                      : doc.shipping > 0
+                      ? "TOTAL PAYABLE:"
+                      : "MERCHANDISE TOTAL:"}
+                  </span>
+                  <span>
+                    ${(isOrderSheet ? (doc.goods_value ?? doc.subtotal) : (doc.total_payable ?? doc.grandTotal)).toFixed(2)} {doc.currency}
+                    {!isOrderSheet && !doc.shipping && (
+                      <span className="block text-[10px] text-amber-600 dark:text-amber-400 font-medium text-right">
+                        + freight (to be confirmed)
+                      </span>
+                    )}
+                  </span>
                 </div>
               </div>
             </div>

@@ -21,9 +21,12 @@ import {
   Package, 
   Heart, 
   TrendingDown, 
-  MessageCircle 
+  MessageCircle,
+  FileText,
+  Download,
 } from "lucide-react";
 import BUSINESS_PROFILE, { getWhatsAppUrl } from "@/config/business-profile";
+import { downloadProductOfferSheetPDF } from "@/lib/pdf-generator";
 
 interface ProductDetailViewProps {
   initialProduct?: B2BProductInput | null;
@@ -536,355 +539,367 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
           </div>
 
           {/* RIGHT: WHOLESALE ASSORTMENT HIERARCHY (7 Cols) */}
-          <div className="lg:col-span-7 space-y-5">
+          <div className="lg:col-span-7 space-y-6">
             
-            {/* 1. PRODUCT NAME & BRAND */}
-            <div className="space-y-1.5 pb-4 border-b border-border/70">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-sans font-bold uppercase tracking-widest text-primary bg-primary/10 px-2.5 py-0.5 rounded-md">
-                  {product.brand}
-                </span>
-                <span className="text-xs text-muted-foreground font-sans font-medium">
-                  SKU: {product.sku}
-                </span>
-                <span className="text-xs text-muted-foreground font-sans font-medium">
-                  • {product.audience} • {product.categoryName || "Apparel"}
-                </span>
+            {/* ========================================================= */}
+            {/* GROUP 1: PRODUCT IDENTITY + PRICE + MOQ / STOCK */}
+            {/* ========================================================= */}
+            <div className="space-y-4 pb-5 border-b border-border/60">
+              
+              {/* 1. Brand / SKU / Category Metadata (Clean, Muted, Non-competing) */}
+              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs font-sans text-muted-foreground">
+                <span className="font-bold text-foreground tracking-wider uppercase">{product.brand}</span>
+                <span className="text-border">•</span>
+                <span>SKU: <span className="font-mono text-[11px] text-foreground/80">{product.sku}</span></span>
+                <span className="text-border">•</span>
+                <span className="uppercase">{product.audience}</span>
+                <span className="text-border">•</span>
+                <span>{product.categoryName || "Apparel"}</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold uppercase tracking-tight text-foreground">
+
+              {/* 2. Product Title (Manrope, restrained weight, clearly larger than metadata) */}
+              <h1 className="text-2xl sm:text-3xl font-display font-bold uppercase tracking-tight text-foreground leading-tight">
                 {product.name}
               </h1>
+
+              {/* 3. Primary Commercial Price & Dynamic Discount */}
+              <div className="space-y-1.5 pt-1">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-3xl sm:text-4xl font-sans font-bold text-foreground tabular-nums tracking-tight">
+                      {formatPrice(currentPrice)}
+                    </span>
+                    <span className="text-sm font-sans font-semibold text-muted-foreground uppercase tracking-wider">
+                      / pc
+                    </span>
+                  </div>
+
+                  {/* Secondary Reference MSRP & Dynamic Discount Badge */}
+                  {product.msrpPrice && product.msrpPrice > currentPrice && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground line-through font-sans tabular-nums">
+                        MSRP: {formatPrice(product.msrpPrice)}
+                      </span>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-sans tabular-nums">
+                        SAVE {Math.round(((product.msrpPrice - currentPrice) / product.msrpPrice) * 100)}%
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. Clean Compact MOQ / Stock Metadata Row */}
+                <div className="flex items-center gap-3 text-xs font-sans text-muted-foreground pt-0.5">
+                  <span>MOQ <strong className="text-foreground font-semibold tabular-nums">{moq} pcs</strong></span>
+                  <span className="text-border">•</span>
+                  <span>Stock <strong className="text-foreground font-semibold tabular-nums">{totalStock.toLocaleString()} pcs</strong></span>
+                </div>
+              </div>
+
             </div>
 
-            {/* 2. UNIT PRICE & COMPACT METADATA */}
-            <div className="space-y-1.5 pb-4 border-b border-border/70">
-              <div className="flex items-baseline gap-3">
-                <span className="text-3xl sm:text-4xl font-sans font-bold text-foreground tabular-nums">
-                  {formatPrice(currentPrice)}
-                </span>
-                <span className="text-sm font-sans font-semibold text-muted-foreground uppercase tracking-wider">/ pc</span>
-                {/* Save % badge: always relative to standardPrice so it doesn't double-count tier discounts.
-                    msrpPrice is the retail/MSRP reference. Only show when msrpPrice > standardPrice to avoid
-                    misleading "save X% vs bulk price" when a lower tier is active. */}
-                {product.msrpPrice && product.msrpPrice > standardPrice && (
-                  <div className="flex items-center gap-2 ml-2">
-                    <span className="text-xs text-muted-foreground line-through font-sans tabular-nums">
-                      MSRP: {formatPrice(product.msrpPrice)}
+            {/* ========================================================= */}
+            {/* GROUP 2: WHOLESALE PRICING + QUANTITY + MATRIX */}
+            {/* ========================================================= */}
+            <div className="space-y-6 pb-5 border-b border-border/60 font-sans">
+              
+              {/* 1. BUY MORE, SAVE MORE Tier Table */}
+              <div className="space-y-2.5">
+                <h3 className="text-xs sm:text-sm font-display font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
+                  <TrendingDown size={15} className="text-foreground/70" />
+                  <span>Buy More, Save More</span>
+                </h3>
+
+                <div className="overflow-x-auto border border-border/80 rounded-xl bg-card">
+                  <table className="w-full text-xs text-left font-sans min-w-[300px]">
+                    <thead className="bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground border-b border-border/60">
+                      <tr>
+                        <th className="w-[30%] px-3.5 py-2.5 font-semibold text-foreground">Tier</th>
+                        <th className="w-[32%] px-3.5 py-2.5 font-semibold text-foreground">Quantity</th>
+                        <th className="w-[38%] px-3.5 py-2.5 font-bold text-right text-foreground">Unit Price</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/50">
+                      {/* STANDARD */}
+                      <tr
+                        onClick={handleSelectStandard}
+                        className={`cursor-pointer transition-colors duration-150 ${
+                          isStandard
+                            ? "bg-foreground/[0.04] text-foreground font-medium ring-1 ring-inset ring-foreground/10"
+                            : "text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
+                        }`}
+                      >
+                        <td className="px-3.5 py-3">
+                          <div className="flex items-center gap-2">
+                            <span className={`w-2 h-2 rounded-full transition-all shrink-0 ${isStandard ? "bg-foreground scale-110" : "bg-muted-foreground/30"}`} />
+                            <span className={`uppercase tracking-wider ${isStandard ? "font-bold text-foreground" : "font-semibold text-muted-foreground"}`}>Standard</span>
+                          </div>
+                        </td>
+                        <td className="px-3.5 py-3 font-normal text-muted-foreground tabular-nums">
+                          {moq}–{bulkThreshold - 1} pcs
+                        </td>
+                        <td className="px-3.5 py-3 text-right tabular-nums whitespace-nowrap">
+                          <span className={`font-bold tabular-nums text-sm ${isStandard ? "text-foreground" : "text-foreground/90"}`}>
+                            {formatPrice(standardPrice)}
+                          </span>
+                        </td>
+                      </tr>
+
+                      {/* BULK */}
+                      <tr
+                        onClick={handleSelectBulk}
+                        className={`cursor-pointer transition-colors duration-150 ${
+                          isBulk
+                            ? "bg-foreground/[0.04] text-foreground font-medium ring-1 ring-inset ring-foreground/10"
+                            : "text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
+                        }`}
+                      >
+                        <td className="px-3.5 py-3">
+                          <div className="flex items-center gap-2">
+                            <span className={`w-2 h-2 rounded-full transition-all shrink-0 ${isBulk ? "bg-foreground scale-110" : "bg-muted-foreground/30"}`} />
+                            <span className={`uppercase tracking-wider ${isBulk ? "font-bold text-foreground" : "font-semibold text-muted-foreground"}`}>Bulk</span>
+                          </div>
+                        </td>
+                        <td className="px-3.5 py-3 font-normal text-muted-foreground tabular-nums">
+                          {bulkThreshold}+ pcs
+                        </td>
+                        <td className="px-3.5 py-3 text-right tabular-nums whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-2">
+                            {bulkSavingsPercent > 0 && (
+                              <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 tabular-nums">
+                                {bulkSavingsPercent}% OFF
+                              </span>
+                            )}
+                            <span className={`font-bold tabular-nums text-sm ${isBulk ? "text-foreground" : "text-foreground/90"}`}>
+                              {formatPrice(bulkPrice)}
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+
+                      {/* FULL STOCK */}
+                      {totalStock > moq && (
+                        <tr
+                          onClick={handleSelectFullStock}
+                          className={`cursor-pointer transition-colors duration-150 ${
+                            isFullStock
+                              ? "bg-emerald-500/[0.06] text-foreground font-medium ring-1 ring-inset ring-emerald-500/20"
+                              : "text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
+                          }`}
+                        >
+                          <td className="px-3.5 py-3">
+                            <div className="flex items-center gap-2">
+                              <span className={`w-2 h-2 rounded-full transition-all shrink-0 ${isFullStock ? "bg-emerald-600 scale-110" : "bg-muted-foreground/30"}`} />
+                              <span className={`uppercase tracking-wider ${isFullStock ? "font-bold text-foreground" : "font-semibold text-muted-foreground"}`}>Full Stock</span>
+                            </div>
+                          </td>
+                          <td className="px-3.5 py-3 font-normal text-muted-foreground tabular-nums">
+                            {totalStock.toLocaleString()} pcs
+                          </td>
+                          <td className="px-3.5 py-3 text-right tabular-nums whitespace-nowrap">
+                            <div className="flex items-center justify-end gap-2">
+                              {fullStockSavingsPercent > 0 && (
+                                <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 tabular-nums">
+                                  {fullStockSavingsPercent}% OFF
+                                </span>
+                              )}
+                              <span className={`font-bold tabular-nums text-sm ${isFullStock ? "text-foreground" : "text-foreground/90"}`}>
+                                {formatPrice(resolvedFullStockPrice)}
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* 2. ORDER QUANTITY & ESTIMATED TOTAL */}
+              <div className="space-y-3 pt-1">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs sm:text-sm font-display font-bold uppercase tracking-wider text-foreground">
+                    Order Quantity
+                  </h3>
+                  <span className="text-xs font-sans text-muted-foreground font-medium tabular-nums">
+                    MOQ: {moq} pcs • Step: {moq} pcs
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  {/* Quantity Stepper */}
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex items-center border border-border rounded-xl bg-card shadow-2xs">
+                      <button 
+                        type="button" 
+                        onClick={handleDecrement}
+                        disabled={quantity <= moq && !isFullStock}
+                        className="w-10 h-10 flex items-center justify-center text-foreground font-bold text-base hover:bg-secondary rounded-l-xl cursor-pointer transition-colors select-none disabled:opacity-30 disabled:cursor-not-allowed"
+                        aria-label="Decrease quantity"
+                        title={quantity <= moq ? `Minimum order quantity is ${moq} pcs` : undefined}
+                      >
+                        −
+                      </button>
+                      <div className="w-20 sm:w-24 text-center font-bold text-sm select-none tabular-nums font-sans">
+                        {quantity.toLocaleString()}
+                      </div>
+                      <button 
+                        type="button" 
+                        onClick={handleIncrement}
+                        disabled={isFullStock || (totalStock > 0 && quantity >= totalStock)}
+                        className="w-10 h-10 flex items-center justify-center text-foreground font-bold text-base hover:bg-secondary rounded-r-xl cursor-pointer transition-colors select-none disabled:opacity-30 disabled:cursor-not-allowed"
+                        aria-label="Increase quantity"
+                        title={isFullStock || (totalStock > 0 && quantity >= totalStock) ? `Maximum available stock is ${totalStock.toLocaleString()} pcs` : undefined}
+                      >
+                        +
+                      </button>
+                    </div>
+                    <span className="text-sm text-muted-foreground font-medium">pcs</span>
+                  </div>
+
+                  {/* Estimated Total */}
+                  <div className="text-right">
+                    <span className="text-xs uppercase font-semibold text-muted-foreground block tracking-wider">
+                      Est. Total
                     </span>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-sans tabular-nums">
-                      Save {Math.round(((product.msrpPrice - standardPrice) / product.msrpPrice) * 100)}%
+                    <span className="text-2xl font-bold text-foreground font-sans tabular-nums block leading-tight">
+                      {formatPrice(currentPrice * quantity)}
                     </span>
+                    <span className="text-[11px] text-muted-foreground block tabular-nums">
+                      ({quantity.toLocaleString()} pcs × {formatPrice(currentPrice)} / pc)
+                    </span>
+                  </div>
+                </div>
+
+                {isBelowMoq && (
+                  <div className="text-xs font-sans font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 pt-1">
+                    <AlertCircle size={14} />
+                    <span>Minimum order quantity is {moq} pcs.</span>
                   </div>
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 text-xs font-sans font-medium text-muted-foreground">
-                <span>MOQ <strong className="text-foreground font-semibold tabular-nums">{moq}</strong></span>
-                <span>•</span>
-                <span>Step <strong className="text-foreground font-semibold tabular-nums">{moq}</strong></span>
-                <span>•</span>
-                <span>Stock <strong className="text-foreground font-semibold tabular-nums">{totalStock.toLocaleString()}</strong></span>
-              </div>
-            </div>
-
-            {/* 3. BUY MORE, SAVE MORE — THREE PURCHASING MODES */}
-            <div className="space-y-2 pb-4 border-b border-border/70 font-sans">
-              <h3 className="text-sm font-display font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-                <TrendingDown size={15} className="text-primary" />
-                <span>Buy More, Save More</span>
-              </h3>
-
-              <div className="overflow-x-auto border border-border/80 rounded-2xl bg-card shadow-xs">
-                <table className="w-full text-xs text-left font-sans min-w-[300px]">
-                  <thead className="bg-secondary/70 text-xs uppercase tracking-wider text-muted-foreground border-b border-border/70">
-                    <tr>
-                      <th className="w-[28%] px-4 py-2.5 font-semibold text-foreground">Tier</th>
-                      <th className="w-[32%] px-4 py-2.5 font-semibold text-foreground">Quantity</th>
-                      <th className="w-[40%] px-4 py-2.5 font-bold text-right text-foreground">Unit Price</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/60">
-                    {/* STANDARD */}
-                    <tr
-                      onClick={handleSelectStandard}
-                      className={`cursor-pointer transition-all duration-150 ${
-                        isStandard
-                          ? "bg-primary/[0.08] text-foreground ring-1 ring-inset ring-primary/30"
-                          : "text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
-                      }`}
-                    >
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full transition-all shrink-0 ${isStandard ? "bg-primary scale-110" : "bg-muted-foreground/30"}`} />
-                          <span className="font-semibold uppercase tracking-wider text-foreground">Standard</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 font-normal text-muted-foreground tabular-nums">
-                        {moq}–{bulkThreshold - 1} pcs
-                      </td>
-                      <td className="px-4 py-3 text-right tabular-nums whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-2">
-                          <span className="font-bold text-foreground tabular-nums text-sm">
-                            {formatPrice(standardPrice)}
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-
-                    {/* BULK */}
-                    <tr
-                      onClick={handleSelectBulk}
-                      className={`cursor-pointer transition-all duration-150 ${
-                        isBulk
-                          ? "bg-primary/[0.08] text-foreground ring-1 ring-inset ring-primary/30"
-                          : "text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
-                      }`}
-                    >
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full transition-all shrink-0 ${isBulk ? "bg-primary scale-110" : "bg-muted-foreground/30"}`} />
-                          <span className="font-semibold uppercase tracking-wider text-foreground">Bulk</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 font-normal text-muted-foreground tabular-nums">
-                        {bulkThreshold}+ pcs
-                      </td>
-                      <td className="px-4 py-3 text-right tabular-nums whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-2">
-                          {bulkSavingsPercent > 0 && (
-                            <span className={`text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded tabular-nums ${
-                              isBulk ? "bg-primary text-primary-foreground" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                            }`}>
-                              {bulkSavingsPercent}% OFF
-                            </span>
-                          )}
-                          <span className="font-bold text-foreground tabular-nums text-sm">
-                            {formatPrice(bulkPrice)}
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-
-                    {/* FULL STOCK */}
-                    {totalStock > moq && (
-                      <tr
-                        onClick={handleSelectFullStock}
-                        className={`cursor-pointer transition-all duration-150 ${
-                          isFullStock
-                            ? "bg-emerald-500/[0.10] text-foreground ring-1 ring-inset ring-emerald-500/40"
-                            : "text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
-                        }`}
+              {/* 3. INCLUDED COLORS & INCLUDED SIZES (Display-only) */}
+              <div className="space-y-3 pt-1">
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-display font-bold uppercase tracking-wider text-muted-foreground block">
+                    Included Colors
+                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {colorsList.map((color, i) => (
+                      <span
+                        key={i}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-secondary/70 text-foreground border border-border/50"
                       >
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full transition-all shrink-0 ${isFullStock ? "bg-emerald-500 scale-110" : "bg-muted-foreground/30"}`} />
-                            <span className="font-semibold uppercase tracking-wider text-foreground">Full Stock</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 font-normal text-muted-foreground tabular-nums">
-                          {totalStock.toLocaleString()} pcs
-                        </td>
-                        <td className="px-4 py-3 text-right tabular-nums whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-2">
-                            {fullStockSavingsPercent > 0 && (
-                              <span className={`text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded tabular-nums ${
-                                isFullStock ? "bg-emerald-600 text-white" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                              }`}>
-                                {fullStockSavingsPercent}% OFF
-                              </span>
-                            )}
-                            <span className="font-bold text-foreground tabular-nums text-sm">
-                              {formatPrice(resolvedFullStockPrice)}
-                            </span>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                        <span
+                          className="w-2.5 h-2.5 rounded-full border border-black/10 shrink-0"
+                          style={{ backgroundColor: getColorHex(color) }}
+                        />
+                        <span>{color}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
 
-            {/* 4. QUANTITY SELECTOR */}
-            <div className="space-y-2.5 pb-4 border-b border-border/70 font-sans">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xs font-display font-semibold uppercase tracking-wider text-foreground">
-                  Order Quantity
-                </h3>
-                <span className="text-xs font-sans text-muted-foreground font-medium tabular-nums">
-                  MOQ {moq} • Step {moq}
-                </span>
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-display font-bold uppercase tracking-wider text-muted-foreground block">
+                    Included Sizes
+                  </span>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {sizesList.map((size, i) => (
+                      <span
+                        key={i}
+                        className="px-2.5 py-1 rounded-md text-xs font-semibold bg-secondary/70 text-foreground border border-border/50"
+                      >
+                        {size}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-4 font-sans">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center border border-border rounded-xl bg-card shadow-xs">
-                    <button 
-                      type="button" 
-                      onClick={handleDecrement}
-                      disabled={quantity <= moq && !isFullStock}
-                      className="w-10 h-10 flex items-center justify-center text-foreground font-bold text-base hover:bg-secondary rounded-l-xl cursor-pointer transition-colors select-none disabled:opacity-30 disabled:cursor-not-allowed"
-                      aria-label="Decrease quantity"
-                      title={quantity <= moq ? `Minimum order quantity is ${moq} pcs` : undefined}
-                    >
-                      −
-                    </button>
-                    <div className="w-24 text-center font-bold text-sm select-none tabular-nums font-sans">
-                      {quantity.toLocaleString()}
-                    </div>
-                    <button 
-                      type="button" 
-                      onClick={handleIncrement}
-                      disabled={isFullStock || (totalStock > 0 && quantity >= totalStock)}
-                      className="w-10 h-10 flex items-center justify-center text-foreground font-bold text-base hover:bg-secondary rounded-r-xl cursor-pointer transition-colors select-none disabled:opacity-30 disabled:cursor-not-allowed"
-                      aria-label="Increase quantity"
-                      title={isFullStock || (totalStock > 0 && quantity >= totalStock) ? `Maximum available stock is ${totalStock.toLocaleString()} pcs` : undefined}
-                    >
-                      +
-                    </button>
+              {/* 4. PACKAGE BREAKDOWN MATRIX TABLE */}
+              {matrixData && (
+                <div className="space-y-2 pt-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-xs sm:text-sm font-display font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
+                      <Package size={14} className="text-foreground/70" />
+                      <span>
+                        {isFullStock 
+                          ? `Full Stock — ${matrixData.grandTotal.toLocaleString()} pcs` 
+                          : `Package Breakdown — ${quantity.toLocaleString()} pcs`}
+                      </span>
+                    </h3>
+                    <span className="text-[11px] font-sans font-bold text-foreground px-2.5 py-0.5 bg-secondary rounded-full uppercase tracking-wider tabular-nums border border-border/60">
+                      Total: {matrixData.grandTotal.toLocaleString()} pcs
+                    </span>
                   </div>
 
-                  <span className="text-sm text-muted-foreground font-semibold">pcs</span>
-                </div>
-
-                <div className="text-right">
-                  <span className="text-xs uppercase font-semibold text-muted-foreground block">
-                    Est. Total
-                  </span>
-                  <span className="text-2xl font-bold text-foreground font-sans tabular-nums">
-                    {formatPrice(currentPrice * quantity)}
-                  </span>
-                  <span className="text-xs text-muted-foreground block tabular-nums">
-                    ({quantity.toLocaleString()} pcs × {formatPrice(currentPrice)})
-                  </span>
-                </div>
-              </div>
-
-              {isBelowMoq && (
-                <div className="text-sm font-sans font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 pt-1">
-                  <AlertCircle size={14} />
-                  <span>Minimum order quantity is {moq} pcs.</span>
-                </div>
-              )}
-            </div>
-
-            {/* 5. INCLUDED COLORS */}
-            <div className="space-y-2 pb-4 border-b border-border/70 font-sans">
-              <h3 className="text-sm font-display font-semibold uppercase tracking-wider text-foreground">
-                Included Colors
-              </h3>
-              <div className="flex flex-wrap items-center gap-2 font-sans">
-                {colorsList.map((color, i) => (
-                  <span
-                    key={i}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-secondary/80 text-foreground border border-border/60 shadow-xs"
-                  >
-                    <span
-                      className="w-2.5 h-2.5 rounded-full border border-black/10 shrink-0"
-                      style={{ backgroundColor: getColorHex(color) }}
-                    />
-                    <span>{color}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* 6. INCLUDED SIZES */}
-            <div className="space-y-2 pb-4 border-b border-border/70 font-sans">
-              <h3 className="text-sm font-display font-semibold uppercase tracking-wider text-foreground">
-                Included Sizes
-              </h3>
-              <div className="flex flex-wrap items-center gap-2 font-sans">
-                {sizesList.map((size, i) => (
-                  <span
-                    key={i}
-                    className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-secondary/80 text-foreground border border-border/60 shadow-xs"
-                  >
-                    {size}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* 7. PACKAGE BREAKDOWN MATRIX TABLE */}
-            {matrixData && (
-              <div className="space-y-2 pb-4 border-b border-border/70 font-sans">
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-sm font-display font-semibold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-                    <Package size={14} className="text-primary" />
-                    <span>
-                      {isFullStock 
-                        ? `Full Stock — ${matrixData.grandTotal.toLocaleString()} pcs` 
-                        : `Package Breakdown — ${quantity.toLocaleString()} pcs`}
-                    </span>
-                  </h3>
-                  <span className="text-xs font-sans font-bold text-primary px-2.5 py-0.5 bg-primary/10 rounded-full uppercase tracking-wider tabular-nums">
-                    Total: {matrixData.grandTotal.toLocaleString()} pcs
-                  </span>
-                </div>
-
-                <div className="overflow-x-auto border border-border/70 rounded-xl bg-card">
-                  <table className="w-full text-sm text-left min-w-[320px] font-sans">
-                    <thead className="bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground border-b border-border/60">
-                      <tr>
-                        <th className="px-3.5 py-2 font-semibold">Color</th>
-                        {matrixData.sizes.map(s => (
-                          <th key={s} className="px-3 py-2 font-semibold text-center">{s}</th>
+                  <div className="overflow-x-auto border border-border/70 rounded-xl bg-card">
+                    <table className="w-full text-xs text-left min-w-[300px] font-sans">
+                      <thead className="bg-secondary/60 text-[11px] uppercase tracking-wider text-muted-foreground border-b border-border/60">
+                        <tr>
+                          <th className="px-3 py-2 font-semibold">Color</th>
+                          {matrixData.sizes.map(s => (
+                            <th key={s} className="px-3 py-2 font-semibold text-center">{s}</th>
+                          ))}
+                          <th className="px-3 py-2 font-bold text-right text-foreground">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border/50">
+                        {matrixData.colors.map(color => (
+                          <tr key={color} className="hover:bg-secondary/20">
+                            <td className="px-3 py-2 font-medium text-foreground flex items-center gap-1.5">
+                              <span
+                                className="w-2 h-2 rounded-full border border-black/10 shrink-0"
+                                style={{ backgroundColor: getColorHex(color) }}
+                              />
+                              <span>{color}</span>
+                            </td>
+                            {matrixData.sizes.map(size => (
+                              <td key={size} className="px-3 py-2 text-center text-muted-foreground tabular-nums">
+                                {matrixData.cellMap[color]?.[size] || 0}
+                              </td>
+                            ))}
+                            <td className="px-3 py-2 font-bold text-right text-foreground tabular-nums">
+                              {matrixData.rowTotals[color] || 0}
+                            </td>
+                          </tr>
                         ))}
-                        <th className="px-3.5 py-2 font-bold text-right text-foreground">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/50">
-                      {matrixData.colors.map(color => (
-                        <tr key={color} className="hover:bg-secondary/20">
-                          <td className="px-3.5 py-2 font-medium text-foreground flex items-center gap-1.5">
-                            <span
-                              className="w-2 h-2 rounded-full border border-black/10 shrink-0"
-                              style={{ backgroundColor: getColorHex(color) }}
-                            />
-                            <span>{color}</span>
-                          </td>
+                      </tbody>
+                      <tfoot className="bg-secondary/40 border-t border-border font-bold text-foreground">
+                        <tr>
+                          <td className="px-3 py-2 uppercase text-[10px]">TOTAL</td>
                           {matrixData.sizes.map(size => (
-                            <td key={size} className="px-3 py-2 text-center text-muted-foreground tabular-nums">
-                              {matrixData.cellMap[color]?.[size] || 0}
+                            <td key={size} className="px-3 py-2 text-center tabular-nums">
+                              {matrixData.colTotals[size] || 0}
                             </td>
                           ))}
-                          <td className="px-3.5 py-2 font-bold text-right text-foreground tabular-nums">
-                            {matrixData.rowTotals[color] || 0}
+                          <td className="px-3 py-2 text-right text-foreground font-bold tabular-nums">
+                            {matrixData.grandTotal.toLocaleString()}
                           </td>
                         </tr>
-                      ))}
-                    </tbody>
-                    <tfoot className="bg-secondary/40 border-t border-border font-bold text-foreground">
-                      <tr>
-                        <td className="px-3.5 py-2 uppercase text-xs">TOTAL</td>
-                        {matrixData.sizes.map(size => (
-                          <td key={size} className="px-3 py-2 text-center tabular-nums">
-                            {matrixData.colTotals[size] || 0}
-                          </td>
-                        ))}
-                        <td className="px-3.5 py-2 text-right text-primary font-bold tabular-nums">
-                          {matrixData.grandTotal.toLocaleString()}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
+                      </tfoot>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* 8. PRIMARY PURCHASE ACTION: ADD TO CART */}
-            <div className="pt-1 flex items-center gap-3">
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                className="w-full flex-1 py-4 rounded-full bg-foreground text-background font-sans font-bold text-sm uppercase tracking-wider hover:opacity-90 transition-all duration-150 cursor-pointer shadow-md active:scale-[0.98] flex items-center justify-center gap-2.5"
-              >
-                <ShoppingCart size={18} />
-                <span>Add to Cart</span>
-              </button>
+            </div>
 
-              {user && (
+            {/* ========================================================= */}
+            {/* GROUP 3: PURCHASE ACTIONS (ADD TO CART, WISHLIST, WHATSAPP) */}
+            {/* ========================================================= */}
+            <div className="space-y-3 pt-1 font-sans">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  className="w-full flex-1 py-4 rounded-xl bg-foreground text-background font-sans font-bold text-sm uppercase tracking-wider hover:opacity-90 transition-all duration-150 cursor-pointer shadow-sm active:scale-[0.99] flex items-center justify-center gap-2.5"
+                >
+                  <ShoppingCart size={18} />
+                  <span>Add to Cart</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => {
@@ -892,35 +907,78 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
                       toggleWishlist(toStorefrontProduct(product));
                     }
                   }}
-                  className={`p-4 rounded-full border transition-all cursor-pointer flex items-center justify-center shrink-0 ${
+                  className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-center shrink-0 ${
                     product && isInWishlist(product.id)
-                      ? "bg-rose-50 border-rose-200 text-rose-600"
-                      : "border-border text-foreground hover:bg-secondary"
+                      ? "bg-rose-50 border-rose-200 text-rose-600 dark:bg-rose-950/30 dark:border-rose-800"
+                      : "border-border/80 text-foreground hover:bg-secondary"
                   }`}
                   title={product && isInWishlist(product.id) ? "Remove from wishlist" : "Add to wishlist"}
                   aria-label="Toggle wishlist"
                 >
                   <Heart size={18} className={product && isInWishlist(product.id) ? "fill-current text-rose-600" : ""} />
                 </button>
-              )}
-            </div>
+              </div>
 
-            {/* Direct WhatsApp Product Inquiry CTA */}
-            {product && (
-              <div className="pt-3">
+              {/* Direct WhatsApp Product Inquiry CTA — NO phone number visible in CTA */}
+              {product && (
                 <a
                   href={getWhatsAppUrl(`Hello ${BUSINESS_PROFILE.name},\n\nI am interested in:\nProduct: ${product.name}\nSKU: ${product.sku}\nQuantity: ${quantity} pcs`)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-3 px-4 rounded-xl bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/30 text-[#25D366] font-sans font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.99]"
+                  className="w-full py-3.5 px-4 rounded-xl bg-[#25D366]/10 hover:bg-[#25D366]/15 border border-[#25D366]/30 text-[#25D366] font-sans font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
                 >
                   <MessageCircle size={16} />
                   <span>Inquire on WhatsApp</span>
                 </a>
-              </div>
-            )}
+              )}
 
-
+              {/* Instant B2B Commercial Offer Sheet Download (Zero Shipping Details) */}
+              {product && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const activeProfile = product.shippingPackageProfiles?.[0];
+                    downloadProductOfferSheetPDF(
+                      {
+                        name: product.name,
+                        sku: product.sku,
+                        brand: product.brand,
+                        category: product.categoryName || product.categoryId,
+                        audience: product.audience,
+                        price: currentPrice || product.wholesalePrice,
+                        msrpPrice: product.msrpPrice,
+                        moq: product.moq,
+                        fabric: product.material,
+                        gsm: 180,
+                        composition: product.material,
+                        sizes: sizesList,
+                        color: colorsList,
+                        imageUrl: product.images?.[0] || selectedImage,
+                        packageBreakdown: product.packageAllocations,
+                        cartonDimensions: activeProfile
+                          ? {
+                              length: activeProfile.carton_length || 60,
+                              width: activeProfile.carton_width || 40,
+                              height: activeProfile.carton_height || 35,
+                              unit: "cm",
+                            }
+                          : { length: 60, width: 40, height: 35, unit: "cm" },
+                        grossWeight: activeProfile?.gross_weight || (quantity * 0.35).toFixed(1),
+                        netWeight: activeProfile?.net_weight ?? undefined,
+                        cbm: (activeProfile as any)?.cbm ?? undefined,
+                        pricingTiers: product.pricingTiers,
+                      },
+                      user ? { name: user.name, company: user.company_name, email: user.email, country: (user as any)?.country } : undefined,
+                      quantity
+                    );
+                  }}
+                  className="w-full py-3 px-4 rounded-xl border border-border/80 bg-card hover:bg-secondary text-foreground font-sans font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+                >
+                  <FileText size={15} className="text-primary" />
+                  <span>Download Offer Sheet (PDF)</span>
+                </button>
+              )}
+            </div>
 
           </div>
 

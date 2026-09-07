@@ -44,26 +44,26 @@ export function CustomerAccountSidebar() {
 
   return (
     <>
-      <aside className="hidden lg:flex flex-col w-[240px] shrink-0">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden sticky top-24">
+      <aside className="hidden lg:flex flex-col w-[230px] shrink-0 self-start">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 rounded-2xl shadow-xs overflow-hidden sticky top-24 w-full">
           {/* User identity block */}
-          <div className="px-5 pt-5 pb-4 border-b border-slate-100 dark:border-white/10">
-            <div className="flex items-center gap-3 min-w-0">
+          <div className="px-4 pt-4 pb-3.5 border-b border-slate-100 dark:border-white/10">
+            <div className="flex items-center gap-2.5 min-w-0">
               <div
-                className="w-11 h-11 rounded-full bg-gradient-to-tr from-amber-600 to-amber-400 flex items-center justify-center text-white font-bold text-sm shadow-sm uppercase shrink-0 select-none"
+                className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-600 to-amber-400 flex items-center justify-center text-white font-bold text-xs shadow-xs uppercase shrink-0 select-none"
                 aria-label="Account avatar"
               >
                 {initials}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-slate-900 dark:text-white truncate leading-snug">
+                <p className="text-xs font-bold text-slate-900 dark:text-white truncate leading-tight">
                   {user?.name || "Ayaan Buyer"}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                <p className="text-[0.6875rem] text-slate-500 dark:text-slate-400 truncate mt-0.5">
                   {user?.email || ""}
                 </p>
-                <div className="mt-1 inline-flex items-center gap-1 text-[0.6875rem] text-emerald-600 dark:text-emerald-400 font-semibold">
-                  <ShieldCheck size={11} />
+                <div className="mt-1 inline-flex items-center gap-1 text-[0.625rem] text-emerald-600 dark:text-emerald-400 font-semibold">
+                  <ShieldCheck size={10} />
                   <span>Verified Account</span>
                 </div>
               </div>
@@ -71,7 +71,7 @@ export function CustomerAccountSidebar() {
           </div>
 
           {/* Primary navigation */}
-          <nav className="px-3 py-3 flex flex-col gap-0.5" aria-label="Account navigation">
+          <nav className="p-2 flex flex-col gap-0.5" aria-label="Account navigation">
             {primaryNav.map((item) => {
               const Icon = item.icon;
               const isActive = item.exact
@@ -83,19 +83,19 @@ export function CustomerAccountSidebar() {
                   key={item.href}
                   href={item.href}
                   className={[
-                    "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
+                    "flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150 h-[40px]",
                     isActive
-                      ? "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400"
-                      : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] hover:text-slate-900 dark:hover:text-white",
+                      ? "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 font-semibold"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] hover:text-slate-900 dark:hover:text-white",
                   ].join(" ")}
                   aria-current={isActive ? "page" : undefined}
                 >
                   <Icon
-                    size={18}
+                    size={16}
                     className={
                       isActive
-                        ? "text-amber-600 dark:text-amber-400"
-                        : "text-slate-400 dark:text-slate-500"
+                        ? "text-amber-600 dark:text-amber-400 shrink-0"
+                        : "text-slate-400 dark:text-slate-500 shrink-0"
                     }
                   />
                   <span>{item.label}</span>
@@ -105,13 +105,13 @@ export function CustomerAccountSidebar() {
           </nav>
 
           {/* Sign out — separated */}
-          <div className="px-3 pb-3 pt-1 border-t border-slate-100 dark:border-white/10">
+          <div className="p-2 pt-1 border-t border-slate-100 dark:border-white/10">
             <button
               type="button"
               onClick={() => setShowSignOutConfirm(true)}
-              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 dark:hover:text-red-400 transition-all duration-150 text-left"
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-500 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 dark:hover:text-red-400 transition-all duration-150 text-left h-[40px] cursor-pointer"
             >
-              <LogOut size={18} className="text-slate-400 dark:text-slate-500" />
+              <LogOut size={16} className="text-slate-400 dark:text-slate-500 shrink-0" />
               <span>Sign Out</span>
             </button>
           </div>

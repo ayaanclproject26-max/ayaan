@@ -11,6 +11,7 @@ import {
 } from "@/lib/filters";
 import { Check, X, Sparkles, RotateCcw } from "lucide-react";
 import { categoryService, CategoryModel } from "@/services/category.service";
+import { AudienceTiles } from "@/components/common/AudienceCard";
 
 export default function CategoryHighlights() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -66,44 +67,7 @@ export default function CategoryHighlights() {
     return [allTile, ...productOnlyCats];
   }, [dynamicCategories]);
 
-  // The 5 Core Audience Departments for the main tiles: MEN, WOMEN, BOYS, GIRLS, UNISEX
-  const audienceDepartments = [
-    {
-      id: "c_men",
-      name: "MEN",
-      slug: "men",
-      image: "https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&q=80&w=800",
-      imageClass: "object-[center_20%]",
-    },
-    {
-      id: "c_women",
-      name: "WOMEN",
-      slug: "women",
-      image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=800",
-      imageClass: "object-[center_20%]",
-    },
-    {
-      id: "c_boys",
-      name: "BOYS",
-      slug: "boys",
-      image: "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&q=80&w=800",
-      imageClass: "object-[center_20%]",
-    },
-    {
-      id: "c_girls",
-      name: "GIRLS",
-      slug: "girls",
-      image: "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&q=80&w=800",
-      imageClass: "object-[center_20%]",
-    },
-    {
-      id: "c_unisex",
-      name: "UNISEX",
-      slug: "unisex",
-      image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800",
-      imageClass: "object-center",
-    },
-  ];
+
 
   // Product categories list for filter pills
   const filterCategoryNames = useMemo(() => {
@@ -209,12 +173,12 @@ export default function CategoryHighlights() {
     <section id="categories" className="py-5 sm:py-8 bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         
-        {/* Section Title */}
+        {/* AUDIENCE Section Title */}
         <div className="mb-3.5 sm:mb-5 text-center md:text-left flex flex-col sm:flex-row sm:items-end justify-between gap-1.5 sm:gap-2">
           <div>
-            <h2 className="text-fluid-h2 font-display font-bold uppercase tracking-tight">SHOP BY CATEGORY</h2>
+            <h2 className="text-fluid-h2 font-display font-bold uppercase tracking-tight">AUDIENCE</h2>
             <p className="text-xs sm:text-sm font-sans text-muted-foreground mt-0.5 sm:mt-1">
-              Select one or multiple departments to explore tailored collections
+              Select one or multiple audiences to explore tailored collections
             </p>
           </div>
           {isCollectionOpen && (
@@ -227,89 +191,65 @@ export default function CategoryHighlights() {
             </button>
           )}
         </div>
-        
-        {/* Primary Five Audience Department Tiles (MEN, WOMEN, BOYS, GIRLS, UNISEX) + 6th Mobile Slot (ALL CATEGORIES) */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3.5">
-          {audienceDepartments.map((category) => {
-            const isSelected = selectedAudiences.includes(category.name.toUpperCase());
-            return (
-              <CategoryCard
-                key={category.id}
-                category={category}
-                variant="primary"
-                isActive={isSelected}
-                onClick={() => handleAudienceToggle(category.name)}
-              />
-            );
-          })}
 
-          {/* 6th Slot: ALL CATEGORIES Tile for Mobile & Tablet Grid */}
-          <button
-            type="button"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className={`group relative overflow-hidden rounded-xl sm:rounded-2xl border transition-all duration-300 w-full aspect-[16/10] flex flex-col items-center justify-center p-2.5 sm:p-3.5 text-center cursor-pointer bg-[#F3EEE5] dark:bg-stone-900/90 lg:hidden ${
-              isExpanded
-                ? "border-foreground ring-2 ring-foreground shadow-lg scale-[1.02]"
-                : "border-border hover:border-foreground/40 shadow-xs hover:shadow-md hover:-translate-y-0.5"
-            }`}
-            aria-label={isExpanded ? "Collapse categories list" : "Expand all product categories"}
-            aria-expanded={isExpanded}
-          >
-            {/* Active Selection / Expanded Indicator Badge */}
-            {isExpanded && (
-              <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 w-5 h-5 sm:w-5.5 sm:h-5.5 rounded-full bg-foreground text-background flex items-center justify-center shadow-md animate-in zoom-in-75">
-                <Check size={11} strokeWidth={3} className="sm:w-3 sm:h-3" />
-              </div>
-            )}
+        {/* Restored 5 Image-Based Audience Tiles (MEN, WOMEN, BOYS, GIRLS, UNISEX) */}
+        <AudienceTiles
+          selectedAudiences={selectedAudiences}
+          onToggle={handleAudienceToggle}
+        />
 
-            {/* Centered Category Label */}
-            <h3 className="font-display font-bold uppercase tracking-tight text-foreground text-xs sm:text-sm md:text-base leading-tight">
+        {/* Separately: PRODUCT CATEGORY Section */}
+        <div className="mt-8 pt-6 border-t border-border/60">
+          <div className="flex items-center justify-between mb-3.5 sm:mb-4">
+            <div>
+              <h3 className="text-xs sm:text-sm font-display font-bold uppercase tracking-wider text-foreground">
+                PRODUCT CATEGORY
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Browse apparel categories and export styles
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="px-4 sm:px-5 py-2 border border-border text-foreground text-xs font-semibold uppercase tracking-wider rounded-full hover:bg-secondary transition-colors cursor-pointer"
+            >
               {isExpanded ? "SHOW LESS" : "ALL CATEGORIES"}
-            </h3>
-          </button>
-        </div>
+            </button>
+          </div>
 
-        {/* Action Button: ALL CATEGORIES accordion (Desktop only where 5 tiles span 1 row) */}
-        <div className="hidden lg:flex justify-center mt-5 sm:mt-6">
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="px-6 sm:px-8 py-2.5 sm:py-3 border border-foreground text-foreground text-xs sm:text-sm font-semibold uppercase tracking-wider rounded-full hover:bg-foreground hover:text-background transition-colors duration-300 active:scale-95 cursor-pointer"
+          {/* Expanded Detailed Categories Grid */}
+          <div
+            className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${
+              isExpanded ? "grid-rows-[1fr] opacity-100 mt-2" : "grid-rows-[0fr] opacity-0 mt-0"
+            }`}
           >
-            {isExpanded ? "SHOW LESS" : "ALL CATEGORIES"}
-          </button>
-        </div>
+            <div className="overflow-hidden">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2.5 sm:gap-3.5">
+                {detailedCategories.map((category) => {
+                  const isSelected =
+                    category.name === "ALL"
+                      ? selectedCategories.includes("ALL")
+                      : selectedCategories.some(
+                          (c) => c.toLowerCase() === category.name.toLowerCase()
+                        );
 
-        {/* Expanded Detailed Categories Grid */}
-        <div
-          className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${
-            isExpanded ? "grid-rows-[1fr] opacity-100 mt-5 sm:mt-6" : "grid-rows-[0fr] opacity-0 mt-0"
-          }`}
-        >
-          <div className="overflow-hidden">
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2.5 sm:gap-3.5">
-              {detailedCategories.map((category) => {
-                const isSelected =
-                  category.name === "ALL"
-                    ? selectedCategories.includes("ALL")
-                    : selectedCategories.some(
-                        (c) => c.toLowerCase() === category.name.toLowerCase()
-                      );
-
-                return (
-                  <CategoryCard 
-                    key={category.id} 
-                    category={{ 
-                      id: String(category.id),
-                      name: category.name,
-                      slug: category.slug || String(category.id),
-                      image: category.image_url || category.image || "/categories/default.jpg"
-                    }} 
-                    variant="compact"
-                    isActive={isSelected}
-                    onClick={() => handleCategoryClick(category.name)}
-                  />
-                );
-              })}
+                  return (
+                    <CategoryCard 
+                      key={category.id} 
+                      category={{ 
+                        id: String(category.id),
+                        name: category.name,
+                        slug: category.slug || String(category.id),
+                        image: category.image_url || category.image || "/categories/default.jpg"
+                      }} 
+                      variant="compact"
+                      isActive={isSelected}
+                      onClick={() => handleCategoryClick(category.name)}
+                    />
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

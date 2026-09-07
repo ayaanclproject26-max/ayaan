@@ -4,20 +4,20 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/CartContext";
 import { useAuth } from "@/lib/AuthContext";
-import { createOrder } from "@/lib/services/orders";
-import { uploadPaymentProof } from "@/lib/services/storage";
+import { createOrder, OrderRecord } from "@/lib/services/orders";
 import { shippingService, ShippingQuoteOption, ShipmentSpecs } from "@/services/shipping.service";
 import { getWhatsAppUrl } from "@/config/business-profile";
 import { formatPrice } from "@/lib/formatters";
 import {
+  downloadProformaInvoicePDF,
+  downloadProductOfferSheetPDF,
+} from "@/lib/pdf-generator";
+import {
   X,
-  CreditCard,
-  Building2,
   Truck,
   FileText,
   CheckCircle2,
   AlertCircle,
-  Upload,
   ShieldCheck,
   ArrowRight,
   Plane,
@@ -26,6 +26,7 @@ import {
   RefreshCw,
   ChevronDown,
   ChevronUp,
+  Download,
 } from "lucide-react";
 
 interface CheckoutModalProps {
@@ -48,10 +49,11 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState("US");
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "transfer" | "cod" | "net_30">("card");
-  const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Confirmed order state to show the post-order document download screen
+  const [confirmedOrder, setConfirmedOrder] = useState<OrderRecord | null>(null);
 
   // ── Shipping Mode State ────────────────────────────────────────────────────
   // Two explicit customer choices:
@@ -67,6 +69,14 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [showSpecsDetails, setShowSpecsDetails] = useState(false);
 
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Reset confirmation state when modal opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setConfirmedOrder(null);
+      setError("");
+    }
+  }, [isOpen]);
 
   // Prefill user information when modal opens
   useEffect(() => {
@@ -96,7 +106,6 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         city: city.trim() || undefined,
         postal_code: postalCode.trim() || undefined,
         address1: address.trim() || undefined,
-        // Only request air quotes — sea is not an offered customer option
         shipping_mode: "air",
       });
 
@@ -140,16 +149,16 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   // ── Derived financial totals ───────────────────────────────────────────────
   // Aramex: shipping charge is included in the PI total.
   // Manual: shipping charge is NOT included; to be confirmed separately.
+  // Domestic 5% tax is REMOVED: Commercial B2B export invoices are zero-rated.
   const aramexShippingCost = shippingMode === "aramex" && aramexQuote ? (aramexQuote.amount || 0) : 0;
-  const tax = Math.round(subtotal * 0.05 * 100) / 100;
-  const total = subtotal + aramexShippingCost + tax;
+  const total = subtotal + aramexShippingCost;
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     if (!shippingName.trim() || !email.trim() || !address.trim() || !city.trim() || !postalCode.trim()) {
-      setError("Please complete all shipping address fields.");
+      setError("Please complete all destination address fields.");
       return;
     }
 
@@ -158,7 +167,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       return;
     }
 
-    // For Aramex: require a valid quote before placing the order
+    // For Aramex: require a valid quote before confirming the order
     if (shippingMode === "aramex" && !aramexQuote) {
       setError("Aramex shipping quote is required. Please wait for the quote to load, or select 'Discuss Shipping Directly'.");
       return;
@@ -200,9 +209,9 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
               mode: "manual",
               shipping_method: "Discuss Shipping Directly",
               carrier: null,
-              quoted_shipping_charge: null, // explicitly null — not $0
+              quoted_shipping_charge: null,
               currency: "USD",
-              notes: "Shipping to be confirmed directly with AYAAN CLOTHING team.",
+              notes: "Freight to be confirmed separately by AYAAN CLOTHING team.",
             };
 
       const newOrder = await createOrder({
@@ -216,10 +225,10 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         shippingCountryCode: country,
         shippingMethod: shippingMode === "aramex" ? (aramexQuote?.service_name || "Aramex Priority Air Express") : "Manual — Discuss Shipping Directly",
         carrier: shippingMode === "aramex" ? (aramexQuote?.carrier || "Aramex Express Air") : undefined,
-        shippingCost: shippingMode === "aramex" ? aramexShippingCost : 0, // 0 for manual = "not quoted", not "free"
+        shippingCost: shippingMode === "aramex" ? aramexShippingCost : 0,
         shippingQuoteId: shippingMode === "aramex" ? aramexQuote?.quote_id : undefined,
         shippingSnapshot,
-        paymentMethod,
+        paymentMethod: "proforma_invoice",
         items: items.map((item) => ({
           productId: item.product.id,
           productName: item.product.name,
@@ -233,25 +242,10 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         })),
       });
 
-      // If user uploaded payment receipt
-      if (paymentProofFile && newOrder?.id) {
-        try {
-          await uploadPaymentProof(paymentProofFile, newOrder.id);
-        } catch (uploadErr) {
-          console.warn("Payment upload notice:", uploadErr);
-        }
-      }
-
       clearCart();
-      onClose();
-
-      if (user) {
-        router.push(`/profile/orders/${newOrder.id}`);
-      } else {
-        router.push(`/login`);
-      }
+      setConfirmedOrder(newOrder);
     } catch (err: any) {
-      setError(err?.message || "Failed to place order. Please try again.");
+      setError(err?.message || "Failed to confirm order. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -262,6 +256,179 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   // WhatsApp message for manual shipping inquiry
   const manualShippingWhatsAppMsg = `Hello AYAAN CLOTHING,\n\nI would like to discuss shipping options for my order.\n\nItems: ${totalItemQuantity} pcs\nMerchandise value: $${subtotal.toFixed(2)} USD\nDestination: ${city || "—"}, ${country}\n\nPlease advise on shipping arrangements.`;
 
+  // ── Post-Order Confirmation View with Direct PDF Downloads ─────────────────
+  if (confirmedOrder) {
+    const isManual =
+      confirmedOrder.shipping_snapshot?.mode === "manual" ||
+      !confirmedOrder.shipping_cost;
+
+    return (
+      <>
+        <div
+          className="fixed inset-0 bg-ink/60 backdrop-blur-xs z-[220] animate-in fade-in"
+          onClick={onClose}
+        />
+        <div className="fixed inset-0 z-[230] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div
+            className="bg-card border border-border/80 w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden my-auto animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-border bg-emerald-500/5">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                  <CheckCircle2 size={22} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold font-display text-foreground">
+                    Order Confirmed!
+                  </h2>
+                  <p className="text-xs text-muted-foreground font-mono font-bold">
+                    Ref: #{confirmedOrder.order_number}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5 max-h-[80vh] overflow-y-auto font-sans">
+              <div className="p-4 rounded-2xl bg-secondary/30 border border-border space-y-2 text-xs">
+                <p className="text-foreground leading-relaxed">
+                  Thank you! Your commercial export order has been recorded. <strong>No online payment was required.</strong> Our export desk is reviewing your order specifications and will issue payment settlement details per your Proforma Invoice.
+                </p>
+                <div className="pt-2.5 border-t border-border/60 flex items-center justify-between font-bold text-foreground">
+                  <span>Merchandise Value ({confirmedOrder.items?.length || 0} items):</span>
+                  <span>${confirmedOrder.subtotal.toFixed(2)} USD</span>
+                </div>
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>Shipping Arrangement:</span>
+                  <span className="font-semibold text-foreground">
+                    {isManual ? (
+                      <span className="text-amber-600 dark:text-amber-400">To be confirmed separately</span>
+                    ) : (
+                      `$${(confirmedOrder.shipping_cost || 0).toFixed(2)} USD (Aramex Priority Air)`
+                    )}
+                  </span>
+                </div>
+                <div className="pt-1.5 border-t border-border/40 flex items-center justify-between text-sm font-black text-foreground">
+                  <span>{isManual ? "Merchandise Total (USD):" : "Grand Total (USD):"}</span>
+                  <span className="text-primary">${confirmedOrder.total_amount.toFixed(2)} USD</span>
+                </div>
+              </div>
+
+              {/* Commercial Documents Download Section */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <FileText size={15} className="text-primary" />
+                  <span>Download Official Documents (PDF)</span>
+                </h3>
+
+                {/* Primary Button: Download Proforma Invoice */}
+                <button
+                  type="button"
+                  onClick={() => downloadProformaInvoicePDF(confirmedOrder)}
+                  className="w-full p-4 rounded-2xl bg-primary text-primary-foreground font-bold text-xs uppercase tracking-wider flex items-center justify-between hover:opacity-95 transition-all shadow-md cursor-pointer group"
+                >
+                  <div className="flex items-center gap-3">
+                    <Download size={18} className="group-hover:translate-y-0.5 transition-transform" />
+                    <div className="text-left">
+                      <span className="block font-bold">Download Proforma Invoice (PDF)</span>
+                      <span className="block text-[10px] opacity-80 normal-case font-normal">
+                        Order-level commercial P.I. • Itemized breakdown &amp; export terms
+                      </span>
+                    </div>
+                  </div>
+                  <ArrowRight size={16} />
+                </button>
+
+                {/* Offer Sheet Downloads per Item */}
+                {confirmedOrder.items && confirmedOrder.items.length > 0 && (
+                  <div className="space-y-2 pt-1">
+                    <span className="text-[11px] font-semibold text-muted-foreground block">
+                      Product Offer Sheets (Zero Shipping Info):
+                    </span>
+                    {confirmedOrder.items.map((it, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() =>
+                          downloadProductOfferSheetPDF(
+                            {
+                              name: it.product_name,
+                              sku: it.sku,
+                              price: it.unit_price,
+                              moq: it.quantity,
+                              imageUrl: it.product_image_url,
+                              packageBreakdown: it.package_breakdown,
+                            },
+                            {
+                              name: confirmedOrder.shipping_name,
+                              company: confirmedOrder.shipping_company,
+                              email: confirmedOrder.email,
+                              country: confirmedOrder.shipping_country_code,
+                            },
+                            it.quantity
+                          )
+                        }
+                        className="w-full p-3 rounded-xl border border-border bg-card hover:bg-secondary text-foreground text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <FileText size={14} className="text-primary shrink-0" />
+                          <span className="truncate">Download Offer Sheet: {it.product_name}</span>
+                        </div>
+                        <span className="text-[10px] text-primary font-bold shrink-0 font-mono ml-2 flex items-center gap-1">
+                          <Download size={11} />
+                          <span>PDF</span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons: WhatsApp & View Order */}
+              <div className="pt-3 border-t border-border grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <a
+                  href={getWhatsAppUrl(
+                    `Hello AYAAN CLOTHING,\n\nI have confirmed Order #${confirmedOrder.order_number}.\n\nTotal: $${confirmedOrder.total_amount.toFixed(2)} USD\nDestination: ${confirmedOrder.shipping_city}, ${confirmedOrder.shipping_country_code}\n\nPlease advise on next steps.`
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-3 px-4 rounded-xl bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/30 text-[#25D366] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                >
+                  <MessageCircle size={15} />
+                  <span>Contact on WhatsApp</span>
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    if (user) {
+                      router.push(`/profile/orders/${confirmedOrder.id}`);
+                    } else {
+                      router.push(`/search`);
+                    }
+                  }}
+                  className="py-3 px-4 rounded-xl border border-border bg-secondary hover:bg-secondary/80 text-foreground font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                >
+                  <span>{user ? "View in Dashboard" : "Continue Browsing"}</span>
+                  <ArrowRight size={14} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // ── Checkout Form ──────────────────────────────────────────────────────────
   return (
     <>
       <div
@@ -277,10 +444,10 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
           <div className="flex items-center justify-between px-6 py-4 border-b border-border">
             <div>
               <h2 className="text-xl font-bold font-display text-foreground">
-                Secure Checkout
+                Commercial Order Confirmation
               </h2>
               <p className="text-xs text-muted-foreground">
-                Destination, shipping arrangement, and payment details
+                Destination details, shipping arrangement &amp; Proforma Invoice generation
               </p>
             </div>
             <button
@@ -303,19 +470,19 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             <div>
               <h3 className="text-sm font-display font-bold uppercase tracking-wider text-foreground mb-3 flex items-center gap-2">
                 <Truck size={16} className="text-primary" />
-                <span>1. Shipping Destination</span>
+                <span>1. Destination Details</span>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-body">
                 <div>
                   <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                    Contact Name *
+                    Contact / Company Name *
                   </label>
                   <input
                     type="text"
                     required
                     value={shippingName}
                     onChange={(e) => setShippingName(e.target.value)}
-                    placeholder="John Doe"
+                    placeholder="John Doe / Global Retail Ltd"
                     className="w-full px-3.5 py-2 text-xs rounded-xl border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
                   />
                 </div>
@@ -425,10 +592,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 {/* ── OPTION A: AIR — ARAMEX ─────────────────────────────── */}
                 <button
                   type="button"
-                  onClick={() => {
-                    setShippingMode("aramex");
-                    // Trigger quote fetch if not yet available
-                  }}
+                  onClick={() => setShippingMode("aramex")}
                   className={`p-4 rounded-2xl border text-left flex flex-col gap-3 transition-all cursor-pointer relative ${
                     shippingMode === "aramex"
                       ? "border-primary bg-primary/5 text-foreground shadow-xs ring-1 ring-primary"
@@ -494,10 +658,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 {/* ── OPTION B: DISCUSS SHIPPING DIRECTLY ─────────────────── */}
                 <button
                   type="button"
-                  onClick={() => {
-                    setShippingMode("manual");
-                    // Clear any Aramex state — no quote applies
-                  }}
+                  onClick={() => setShippingMode("manual")}
                   className={`p-4 rounded-2xl border text-left flex flex-col gap-3 transition-all cursor-pointer relative ${
                     shippingMode === "manual"
                       ? "border-primary bg-primary/5 text-foreground shadow-xs ring-1 ring-primary"
@@ -522,10 +683,10 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     {shippingMode === "manual" && <CheckCircle2 size={16} className="text-primary shrink-0" />}
                   </div>
 
-                  {/* Manual shipping info — no quote, no price */}
+                  {/* Manual shipping info — no quote, no fake price */}
                   <div className="pt-2 border-t border-border/50 space-y-2">
                     <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      Shipping charges are not included in your order total. Our team will confirm shipping arrangements with you directly.
+                      Shipping charges are not included in your order total. Our export team will confirm shipping arrangements with you directly.
                     </p>
                     {shippingMode === "manual" && (
                       <a
@@ -578,109 +739,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
               )}
             </div>
 
-            {/* 3. Payment Method */}
-            <div>
-              <h3 className="text-sm font-display font-bold uppercase tracking-wider text-foreground mb-3 flex items-center gap-2">
-                <CreditCard size={16} className="text-primary" />
-                <span>3. Payment Method</span>
-              </h3>
-              <div className={`grid grid-cols-1 ${user?.role === "b2b_buyer" ? "sm:grid-cols-4" : "sm:grid-cols-3"} gap-3 font-body`}>
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod("card")}
-                  className={`p-3.5 rounded-2xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
-                    paymentMethod === "card"
-                      ? "border-primary bg-primary/5 text-foreground shadow-xs ring-1 ring-primary"
-                      : "border-border hover:border-primary/40 text-muted-foreground"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <CreditCard size={18} className={paymentMethod === "card" ? "text-primary" : "text-muted-foreground"} />
-                    {paymentMethod === "card" && <CheckCircle2 size={14} className="text-primary" />}
-                  </div>
-                  <span className="font-bold text-xs text-foreground">Credit / Debit Card</span>
-                  <span className="text-[10px] text-muted-foreground">Instant USD payment</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod("transfer")}
-                  className={`p-3.5 rounded-2xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
-                    paymentMethod === "transfer"
-                      ? "border-primary bg-primary/5 text-foreground shadow-xs ring-1 ring-primary"
-                      : "border-border hover:border-primary/40 text-muted-foreground"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <Building2 size={18} className={paymentMethod === "transfer" ? "text-primary" : "text-muted-foreground"} />
-                    {paymentMethod === "transfer" && <CheckCircle2 size={14} className="text-primary" />}
-                  </div>
-                  <span className="font-bold text-xs text-foreground">Bank Wire Transfer</span>
-                  <span className="text-[10px] text-muted-foreground">SWIFT wire transfer</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod("cod")}
-                  className={`p-3.5 rounded-2xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
-                    paymentMethod === "cod"
-                      ? "border-primary bg-primary/5 text-foreground shadow-xs ring-1 ring-primary"
-                      : "border-border hover:border-primary/40 text-muted-foreground"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <Truck size={18} className={paymentMethod === "cod" ? "text-primary" : "text-muted-foreground"} />
-                    {paymentMethod === "cod" && <CheckCircle2 size={14} className="text-primary" />}
-                  </div>
-                  <span className="font-bold text-xs text-foreground">Cash on Delivery</span>
-                  <span className="text-[10px] text-muted-foreground">Pay on arrival</span>
-                </button>
-
-                {user?.role === "b2b_buyer" && (
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("net_30")}
-                    className={`p-3.5 rounded-2xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
-                      paymentMethod === "net_30"
-                        ? "border-primary bg-primary/5 text-foreground shadow-xs ring-1 ring-primary"
-                        : "border-border hover:border-primary/40 text-muted-foreground"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <FileText size={18} className={paymentMethod === "net_30" ? "text-primary" : "text-muted-foreground"} />
-                      {paymentMethod === "net_30" && <CheckCircle2 size={14} className="text-primary" />}
-                    </div>
-                    <span className="font-bold text-xs text-foreground">Net 30 Terms</span>
-                    <span className="text-[10px] text-muted-foreground">B2B Trade Credit</span>
-                  </button>
-                )}
-              </div>
-
-              {/* Upload Payment Receipt for Bank Transfer */}
-              {paymentMethod === "transfer" && (
-                <div className="mt-3 p-4 rounded-2xl border border-dashed border-primary/40 bg-primary/5">
-                  <p className="text-xs font-semibold text-foreground mb-2">
-                    Attach Payment Slip / Wire Transfer Document (Optional)
-                  </p>
-                  <label className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-border bg-card hover:bg-secondary cursor-pointer text-xs text-foreground transition-colors">
-                    <Upload size={16} className="text-primary" />
-                    <span>{paymentProofFile ? paymentProofFile.name : "Select Receipt Image or PDF"}</span>
-                    <input
-                      type="file"
-                      accept="image/*,.pdf"
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          setPaymentProofFile(e.target.files[0]);
-                        }
-                      }}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-              )}
-            </div>
-
-            {/* Order Summary */}
+            {/* Order Summary — zero tax, clear export pricing */}
             <div className="p-4 rounded-2xl bg-secondary/30 border border-border/80 space-y-2 text-sm font-body">
               <div className="flex justify-between text-muted-foreground">
                 <span>Goods Value ({totalItemQuantity} pcs):</span>
@@ -697,7 +756,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 </span>
                 <span className="font-bold text-foreground">
                   {shippingMode === "manual" ? (
-                    <span className="text-amber-600 dark:text-amber-400 text-xs">To be confirmed</span>
+                    <span className="text-amber-600 dark:text-amber-400 text-xs">To be confirmed separately</span>
                   ) : aramexLoading ? (
                     <span className="text-muted-foreground text-xs">Calculating…</span>
                   ) : aramexQuote ? (
@@ -706,10 +765,6 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     <span className="text-muted-foreground">—</span>
                   )}
                 </span>
-              </div>
-              <div className="flex justify-between text-muted-foreground">
-                <span>Estimated Tax (5%):</span>
-                <span className="font-bold text-foreground">{formatPrice(tax)}</span>
               </div>
               <div className="flex justify-between text-base font-bold text-foreground pt-2.5 border-t border-border">
                 <span>
@@ -728,24 +783,20 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <ShieldCheck size={16} className="text-emerald-500 shrink-0" />
-              <span>Orders backed by AYAAN CLOTHING buyer protection &amp; real-time order tracking</span>
+              <span>Commercial orders backed by AYAAN CLOTHING export standard &amp; Proforma Invoice</span>
             </div>
 
-            {/* Submit */}
+            {/* Submit — No payment step */}
             <button
               type="submit"
               disabled={loading || (shippingMode === "aramex" && !aramexQuote)}
-              className="w-full py-3.5 px-4 bg-primary text-primary-foreground font-bold rounded-2xl text-xs uppercase tracking-wider shadow-md hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-40 cursor-pointer"
+              className="w-full py-4 px-4 bg-primary text-primary-foreground font-bold rounded-2xl text-xs uppercase tracking-wider shadow-md hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-40 cursor-pointer"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  <span>
-                    {shippingMode === "manual"
-                      ? `Place Order — $${formatPrice(total)} Merchandise`
-                      : `Place Order & Confirm ($${formatPrice(total)})`}
-                  </span>
+                  <span>Confirm Order &amp; Generate Proforma Invoice</span>
                   <ArrowRight size={16} />
                 </>
               )}

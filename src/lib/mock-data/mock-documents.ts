@@ -46,34 +46,47 @@ export function generateMockDocument(order: OrderRecord, docType: string, isAdmi
       // Offer Sheet NEVER contains shipping information — shipping is always negotiated separately
       return {
         document_type: "ORDER_SHEET",
-        title: "OFFICIAL EXPORT ORDER SHEET",
+        doc_type: "ORDER_SHEET",
+        title: "OFFICIAL COMMERCIAL OFFER SHEET",
         document_number: `OS-${order.order_number}`,
+        doc_number: `OS-${order.order_number}`,
         order_number: order.order_number,
-        date: order.created_at,
+        date: order.created_at || new Date().toISOString(),
+        valid_until: "30 Days from date of issuance",
         exporter: header,
         buyer,
-        shipping_method: order.shipping_method || "To Be Confirmed",
-        carrier: null, // shipping not quoted on offer sheet
         currency: "USD",
         items: items.map((i, idx) => ({
           serial: idx + 1,
+          description: i.product_name,
           product_name: i.product_name,
           sku: i.sku || `AYN-${idx + 100}`,
           size: i.size || "Standard Assorted",
           quantity: i.quantity,
           unit_price: i.unit_price,
+          unitPrice: i.unit_price,
           line_total: i.line_total,
+          total: i.line_total,
         })),
         summary: {
           total_units: totalPcs,
-          // Offer Sheet shows goods value only — no shipping charge
+          goods_value: order.subtotal,
           subtotal: order.subtotal,
-          shipping_fee: null, // intentionally excluded
-          tax: order.tax_amount || 0,
-          grand_total: order.subtotal + (order.tax_amount || 0), // merchandise + tax only
+          shipping_fee: null, // strictly zero shipping info
+          tax: 0,
+          grand_total: order.subtotal,
+          total_payable: order.subtotal,
         },
-        terms: "Production and packing per Ayaan Clothing export standard AQL 2.5.",
-        shipping_note: "Shipping to be confirmed separately by AYAAN CLOTHING.",
+        financials: {
+          goods_value: order.subtotal,
+          subtotal: order.subtotal,
+          shipping_charge: 0,
+          tax_amount: 0,
+          grand_total: order.subtotal,
+          total_payable: order.subtotal,
+          currency: "USD",
+        },
+        terms: "Commercial Offer only — Not an invoice. Valid for 30 days. Production per Ayaan Clothing export standard AQL 2.5.",
       };
 
     case "PROFORMA_INVOICE": {
@@ -86,47 +99,72 @@ export function generateMockDocument(order: OrderRecord, docType: string, isAdmi
 
       const freightCharge = isManualShipping ? null : (order.shipping_cost || 0);
       const piTotal = isManualShipping
-        ? order.subtotal + (order.tax_amount || 0)
+        ? order.subtotal
         : order.total_amount;
 
       return {
         document_type: "PROFORMA_INVOICE",
+        doc_type: "PROFORMA_INVOICE",
         title: "PROFORMA INVOICE (P.I.)",
         document_number: `PI-${order.order_number}`,
+        doc_number: `PI-${order.order_number}`,
         pi_number: `PI-${order.order_number}`,
         order_number: order.order_number,
-        date: order.created_at,
+        date: order.created_at || new Date().toISOString(),
         validity: "30 Days from date of issuance",
+        valid_until: "30 Days from date of issuance",
         exporter: header,
         buyer,
         payment_terms: "100% Advance T/T or Irrevocable Confirmed L/C at sight",
-        shipping_terms: "FOB Dhaka / CIF Destination",
+        shipping_terms: isManualShipping ? "FOB Dhaka (Freight to be confirmed)" : "CIF Destination / DAP",
         carrier: isManualShipping ? null : (order.carrier || "Aramex Express Air"),
+        shipping_snapshot: order.shipping_snapshot,
         currency: "USD",
         items: items.map((i, idx) => ({
           serial: idx + 1,
           description: `${i.product_name} (HS Code: 6109.10.00)`,
+          product_name: i.product_name,
+          sku: i.sku || `AYN-${idx + 100}`,
           quantity: i.quantity,
           unit_price: i.unit_price,
+          unitPrice: i.unit_price,
           amount: i.line_total,
+          line_total: i.line_total,
+          total: i.line_total,
+          size: i.size,
+          color: i.color,
+          package_breakdown: i.package_breakdown,
         })),
         summary: {
           total_quantity: totalPcs,
           fob_amount: order.subtotal,
-          // freight is null when shipping has not been quoted (manual arrangement)
+          goods_value: order.subtotal,
+          subtotal: order.subtotal,
           freight: freightCharge,
           insurance: 0,
+          tax: 0,
           total_cif_amount: piTotal,
+          grand_total: piTotal,
+          total_payable: piTotal,
         },
-        ...(isManualShipping && {
-          shipping_note: "Freight not included. Shipping charges to be confirmed separately by AYAAN CLOTHING team.",
-        }),
+        financials: {
+          goods_value: order.subtotal,
+          subtotal: order.subtotal,
+          shipping_charge: freightCharge || 0,
+          tax_amount: 0,
+          grand_total: piTotal,
+          total_payable: piTotal,
+          currency: "USD",
+        },
+        shipping_note: isManualShipping
+          ? "Freight to be confirmed separately by AYAAN CLOTHING team."
+          : undefined,
         bank_details: {
-          bank_name: "Standard Chartered Bank",
-          branch: "Gulshan Branch, Dhaka, Bangladesh",
-          account_name: "Ayaan Clothing Ltd",
-          account_number: "01-8829471-01",
-          swift_code: "SCBLBDDX",
+          is_configured: false,
+          beneficiary_name: BUSINESS_PROFILE.name,
+          country: "Bangladesh",
+          currency: "USD",
+          instructions: "Wire instructions countersigned upon PO approval.",
         },
       };
     }

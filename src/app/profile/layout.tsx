@@ -14,6 +14,7 @@ function getBreadcrumbLabel(pathname: string): string {
   if (pathname.startsWith("/profile/orders")) return "Orders";
   if (pathname.startsWith("/profile/addresses")) return "Addresses";
   if (pathname.startsWith("/profile/documents")) return "Documents";
+  if (pathname.startsWith("/profile/details")) return "Account Details";
   return "Account";
 }
 
@@ -48,12 +49,12 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
 
   return (
     <div className="bg-slate-50/70 dark:bg-slate-950 min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-4 sm:py-6">
 
         {/* Breadcrumb */}
         <nav
           aria-label="Breadcrumb"
-          className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mb-5 sm:mb-6"
+          className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mb-4 sm:mb-5"
         >
           <Link
             href="/"
@@ -82,12 +83,12 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
         </nav>
 
         {/* Mobile nav (shown on < lg) */}
-        <div className="mb-5 sm:mb-6">
+        <div className="mb-4 sm:mb-5">
           <CustomerAccountMobileNav />
         </div>
 
-        {/* Main layout — explicit sidebar width */}
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-7 items-start">
+        {/* Main layout — compact 230px sidebar & spacious content workspace */}
+        <div className="flex flex-col lg:flex-row gap-5 lg:gap-6 items-start">
           {/* Desktop sidebar */}
           <CustomerAccountSidebar />
 

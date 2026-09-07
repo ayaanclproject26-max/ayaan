@@ -278,15 +278,14 @@ export default function HotSales() {
                             key={aud.id}
                             type="button"
                             onClick={() => handleSweaterAudienceToggle(aud.id)}
-                            className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                            className={`inline-flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
                               isSelected
-                                ? "bg-foreground text-background shadow-sm ring-1 ring-foreground"
-                                : "bg-card hover:bg-card/80 text-foreground/80 border border-border/80 hover:border-foreground/40"
+                                ? "border-primary bg-primary/[0.08] text-primary ring-1 ring-primary/30 shadow-xs font-bold"
+                                : "bg-card hover:bg-secondary/70 text-foreground/80 hover:text-foreground border border-border/80 hover:border-foreground/30 shadow-2xs"
                             }`}
                           >
-                            <Icon size={14} className="shrink-0" />
                             <span>{aud.label}</span>
-                            {isSelected && <Check size={12} strokeWidth={3} className="ml-0.5" />}
+                            <Icon size={15} className={`shrink-0 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
                           </button>
                         );
                       })}

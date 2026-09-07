@@ -235,20 +235,21 @@ export async function getCommercialDocument(
   try {
     const { orderService } = await import("@/services/order.service");
     const orderDoc = await orderService.getOrderCommercialDocument(cleanId, docType);
-    if (orderDoc && orderDoc.doc_number) {
+    if (orderDoc && (orderDoc.doc_number || orderDoc.document_number)) {
+      const docNum = orderDoc.doc_number || orderDoc.document_number;
       return {
-        id: orderDoc.id || `doc_${docType}_${orderDoc.order_id}`,
-        docNumber: orderDoc.doc_number,
-        docType: (orderDoc.doc_type || docType) as CommercialDocType,
+        id: orderDoc.id || `doc_${docType}_${orderDoc.order_id || cleanId}`,
+        docNumber: docNum,
+        docType: (orderDoc.doc_type || orderDoc.document_type || docType) as CommercialDocType,
         title: orderDoc.title,
         date: orderDoc.date,
         orderNumber: orderDoc.order_number,
-        order_id: orderDoc.order_id,
-        companyName: orderDoc.buyer?.company_name || orderDoc.buyer?.name || "Consignee",
+        order_id: orderDoc.order_id || cleanId,
+        companyName: orderDoc.buyer?.company || orderDoc.buyer?.company_name || orderDoc.buyer?.name || "Consignee",
         buyerName: orderDoc.buyer?.name || "Valued Buyer",
         buyerEmail: orderDoc.buyer?.email || "",
         buyerPhone: orderDoc.buyer?.phone,
-        buyerAddress: [
+        buyerAddress: orderDoc.buyer?.address || [
           orderDoc.buyer?.address1,
           orderDoc.buyer?.address2,
           orderDoc.buyer?.city,
@@ -263,26 +264,26 @@ export async function getCommercialDocument(
           product_image_url: item.product_image_url,
           quantity: item.quantity,
           unitPrice: item.unitPrice ?? item.unit_price,
-          total: item.total ?? item.line_total,
+          total: item.total ?? item.line_total ?? item.amount,
           size: item.size,
           color: item.color,
           package_breakdown: item.package_breakdown,
           details: item.details,
         })),
-        subtotal: orderDoc.financials?.subtotal ?? orderDoc.financials?.goods_value ?? 0,
-        goods_value: orderDoc.financials?.goods_value ?? orderDoc.financials?.subtotal ?? 0,
+        subtotal: orderDoc.financials?.subtotal ?? orderDoc.summary?.subtotal ?? orderDoc.summary?.goods_value ?? orderDoc.summary?.fob_amount ?? 0,
+        goods_value: orderDoc.financials?.goods_value ?? orderDoc.summary?.goods_value ?? orderDoc.summary?.fob_amount ?? orderDoc.summary?.subtotal ?? 0,
         discount: orderDoc.financials?.discount_amount ?? 0,
-        shipping: orderDoc.financials?.shipping_charge ?? 0,
-        tax: orderDoc.financials?.tax_amount ?? 0,
+        shipping: orderDoc.financials?.shipping_charge ?? orderDoc.summary?.freight ?? 0,
+        tax: 0,
         other_charges: orderDoc.financials?.other_charges ?? 0,
-        grandTotal: orderDoc.financials?.grand_total ?? orderDoc.financials?.total_payable ?? 0,
-        total_payable: orderDoc.financials?.total_payable ?? orderDoc.financials?.grand_total ?? 0,
-        currency: orderDoc.financials?.currency || "USD",
+        grandTotal: orderDoc.financials?.grand_total ?? orderDoc.summary?.grand_total ?? orderDoc.summary?.total_cif_amount ?? 0,
+        total_payable: orderDoc.financials?.total_payable ?? orderDoc.summary?.total_payable ?? orderDoc.summary?.total_cif_amount ?? orderDoc.summary?.grand_total ?? 0,
+        currency: orderDoc.financials?.currency || orderDoc.currency || "USD",
         paymentTerms: orderDoc.payment_terms,
         shippingTerms: orderDoc.shipping_terms,
         incoterm: orderDoc.incoterm,
-        validUntil: orderDoc.valid_until,
-        notes: orderDoc.notes,
+        validUntil: orderDoc.valid_until || orderDoc.validity,
+        notes: orderDoc.notes || orderDoc.shipping_note,
         bankDetails: {
           isConfigured: Boolean(orderDoc.bank_details?.is_configured),
           beneficiaryName: orderDoc.bank_details?.beneficiary_name || BUSINESS_PROFILE.name,
@@ -295,7 +296,60 @@ export async function getCommercialDocument(
       };
     }
   } catch {
-    // If not found in orders, proceed to search quotations
+    // If not found in orders, proceed
+  }
+
+  // Check if ID is a product ID or slug for an OFFER_SHEET
+  if (docType === "ORDER_SHEET") {
+    try {
+      const { getProductBySlugOrId } = await import("@/lib/services/products");
+      const prod = await getProductBySlugOrId(cleanId);
+      if (prod) {
+        const basePrice = Number(prod.wholesalePrice || (prod as any).price) || 12;
+        const moq = prod.moq || 10;
+        return {
+          id: `doc_offer_${prod.id}`,
+          docNumber: `OS-${(prod.sku || prod.id).toUpperCase()}`,
+          docType: "ORDER_SHEET",
+          title: "OFFICIAL COMMERCIAL OFFER SHEET",
+          date: new Date().toISOString().slice(0, 10),
+          companyName: "Commercial Buyer",
+          buyerName: "Prospective Consignee",
+          buyerEmail: "buyer@example.com",
+          buyerCountry: "Worldwide Export",
+          items: [
+            {
+              description: prod.name,
+              sku: prod.sku || "AYN-SKU",
+              product_image_url: prod.images?.[0],
+              quantity: moq,
+              unitPrice: basePrice,
+              total: basePrice * moq,
+              details: `Material: ${prod.material || "100% Cotton"} • MOQ: ${moq} pcs`,
+            },
+          ],
+          subtotal: basePrice * moq,
+          goods_value: basePrice * moq,
+          discount: 0,
+          shipping: 0, // Strictly zero shipping on offer sheet
+          tax: 0,
+          grandTotal: basePrice * moq,
+          total_payable: basePrice * moq,
+          currency: "USD",
+          paymentTerms: "100% Advance T/T or L/C at sight",
+          shippingTerms: "FOB Dhaka (Shipping negotiated separately)",
+          incoterm: "FOB",
+          validUntil: "30 Days from date of issuance",
+          notes: "Commercial Offer only — Not an invoice. Valid for 30 days. FOB Dhaka Port / Airport.",
+          bankDetails: {
+            isConfigured: false,
+            beneficiaryName: BUSINESS_PROFILE.name,
+          },
+        };
+      }
+    } catch {
+      // ignore
+    }
   }
 
   const quote = await getQuotationById(id);

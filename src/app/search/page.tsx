@@ -45,6 +45,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 
+import { AudienceSelector, AUDIENCE_OPTIONS } from "@/components/common/AudiencePill";
+
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
@@ -61,14 +63,6 @@ const SORT_OPTIONS = [
 ] as const;
 
 type SortValue = (typeof SORT_OPTIONS)[number]["value"];
-
-const AUDIENCE_OPTIONS = [
-  { id: "MEN",    label: "MEN",    icon: User },
-  { id: "WOMEN",  label: "WOMEN",  icon: User },
-  { id: "BOYS",   label: "BOYS",   icon: Smile },
-  { id: "GIRLS",  label: "GIRLS",  icon: Sparkles },
-  { id: "UNISEX", label: "UNISEX", icon: Users },
-];
 
 // ---------------------------------------------------------------------------
 // Main component
@@ -581,11 +575,11 @@ function SearchResultsContent() {
         </div>
       )}
 
-      {/* 1. AUDIENCE / DEPARTMENT FILTER */}
+      {/* 1. AUDIENCE FILTER */}
       <div className="flex flex-col gap-2.5">
         <div className="flex items-center justify-between">
           <span className="text-[0.6875rem] font-bold uppercase tracking-wider text-muted-foreground">
-            AUDIENCE / DEPARTMENT
+            AUDIENCE
           </span>
           {selectedAudiences.length > 0 && (
             <span className="text-[0.6875rem] font-semibold text-primary">
@@ -594,64 +588,11 @@ function SearchResultsContent() {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          {AUDIENCE_OPTIONS.slice(0, 4).map((aud) => {
-            const Icon = aud.icon;
-            const isSelected = selectedAudiences.includes(aud.id);
-            return (
-              <button
-                key={aud.id}
-                type="button"
-                onClick={() => handleAudienceToggle(aud.id)}
-                className={`relative flex flex-col items-center justify-center p-2 rounded-xl border transition-all duration-200 cursor-pointer h-[72px] text-center ${
-                  isSelected
-                    ? "border-primary bg-primary/[0.08] ring-1 ring-primary/30 shadow-xs"
-                    : "border-border/75 bg-card hover:bg-secondary/70 hover:border-foreground/30"
-                }`}
-              >
-                {isSelected && (
-                  <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-                    <Check size={9} strokeWidth={3} />
-                  </span>
-                )}
-                <Icon size={18} className={`mb-1 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
-                <span className="text-xs font-bold uppercase tracking-wider text-foreground">
-                  {aud.label}
-                </span>
-              </button>
-            );
-          })}
-
-          {/* UNISEX centred */}
-          <div className="col-span-2 flex justify-center">
-            {(() => {
-              const aud = AUDIENCE_OPTIONS[4];
-              const Icon = aud.icon;
-              const isSelected = selectedAudiences.includes(aud.id);
-              return (
-                <button
-                  type="button"
-                  onClick={() => handleAudienceToggle(aud.id)}
-                  className={`relative flex flex-col items-center justify-center p-2 rounded-xl border transition-all duration-200 cursor-pointer h-[72px] text-center w-[calc(50%-0.25rem)] ${
-                    isSelected
-                      ? "border-primary bg-primary/[0.08] ring-1 ring-primary/30 shadow-xs"
-                      : "border-border/75 bg-card hover:bg-secondary/70 hover:border-foreground/30"
-                  }`}
-                >
-                  {isSelected && (
-                    <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-                      <Check size={9} strokeWidth={3} />
-                    </span>
-                  )}
-                  <Icon size={18} className={`mb-1 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
-                  <span className="text-xs font-bold uppercase tracking-wider text-foreground">
-                    {aud.label}
-                  </span>
-                </button>
-              );
-            })()}
-          </div>
-        </div>
+        <AudienceSelector
+          selectedAudiences={selectedAudiences}
+          onToggle={handleAudienceToggle}
+          layout="grid"
+        />
       </div>
 
       {/* 2. PRODUCT CATEGORY FILTER (Dynamic) */}

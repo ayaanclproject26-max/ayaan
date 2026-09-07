@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { getUserOrders, cancelOrder, OrderRecord, OrderItemRecord } from "@/lib/services/orders";
 import {
@@ -253,13 +254,26 @@ function OrderCard({
 
 // ─── Main page ─────────────────────────────────────────────────────────────────
 
-export default function OrdersPage() {
+function OrdersContent() {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab") as TabKey | null;
+
+  const validTabs: TabKey[] = ["all", "pending", "processing", "shipped", "delivered", "cancelled"];
+  const initialTab: TabKey = tabParam && validTabs.includes(tabParam) ? tabParam : "all";
+
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabKey>("all");
+  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
   const [searchQuery, setSearchQuery] = useState("");
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+
+  // Sync tab with URL search parameter if it changes
+  useEffect(() => {
+    if (tabParam && validTabs.includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   const fetchOrders = async () => {
     if (user?.id) {
@@ -476,5 +490,20 @@ export default function OrdersPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function OrdersPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="py-16 flex flex-col items-center justify-center gap-3">
+          <div className="w-7 h-7 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs text-slate-400">Loading orders…</p>
+        </div>
+      }
+    >
+      <OrdersContent />
+    </Suspense>
   );
 }

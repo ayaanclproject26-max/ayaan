@@ -127,10 +127,15 @@ export interface CreateOrderInput {
   items: Array<{
     productId?: string;
     variantId?: string;
+    productName?: string;
     name?: string;
+    sku?: string;
+    productSlug?: string;
+    productImage?: string;
     image?: string;
     size?: string;
     color?: string;
+    variantTitle?: string;
     quantity: number;
     unitPrice?: number;
     packageBreakdown?: any;
@@ -144,16 +149,15 @@ export class OrderService {
   async getUserOrders(userId?: string | number): Promise<OrderRecord[]> {
     if (!isFrontendOnly() && userId) {
       try {
-        const res = await apiClient.get<any>("/orders");
-        const raw = Array.isArray(res) ? res : res?.data;
-        if (Array.isArray(raw) && raw.length > 0) {
-          return raw.map((r: any) => this.normalizeOrderRecord(r));
+        const res = await apiClient.get<any>(`/orders?user_id=${userId}`);
+        const data = res?.data?.data || res?.data || res;
+        if (Array.isArray(data)) {
+          return data.map((o) => this.normalizeOrderRecord(o));
         }
-      } catch {
-        // Fallback
+      } catch (err: any) {
+        console.warn("API getUserOrders failed, falling back to mock:", err.message);
       }
     }
-
     if (userId) {
       return mockStore.getUserOrders(userId);
     }
@@ -161,22 +165,21 @@ export class OrderService {
   }
 
   /**
-   * Fetch single order by ID or order_number
+   * Fetch a single order by ID
    */
-  async getOrderById(id: string): Promise<OrderRecord | null> {
+  async getOrderById(orderId: string): Promise<OrderRecord | null> {
     if (!isFrontendOnly()) {
       try {
-        const res = await apiClient.get<any>(`/orders/${id}`);
-        const raw = res?.data || res;
-        if (raw && raw.id) {
-          return this.normalizeOrderRecord(raw);
+        const res = await apiClient.get<any>(`/orders/${orderId}`);
+        const data = res?.data?.data || res?.data || res;
+        if (data && data.id) {
+          return this.normalizeOrderRecord(data);
         }
-      } catch {
-        // Fallback
+      } catch (err: any) {
+        console.warn(`API getOrderById(${orderId}) failed, falling back to mock:`, err.message);
       }
     }
-
-    return mockStore.getOrderById(id);
+    return mockStore.getOrderById(orderId);
   }
 
   /**
@@ -198,7 +201,7 @@ export class OrderService {
       order_number: orderNumber,
       user_id: input.userId || null,
       status: "processing",
-      payment_status: input.paymentMethod === "bank_transfer" ? "pending" : "paid",
+      payment_status: "pending",
       fulfillment_status: "processing",
       currency: "USD",
       email: input.email,
@@ -217,7 +220,8 @@ export class OrderService {
       shipment_id: `SHP-${Math.floor(10000 + Math.random() * 90000)}`,
       direct_tracking_url: getWhatsAppUrl(`Track Order ${orderNumber}`),
       carrier_status: "Processing at Export Facility",
-      payment_method: input.paymentMethod || "card",
+      payment_method: input.paymentMethod || "proforma_invoice",
+      shipping_snapshot: input.shippingSnapshot,
       subtotal,
       subtotal_cents: Math.round(subtotal * 100),
       shipping_cost: shipping,
@@ -236,12 +240,12 @@ export class OrderService {
         order_id: orderId,
         product_id: item.productId,
         product_variant_id: item.variantId,
-        product_name: item.name || "Export Garment Item",
-        product_slug: (item.name || "garment").toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-        product_image_url: item.image || "/placeholder.jpg",
-        sku: `AYN-EXP-${idx + 101}`,
-        size: item.size || "Standard Assorted",
-        color: item.color || "Black",
+        product_name: item.productName || item.name || "Export Garment Item",
+        product_slug: item.productSlug || (item.productName || item.name || "garment").toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        product_image_url: item.productImage || item.image || "/placeholder.jpg",
+        sku: item.sku || `AYN-EXP-${idx + 101}`,
+        size: item.size || item.variantTitle || "Standard Assorted",
+        color: item.color || "Assorted",
         quantity: item.quantity,
         unit_price: item.unitPrice || 15,
         unit_price_cents: Math.round((item.unitPrice || 15) * 100),
@@ -254,16 +258,7 @@ export class OrderService {
           id: `ev_${Date.now()}_1`,
           order_id: orderId,
           event_type: "order_placed",
-          message: `Order placed online (${totalUnits} pcs total).`,
-          created_at: new Date().toISOString(),
-        },
-        {
-          id: `ev_${Date.now()}_2`,
-          order_id: orderId,
-          event_type: input.paymentMethod === "bank_transfer" ? "payment_proof_uploaded" : "payment_succeeded",
-          message: input.paymentMethod === "bank_transfer"
-            ? "Awaiting Proforma Invoice (P.I.) bank wire remittance."
-            : "Payment verified via secure online gateway.",
+          message: `Commercial order confirmed (${totalUnits} pcs). Proforma Invoice issued.`,
           created_at: new Date().toISOString(),
         },
       ],

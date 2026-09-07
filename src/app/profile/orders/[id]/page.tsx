@@ -14,6 +14,10 @@ import {
 } from "@/lib/order-status";
 import BUSINESS_PROFILE, { getWhatsAppUrl } from "@/config/business-profile";
 import {
+  downloadProformaInvoicePDF,
+  downloadProductOfferSheetPDF,
+} from "@/lib/pdf-generator";
+import {
   ArrowLeft,
   Package,
   Truck,
@@ -32,6 +36,7 @@ import {
   AlertCircle,
   Clock,
   ChevronRight,
+  Download,
 } from "lucide-react";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -466,10 +471,12 @@ function DocumentRow({
   label,
   href,
   locked,
+  onDownload,
 }: {
   label: string;
   href: string;
   locked?: boolean;
+  onDownload?: () => void;
 }) {
   if (locked) {
     return (
@@ -491,13 +498,26 @@ function DocumentRow({
         <FileText size={13} className="text-amber-600" />
         <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{label}</span>
       </div>
-      <Link
-        href={href}
-        className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
-      >
-        <span>Open</span>
-        <ChevronRight size={12} />
-      </Link>
+      <div className="flex items-center gap-2">
+        {onDownload && (
+          <button
+            type="button"
+            onClick={onDownload}
+            className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 bg-slate-100 dark:bg-white/5 px-2 py-1 rounded cursor-pointer transition-colors"
+            title="Download PDF (A4)"
+          >
+            <Download size={11} />
+            <span>PDF</span>
+          </button>
+        )}
+        <Link
+          href={href}
+          className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+        >
+          <span>Open</span>
+          <ChevronRight size={12} />
+        </Link>
+      </div>
     </div>
   );
 }
@@ -837,15 +857,67 @@ export default function OrderDetailPage({ params }: Props) {
           </SectionCard>
 
           {/* Documents */}
-          <SectionCard title="Documents" icon={FileText}>
+          <SectionCard title="Commercial Documents" icon={FileText}>
             <div>
+              {order.items && order.items.length > 1 ? (
+                order.items.map((it, idx) => (
+                  <DocumentRow
+                    key={idx}
+                    label={`Offer Sheet: ${it.product_name}`}
+                    href={`/admin/documents/ORDER_SHEET/order_${order.id}`}
+                    onDownload={() => {
+                      downloadProductOfferSheetPDF(
+                        {
+                          name: it.product_name,
+                          sku: it.sku,
+                          price: it.unit_price,
+                          moq: it.quantity,
+                          imageUrl: it.product_image_url,
+                          packageBreakdown: it.package_breakdown,
+                        },
+                        {
+                          name: order.shipping_name,
+                          company: order.shipping_company,
+                          email: order.email,
+                          country: order.shipping_country_code,
+                        },
+                        it.quantity
+                      );
+                    }}
+                  />
+                ))
+              ) : (
+                <DocumentRow
+                  label="Commercial Offer Sheet"
+                  href={`/admin/documents/ORDER_SHEET/order_${order.id}`}
+                  onDownload={() => {
+                    if (order.items && order.items[0]) {
+                      const it = order.items[0];
+                      downloadProductOfferSheetPDF(
+                        {
+                          name: it.product_name,
+                          sku: it.sku,
+                          price: it.unit_price,
+                          moq: it.quantity,
+                          imageUrl: it.product_image_url,
+                          packageBreakdown: it.package_breakdown,
+                        },
+                        {
+                          name: order.shipping_name,
+                          company: order.shipping_company,
+                          email: order.email,
+                          country: order.shipping_country_code,
+                        },
+                        it.quantity
+                      );
+                    }
+                  }}
+                />
+              )}
               <DocumentRow
-                label="Order Sheet"
-                href={`/admin/documents/ORDER_SHEET/order_${order.id}`}
-              />
-              <DocumentRow
-                label="Proforma Invoice"
+                label="Proforma Invoice (P.I.)"
                 href={`/admin/documents/PROFORMA_INVOICE/order_${order.id}`}
+                onDownload={() => downloadProformaInvoicePDF(order)}
               />
               <DocumentRow
                 label="Commercial Invoice"
