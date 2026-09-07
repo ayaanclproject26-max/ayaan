@@ -40,7 +40,6 @@ export interface BusinessProfile {
     email: string | null;
     phone: string | null;
     whatsappNumber: string;
-    whatsappDisplay: string;
     whatsappUrl: string;
     website: string;
   };
@@ -63,7 +62,6 @@ export interface BusinessProfile {
 }
 
 export const WHATSAPP_BUSINESS_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "8801982183886";
-export const WHATSAPP_BUSINESS_DISPLAY = process.env.NEXT_PUBLIC_WHATSAPP_DISPLAY || "+880 1982-183886";
 export const WHATSAPP_BUSINESS_URL = `https://wa.me/${WHATSAPP_BUSINESS_NUMBER.replace(/[^0-9]/g, "")}`;
 
 /**
@@ -102,7 +100,6 @@ export const BUSINESS_PROFILE: BusinessProfile = {
     email: null,
     phone: null,
     whatsappNumber: WHATSAPP_BUSINESS_NUMBER,
-    whatsappDisplay: WHATSAPP_BUSINESS_DISPLAY,
     whatsappUrl: WHATSAPP_BUSINESS_URL,
     website: "www.ayaanclothing.com",
   },

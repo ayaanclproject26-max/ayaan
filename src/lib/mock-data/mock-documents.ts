@@ -27,9 +27,9 @@ export function generateMockDocument(order: OrderRecord, docType: string, isAdmi
     business_subtitle: BUSINESS_PROFILE.description,
     address: BUSINESS_PROFILE.address.formatted,
     established_year: BUSINESS_PROFILE.establishedYear,
-    phone: BUSINESS_PROFILE.contact.whatsappDisplay,
+    phone: null,
     email: BUSINESS_PROFILE.contact.email || "export@ayaanclothing.com",
-    whatsapp: BUSINESS_PROFILE.contact.whatsappDisplay,
+    whatsapp: BUSINESS_PROFILE.contact.whatsappUrl,
     country: "Bangladesh",
   };
 

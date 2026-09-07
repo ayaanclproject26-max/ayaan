@@ -219,7 +219,7 @@ export function generateProductOfferSheetDoc(
     y + 16.5
   );
   doc.text(
-    `Origin: Bangladesh • Export Desk: ${BUSINESS_PROFILE.contact.whatsappDisplay} • ${BUSINESS_PROFILE.contact.email}`,
+    `Origin: Bangladesh • Export Desk: www.ayaanclothing.com • ${BUSINESS_PROFILE.contact.email || "export@ayaanclothing.com"}`,
     margin + 4,
     y + 20.5
   );
@@ -631,7 +631,7 @@ export function generateProformaInvoiceDoc(order: OrderRecord): jsPDF {
     y + 16.5
   );
   doc.text(
-    `Port of Loading: Dhaka Airport (DAC) / Chittagong Port • Contact: ${BUSINESS_PROFILE.contact.whatsappDisplay}`,
+    `Port of Loading: Dhaka Airport (DAC) / Chittagong Port • Web: www.ayaanclothing.com`,
     margin + 4,
     y + 20.5
   );
@@ -687,7 +687,7 @@ export function generateProformaInvoiceDoc(order: OrderRecord): jsPDF {
   doc.text("House #33 (2nd floor), Road #12, Sector #11", margin + 3, y + 13.5);
   doc.text("Uttara, Dhaka-1230, Bangladesh", margin + 3, y + 17.5);
   doc.text("Country of Origin: Bangladesh", margin + 3, y + 21.5);
-  doc.text(`Contact: ${BUSINESS_PROFILE.contact.whatsappDisplay}`, margin + 3, y + 25.5);
+  doc.text(`Contact: export@ayaanclothing.com`, margin + 3, y + 25.5);
   doc.text("Web: www.ayaanclothing.com", margin + 3, y + 29.5);
 
   // Box 2: Consignee / Buyer
