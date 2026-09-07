@@ -30,22 +30,23 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ayaan-clothing.verc
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "AYAAN CLOTHING | Ready-made Garments Manufacturer & Exporter",
+    default: "AYAAN CLOTHING — Bangladesh Garments Manufacturer & Exporter",
     template: "%s | AYAAN CLOTHING",
   },
   description:
-    "AYAAN CLOTHING is a Ready-made Garments Manufacturer & Exporter based in Uttara, Dhaka, Bangladesh (Est. 2010). Offering direct wholesale export sourcing and custom apparel manufacturing.",
+    "Ready-made garments manufacturer and exporter from Bangladesh. B2B wholesale apparel for international buyers. Est. 2010.",
   keywords: [
     "AYAAN CLOTHING",
     "Ready-made Garments Manufacturer",
     "Garments Exporter",
     "wholesale apparel",
-    "clothing manufacturer",
-    "bulk fashion",
+    "clothing manufacturer Bangladesh",
+    "bulk fashion export",
     "RMG Bangladesh",
     "B2B fashion sourcing",
     "custom apparel OEM",
     "Uttara Dhaka",
+    "international wholesale garments",
   ],
   authors: [{ name: "AYAAN CLOTHING" }],
   creator: "AYAAN CLOTHING",
@@ -63,24 +64,24 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: siteUrl,
     siteName: "AYAAN CLOTHING",
-    title: "AYAAN CLOTHING | Ready-made Garments Manufacturer & Exporter",
+    title: "AYAAN CLOTHING — Bangladesh Garments Manufacturer & Exporter",
     description:
-      "Ready-made Garments Manufacturer & Exporter based in Uttara, Dhaka, Bangladesh. Established 2010.",
+      "Ready-made garments manufacturer and exporter from Bangladesh. B2B wholesale apparel for international buyers.",
     images: [
       {
-        url: "/all_brand.jpeg",
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "AYAAN CLOTHING Ready-made Garments Manufacturer & Exporter",
+        alt: "AYAAN CLOTHING — Bangladesh Garments Manufacturer & Exporter",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "AYAAN CLOTHING | Ready-made Garments Manufacturer & Exporter",
+    title: "AYAAN CLOTHING — Bangladesh Garments Manufacturer & Exporter",
     description:
-      "Ready-made Garments Manufacturer & Exporter based in Uttara, Dhaka, Bangladesh. Established 2010.",
-    images: ["/all_brand.jpeg"],
+      "Ready-made garments manufacturer and exporter from Bangladesh. B2B wholesale apparel for international buyers.",
+    images: ["/og-image.jpg"],
   },
   robots: {
     index: true,

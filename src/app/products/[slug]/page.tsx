@@ -26,7 +26,7 @@ export async function generateMetadata({
       product.shortDescription ||
       product.description ||
       `Direct export wholesale ${product.name} by ${product.brand}. Premium grade apparel sourcing with fast global delivery.`;
-    const image = product.images?.[0] || "/all_brand.jpeg";
+    const image = product.images?.[0] || "/og-image.jpg";
 
     return {
       title,
@@ -38,7 +38,7 @@ export async function generateMetadata({
         title,
         description,
         url: `${siteUrl}/products/${product.slug}`,
-        siteName: "Ayaan Clothing",
+        siteName: "AYAAN CLOTHING",
         images: [
           {
             url: image,
@@ -58,7 +58,7 @@ export async function generateMetadata({
     };
   } catch {
     return {
-      title: "Product Detail | Ayaan Clothing",
+      title: "Product Detail | AYAAN CLOTHING",
       description: "Direct wholesale apparel sourcing and retail fashion.",
     };
   }
@@ -81,12 +81,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
         "@context": "https://schema.org",
         "@type": "Product",
         name: product.name,
-        image: product.images || [`${siteUrl}/all_brand.jpeg`],
+        image: product.images || [`${siteUrl}/og-image.jpg`],
         description: product.description || product.shortDescription,
         sku: product.sku,
         brand: {
           "@type": "Brand",
-          name: product.brand || "Ayaan",
+          name: product.brand || "AYAAN CLOTHING",
         },
         offers: {
           "@type": "Offer",
@@ -101,7 +101,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               : "https://schema.org/OutOfStock",
           seller: {
             "@type": "Organization",
-            name: "Ayaan Clothing",
+            name: "AYAAN CLOTHING",
           },
         },
       }
