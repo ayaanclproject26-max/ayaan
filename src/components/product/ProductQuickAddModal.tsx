@@ -147,7 +147,7 @@ export default function ProductQuickAddModal() {
                   <img
                     src={product.images[activeImageIndex]}
                     alt={product.name}
-                    className="w-full h-full object-cover transition-opacity duration-300"
+                    className="w-full h-full object-cover object-center transition-opacity duration-300"
                   />
                   <ProductPromotionBadges product={product} variant="modal" />
                   <ProductBrandLogoOverlay
@@ -163,13 +163,13 @@ export default function ProductQuickAddModal() {
                       <button
                         key={i}
                         onClick={() => setActiveImageIndex(i)}
-                        className={`shrink-0 w-16 h-20 sm:w-[72px] sm:h-[90px] rounded-lg overflow-hidden border-2 transition-all ${
+                        className={`shrink-0 w-14 sm:w-16 aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all ${
                           i === activeImageIndex
                             ? "border-foreground/80 ring-1 ring-foreground/20"
                             : "border-border/50 opacity-60 hover:opacity-100"
                         }`}
                       >
-                        <img src={img} alt={`${product.name} view ${i + 1}`} className="w-full h-full object-cover" />
+                        <img src={img} alt={`${product.name} view ${i + 1}`} className="w-full h-full object-cover object-center" />
                       </button>
                     ))}
                   </div>
