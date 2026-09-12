@@ -30,7 +30,7 @@ import { productService } from "@/services/product.service";
 import { brandService, BrandModel } from "@/services/brand.service";
 import { categoryService, CategoryModel } from "@/services/category.service";
 import { getBrandLogoUrl } from "@/lib/brand-logos";
-import BrandTile from "@/components/common/BrandTile";
+import GlobalFilterRail from "@/components/common/GlobalFilterRail";
 import {
   X,
   Filter,
@@ -43,7 +43,6 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-import { AudienceSelector, AUDIENCE_OPTIONS } from "@/components/common/AudiencePill";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -77,6 +76,7 @@ function SearchResultsContent() {
   const initialCategoryParam= searchParams.get("category") || "";
   const initialSortParam    = (searchParams.get("sort") || "newest") as SortValue;
   const initialPageParam    = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1);
+  const initialFilterOpen   = searchParams.get("filterOpen") === "true";
 
   // ── Filter state (3 Distinct Dimensions: Audience, Category, Brand) ──────
   const [selectedBrands, setSelectedBrands] = useState<string[]>(() =>
@@ -91,7 +91,7 @@ function SearchResultsContent() {
     initialCategoryParam ? initialCategoryParam.split(",").map((s) => s.trim()).filter(Boolean) : []
   );
   const [sort, setSort] = useState<SortValue>(initialSortParam);
-  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(initialFilterOpen);
   const [isSortOpen, setIsSortOpen] = useState(false);
 
   // ── Infinite scroll state ────────────────────────────────────────────────
@@ -150,10 +150,20 @@ function SearchResultsContent() {
       if (categories.length) params.set("category", categories.map((c) => c.toLowerCase()).join(","));
       if (sortVal !== "newest") params.set("sort", sortVal);
       if (page > 1)          params.set("page",     page.toString());
+      if (isFilterOpen)      params.set("filterOpen", "true");
       router.replace(`/search?${params.toString()}`, { scroll: false });
     },
-    [query, router]
+    [query, router, isFilterOpen]
   );
+
+  const handleFilterToggle = () => {
+    const newFilterState = !isFilterOpen;
+    setIsFilterOpen(newFilterState);
+    const params = new URLSearchParams(searchParams.toString());
+    if (newFilterState) params.set("filterOpen", "true");
+    else params.delete("filterOpen");
+    router.replace(`/search?${params.toString()}`, { scroll: false });
+  };
 
   // ── Core fetch function ───────────────────────────────────────────────────
   const fetchPage = useCallback(
@@ -350,6 +360,7 @@ function SearchResultsContent() {
       (entries) => {
         if (
           entries[0].isIntersecting &&
+          isFilterOpen &&
           !loading &&
           !loadingMore &&
           !error &&
@@ -403,7 +414,7 @@ function SearchResultsContent() {
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [loading, loadingMore, error, currentPage, lastPage, query, selectedBrands, selectedAudiences, sort, updateUrl]);
+  }, [loading, loadingMore, error, currentPage, lastPage, query, selectedBrands, selectedAudiences, sort, updateUrl, isFilterOpen]);
 
   // ── Retry failed page ─────────────────────────────────────────────────────
   const handleRetry = useCallback(() => {
@@ -413,37 +424,27 @@ function SearchResultsContent() {
 
   // ── Filter toggle handlers ────────────────────────────────────────────────
   const handleBrandToggle = useCallback(
-    (brandName: string) => {
-      const updated = selectedBrands.includes(brandName)
-        ? selectedBrands.filter((b) => b !== brandName)
-        : [...selectedBrands, brandName];
-      setSelectedBrands(updated);
-      resetAndReload(updated, selectedAudiences, selectedCategories, sort);
+    (brands: string[]) => {
+      setSelectedBrands(brands);
+      resetAndReload(brands, selectedAudiences, selectedCategories, sort);
     },
-    [selectedBrands, selectedAudiences, selectedCategories, sort, resetAndReload]
+    [selectedAudiences, selectedCategories, sort, resetAndReload]
   );
 
   const handleAudienceToggle = useCallback(
-    (audId: string) => {
-      const upper = audId.toUpperCase();
-      const updated = selectedAudiences.includes(upper)
-        ? selectedAudiences.filter((a) => a !== upper)
-        : [...selectedAudiences, upper];
-      setSelectedAudiences(updated);
-      resetAndReload(selectedBrands, updated, selectedCategories, sort);
+    (audiences: string[]) => {
+      setSelectedAudiences(audiences);
+      resetAndReload(selectedBrands, audiences, selectedCategories, sort);
     },
-    [selectedBrands, selectedAudiences, selectedCategories, sort, resetAndReload]
+    [selectedBrands, selectedCategories, sort, resetAndReload]
   );
 
   const handleCategoryToggle = useCallback(
-    (catName: string) => {
-      const updated = selectedCategories.some((c) => c.toLowerCase() === catName.toLowerCase())
-        ? selectedCategories.filter((c) => c.toLowerCase() !== catName.toLowerCase())
-        : [...selectedCategories, catName];
-      setSelectedCategories(updated);
-      resetAndReload(selectedBrands, selectedAudiences, updated, sort);
+    (categories: string[]) => {
+      setSelectedCategories(categories);
+      resetAndReload(selectedBrands, selectedAudiences, categories, sort);
     },
-    [selectedBrands, selectedAudiences, selectedCategories, sort, resetAndReload]
+    [selectedBrands, selectedAudiences, sort, resetAndReload]
   );
 
   const handleSortChange = useCallback(
@@ -466,16 +467,10 @@ function SearchResultsContent() {
     router.push("/");
   }, [router]);
 
-  // ── Body scroll lock (mobile drawer) ─────────────────────────────────────
-  useEffect(() => {
-    document.body.style.overflow = isMobileDrawerOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [isMobileDrawerOpen]);
-
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setIsMobileDrawerOpen(false);
+        setIsFilterOpen(false);
         setIsSortOpen(false);
       }
     };
@@ -489,182 +484,8 @@ function SearchResultsContent() {
   const hasMore           = currentPage < lastPage;
   const isEndOfResults    = currentPage >= lastPage && currentPage > 0 && products.length > 0;
 
-  const getBrandLogo = (brandName: string) => {
-    const normalized = brandName.toLowerCase().replace(/[''.\s-]/g, "");
-    const match = liveBrands.find(
-      (b) =>
-        b.name.toLowerCase() === brandName.toLowerCase() ||
-        String(b.id).toLowerCase() === normalized ||
-        b.slug.toLowerCase() === normalized
-    );
-    return getBrandLogoUrl(brandName, match?.logo_url || match?.logo);
-  };
-
   const currentSortLabel =
     SORT_OPTIONS.find((o) => o.value === sort)?.label ?? "Sort";
-
-  // ── Filter sidebar content (reused in desktop sidebar + mobile drawer) ────
-  const renderFilterContent = () => (
-    <div className="space-y-6">
-      {/* BRAND FILTER */}
-      {availableBrands.length > 0 && (
-        <div className="flex flex-col gap-2.5">
-          <div className="flex items-center justify-between">
-            <span className="text-[0.6875rem] font-bold uppercase tracking-wider text-muted-foreground">
-              BRAND
-            </span>
-            {selectedBrands.length > 0 && (
-              <span className="text-[0.6875rem] font-semibold text-primary">
-                {selectedBrands.length} selected
-              </span>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
-            {availableBrands.map((brandName) => {
-              const isSelected = selectedBrands.includes(brandName);
-              const logo = getBrandLogo(brandName);
-
-              return (
-                <BrandTile
-                  key={brandName}
-                  brand={{ name: brandName, logo_url: logo || undefined }}
-                  isSelected={isSelected}
-                  onClick={() => handleBrandToggle(brandName)}
-                  size="sm"
-                />
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* 1. AUDIENCE FILTER */}
-      <div className="flex flex-col gap-2.5">
-        <div className="flex items-center justify-between">
-          <span className="text-[0.6875rem] font-bold uppercase tracking-wider text-muted-foreground">
-            AUDIENCE
-          </span>
-          {selectedAudiences.length > 0 && (
-            <span className="text-[0.6875rem] font-semibold text-primary">
-              {selectedAudiences.length} selected
-            </span>
-          )}
-        </div>
-
-        <AudienceSelector
-          selectedAudiences={selectedAudiences}
-          onToggle={handleAudienceToggle}
-          layout="grid"
-        />
-      </div>
-
-      {/* 2. PRODUCT CATEGORY FILTER (Dynamic) */}
-      {availableCategories.length > 0 && (
-        <div className="flex flex-col gap-2.5 pt-2 border-t border-border/50">
-          <div className="flex items-center justify-between">
-            <span className="text-[0.6875rem] font-bold uppercase tracking-wider text-muted-foreground">
-              PRODUCT CATEGORY
-            </span>
-            {selectedCategories.length > 0 && (
-              <span className="text-[0.6875rem] font-semibold text-primary">
-                {selectedCategories.length} selected
-              </span>
-            )}
-          </div>
-
-          <div className="flex flex-wrap gap-1.5 max-h-56 overflow-y-auto pr-1">
-            {availableCategories.map((catName) => {
-              const isSelected = selectedCategories.some((c) => c.toLowerCase() === catName.toLowerCase());
-              return (
-                <button
-                  key={catName}
-                  type="button"
-                  onClick={() => handleCategoryToggle(catName)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
-                    isSelected
-                      ? "bg-primary text-primary-foreground shadow-xs scale-[1.02]"
-                      : "bg-secondary/60 hover:bg-secondary border border-border/80 text-foreground/80 hover:text-foreground"
-                  }`}
-                >
-                  {isSelected && <Check size={11} strokeWidth={3} />}
-                  <span>{catName}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ACTIVE FILTERS */}
-      {hasActiveFilters && (
-        <div className="pt-4 border-t border-border/60 flex flex-col gap-2.5">
-          <div className="flex items-center justify-between">
-            <span className="text-[0.6875rem] font-bold uppercase tracking-wider text-muted-foreground">
-              ACTIVE FILTERS
-            </span>
-            <button
-              type="button"
-              onClick={handleClearFilters}
-              className="text-xs font-bold text-destructive hover:underline cursor-pointer"
-            >
-              Clear All
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {selectedBrands.map((b) => (
-              <span
-                key={`side-b-${b}`}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary border border-border text-foreground font-semibold text-xs"
-              >
-                <span>{b}</span>
-                <button
-                  type="button"
-                  onClick={() => handleBrandToggle(b)}
-                  className="hover:text-destructive transition-colors ml-0.5 p-0.5 cursor-pointer"
-                  title={`Remove ${b}`}
-                >
-                  <X size={11} />
-                </button>
-              </span>
-            ))}
-            {selectedAudiences.map((a) => (
-              <span
-                key={`side-a-${a}`}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary border border-border text-foreground font-semibold text-xs"
-              >
-                <span>{a}</span>
-                <button
-                  type="button"
-                  onClick={() => handleAudienceToggle(a)}
-                  className="hover:text-destructive transition-colors ml-0.5 p-0.5 cursor-pointer"
-                  title={`Remove ${a}`}
-                >
-                  <X size={11} />
-                </button>
-              </span>
-            ))}
-            {selectedCategories.map((c) => (
-              <span
-                key={`side-c-${c}`}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary border border-border text-foreground font-semibold text-xs"
-              >
-                <span>{c}</span>
-                <button
-                  type="button"
-                  onClick={() => handleCategoryToggle(c)}
-                  className="hover:text-destructive transition-colors ml-0.5 p-0.5 cursor-pointer"
-                  title={`Remove ${c}`}
-                >
-                  <X size={11} />
-                </button>
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
 
   // ── Initial loading skeleton (full grid) ──────────────────────────────────
   if (loading) {
@@ -678,9 +499,6 @@ function SearchResultsContent() {
             </div>
           </div>
           <div className="flex flex-col lg:flex-row items-start gap-6 xl:gap-8 w-full">
-            <aside className="hidden lg:block w-64 xl:w-72 flex-shrink-0">
-              <div className="bg-card border border-border/70 rounded-2xl p-5 h-96 animate-pulse" />
-            </aside>
             <div className="flex-1 min-w-0">
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-5">
                 <ProductSkeletonRow count={10} />
@@ -722,6 +540,33 @@ function SearchResultsContent() {
           </div>
 
           <div className="flex items-center gap-2 self-start sm:self-auto">
+            {/* Filter Toggle Button (Desktop & Tablet) */}
+            <button
+              type="button"
+              onClick={handleFilterToggle}
+              aria-label={isFilterOpen ? "Close filters" : "Open filters"}
+              aria-expanded={isFilterOpen}
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-sans font-bold uppercase tracking-wider border transition-all duration-200 cursor-pointer ${
+                isFilterOpen || hasActiveFilters
+                  ? "bg-foreground text-background border-foreground shadow-xs"
+                  : "bg-secondary/70 hover:bg-secondary text-foreground border-border/80"
+              }`}
+            >
+              <SlidersHorizontal size={13} />
+              <span>FILTERS</span>
+              {hasActiveFilters && (
+                <span
+                  className={`w-4 h-4 rounded-full text-[10px] font-mono font-bold flex items-center justify-center ${
+                    isFilterOpen
+                      ? "bg-background text-foreground"
+                      : "bg-primary text-primary-foreground"
+                  }`}
+                >
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+
             {/* Sort dropdown */}
             <div className="relative">
               <button
@@ -766,69 +611,38 @@ function SearchResultsContent() {
         </div>
 
         {/* Main content area */}
-        <div className="flex flex-col lg:flex-row items-start gap-6 xl:gap-8 w-full">
+        <div className={
+            isFilterOpen
+              ? "grid grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)] gap-6 xl:gap-8 w-full"
+              : "w-full"
+          }>
 
-          {/* Desktop sidebar */}
-          <aside className="hidden lg:block w-64 xl:w-72 flex-shrink-0">
-            <div className="sticky top-[5.25rem] bg-card border border-border/70 rounded-2xl p-5 shadow-sm space-y-6 max-h-[calc(100vh-6.5rem)] overflow-y-auto">
-              <div className="flex items-center justify-between pb-3 border-b border-border/60">
-                <div className="flex items-center gap-2">
-                  <Filter size={16} className="text-foreground" />
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-foreground">
-                    Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
-                  </h2>
-                </div>
-                {hasActiveFilters && (
-                  <button
-                    type="button"
-                    onClick={handleClearFilters}
-                    className="text-xs font-bold text-destructive hover:underline cursor-pointer"
-                  >
-                    Clear All
-                  </button>
-                )}
-              </div>
-              {renderFilterContent()}
-            </div>
-          </aside>
+          {isFilterOpen && (
+            <GlobalFilterRail
+              isOpen={isFilterOpen}
+              onClose={() => setIsFilterOpen(false)}
+              selectedBrands={selectedBrands}
+              selectedAudiences={selectedAudiences}
+              selectedCategories={selectedCategories}
+              onBrandsChange={handleBrandToggle}
+              onAudiencesChange={handleAudienceToggle}
+              onCategoriesChange={handleCategoryToggle}
+              onClearAll={handleClearFilters}
+              availableBrands={liveBrands}
+              availableCategories={liveCategories}
+            />
+          )}
 
           {/* Product grid area */}
           <div className="flex-1 min-w-0 w-full flex flex-col gap-4">
 
-            {/* Mobile filter button row */}
-            <div className="lg:hidden flex items-center justify-between pb-2">
-              <button
-                type="button"
-                onClick={() => setIsMobileDrawerOpen(true)}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-sm active:scale-95 ${
-                  hasActiveFilters
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-card hover:bg-secondary border-border text-foreground"
-                }`}
-              >
-                <SlidersHorizontal size={14} />
-                <span>Filter</span>
-                {activeFilterCount > 0 && (
-                  <span className="w-5 h-5 rounded-full bg-primary-foreground text-primary text-xs font-bold flex items-center justify-center">
-                    {activeFilterCount}
-                  </span>
-                )}
-              </button>
-
-              {hasActiveFilters && (
-                <button
-                  type="button"
-                  onClick={handleClearFilters}
-                  className="text-xs font-bold text-destructive hover:underline cursor-pointer"
-                >
-                  Clear Filters
-                </button>
-              )}
-            </div>
-
             {/* Product grid */}
             {products.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-5">
+              <div className={`grid gap-3.5 sm:gap-5 transition-all duration-200 ${
+                  isFilterOpen
+                    ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4"
+                    : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+                }`}>
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -900,6 +714,19 @@ function SearchResultsContent() {
               />
             )}
 
+            {/* Fallback button when filter is closed (auto pagination OFF) */}
+            {!isFilterOpen && hasMore && !error && !loading && (
+               <div className="flex justify-center py-8">
+                  <button
+                    type="button"
+                    onClick={handleRetry} // triggers next page
+                    className="px-8 py-3 rounded-full text-xs font-sans font-bold uppercase tracking-widest bg-foreground text-background hover:opacity-90 active:scale-[0.98] cursor-pointer shadow-sm"
+                  >
+                    LOAD MORE
+                  </button>
+               </div>
+            )}
+
             {/* End of results indicator */}
             {isEndOfResults && !hasMore && (
               <div className="flex items-center justify-center gap-3 py-10">
@@ -912,61 +739,6 @@ function SearchResultsContent() {
             )}
 
           </div>
-        </div>
-      </div>
-
-      {/* Mobile drawer backdrop */}
-      {isMobileDrawerOpen && (
-        <div
-          className="fixed inset-0 bg-ink/50 backdrop-blur-sm z-50 lg:hidden transition-opacity duration-300 animate-in fade-in"
-          onClick={() => setIsMobileDrawerOpen(false)}
-        />
-      )}
-
-      {/* Mobile slide-in filter drawer */}
-      <div
-        className={`fixed inset-y-0 left-0 w-[85vw] max-w-sm bg-card z-50 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out lg:hidden border-r border-border ${
-          isMobileDrawerOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
-          <div className="flex items-center gap-2">
-            <Filter size={16} className="text-foreground" />
-            <h2 className="text-xs font-bold uppercase tracking-wider text-foreground">
-              Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
-            </h2>
-          </div>
-          <button
-            type="button"
-            onClick={() => setIsMobileDrawerOpen(false)}
-            className="p-1.5 rounded-full hover:bg-secondary transition-colors cursor-pointer"
-            aria-label="Close filters"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-6">
-          {renderFilterContent()}
-        </div>
-
-        <div className="p-4 border-t border-border bg-card flex items-center gap-3">
-          {hasActiveFilters && (
-            <button
-              type="button"
-              onClick={handleClearFilters}
-              className="flex-1 py-2.5 px-4 rounded-full border border-border text-foreground text-xs font-bold uppercase tracking-wider hover:bg-secondary transition-colors text-center cursor-pointer active:scale-95"
-            >
-              Clear All
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => setIsMobileDrawerOpen(false)}
-            className="flex-1 py-2.5 px-4 rounded-full bg-foreground text-background text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity text-center cursor-pointer font-display active:scale-95"
-          >
-            View {total.toLocaleString()} Results
-          </button>
         </div>
       </div>
 
@@ -1003,3 +775,4 @@ export default function SearchPage() {
     </Suspense>
   );
 }
+
