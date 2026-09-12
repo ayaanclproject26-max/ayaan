@@ -385,7 +385,7 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
           
           {/* LEFT: GALLERY / MEDIA + SPECIFICATIONS (5 Cols with controlled max-width) */}
-          <div className="lg:col-span-5 space-y-3.5 max-w-[460px] xl:max-w-[480px] w-full mx-auto lg:mx-0">
+          <div className="lg:col-span-5 space-y-3.5 max-w-[420px] xl:max-w-[440px] w-full mx-auto lg:mx-0">
             {/* Unified Media Experience (Images + Video + Lightbox) */}
             <ProductGallery
               images={product.images}

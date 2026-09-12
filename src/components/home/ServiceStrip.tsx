@@ -95,7 +95,7 @@ export default function ServiceStrip() {
       ref={sectionRef}
       aria-label="Key Value and Trust Features"
     >
-      <div ref={containerRef} className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8 2xl:px-12">
+      <div ref={containerRef} className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 2xl:px-12">
         {/* ── MOBILE VIEW (md:hidden) — Single-Border Inline Expanding Tile Interaction ── */}
         <div className="md:hidden py-1">
           <div 

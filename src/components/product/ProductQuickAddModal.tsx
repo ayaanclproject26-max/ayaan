@@ -125,7 +125,7 @@ export default function ProductQuickAddModal() {
         onClick={closeProductModal}
       >
         <div
-          className="bg-background w-full max-w-[680px] max-h-[92vh] sm:max-h-[88vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-border/70"
+          className="bg-background w-full max-w-[680px] max-h-[85vh] sm:max-h-[80vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-border/70"
           onClick={(e) => e.stopPropagation()}
         >
           {/* ─── LEVEL 1 & 2: Header (Product Name + Brand/SKU Metadata) ─── */}

@@ -435,7 +435,7 @@ export default function FeaturedProducts() {
       ref={sectionRef}
       className="pb-12 sm:pb-16 bg-background scroll-mt-20"
     >
-      <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8 2xl:px-12">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 2xl:px-12">
         {/* ── Header & Main Controls Bar ── */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 md:mb-8">
           <div>

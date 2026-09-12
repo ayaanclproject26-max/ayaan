@@ -491,7 +491,7 @@ function SearchResultsContent() {
   if (loading) {
     return (
       <div className="w-full bg-background min-h-[70vh] py-6 sm:py-8">
-        <div className="mx-auto w-full max-w-[1720px] px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-border/70 mb-6">
             <div className="space-y-2">
               <div className="h-7 bg-secondary/60 rounded-full w-64 animate-pulse" />
@@ -513,7 +513,7 @@ function SearchResultsContent() {
   // ── Full render ───────────────────────────────────────────────────────────
   return (
     <div className="w-full bg-background min-h-[70vh] py-6 sm:py-8">
-      <div className="mx-auto w-full max-w-[1720px] px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8">
 
         {/* Header row */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-border/70 mb-6">

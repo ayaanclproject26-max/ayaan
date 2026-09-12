@@ -97,7 +97,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       </div>
 
       {/* Card Content Area (Predictable Vertical Alignment & Isolation) */}
-      <div className="p-3 sm:p-3.5 flex flex-col justify-between flex-1 bg-card">
+      <div className="p-2.5 sm:p-3 flex flex-col justify-between flex-1 bg-card">
         {/* Product Title (Normalized 2-line height) */}
         <Link href={`/products/${product.slug}`} className="block">
           <h3 className="text-[14px] sm:text-[15px] font-body font-medium text-foreground transition-colors group-hover:text-primary line-clamp-2 min-h-[2.5rem] sm:min-h-[2.625rem] leading-snug">

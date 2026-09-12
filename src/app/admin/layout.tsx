@@ -83,7 +83,7 @@ export default function AdminLayout({
       </header>
 
       {/* Main Admin Workspace (Sidebar + Content) */}
-      <div className="flex-1 flex w-full max-w-[1720px] mx-auto">
+      <div className="flex-1 flex w-full max-w-[1440px] mx-auto">
         
         {/* Desktop Left Sidebar */}
         <aside className="hidden md:flex flex-col w-64 border-r border-border/80 bg-card p-4 space-y-6 shrink-0">

@@ -51,7 +51,7 @@ export default function CategoryHighlights() {
 
   return (
     <section id="categories" className="pt-1.5 sm:pt-2 pb-4 sm:pb-5 bg-background">
-      <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8 2xl:px-12">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 2xl:px-12">
         
         {/* AUDIENCE Section Title */}
         <div className="mb-2.5 sm:mb-3.5 text-center md:text-left flex flex-col sm:flex-row sm:items-end justify-between gap-1.5 sm:gap-2">

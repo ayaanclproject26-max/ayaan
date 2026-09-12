@@ -48,7 +48,7 @@ export default function ShopByBrand() {
 
   return (
     <section id="brands" className="py-12 sm:py-16 bg-background border-t border-border/60 scroll-mt-20">
-      <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8 2xl:px-12">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 2xl:px-12">
         
         {/* Section Heading & Subtitle */}
         <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-3">

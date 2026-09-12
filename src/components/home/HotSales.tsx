@@ -192,7 +192,7 @@ export default function HotSales() {
 
   return (
     <section id="hot-sales" className="pb-7 sm:pb-9 bg-background">
-      <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8 2xl:px-12">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 2xl:px-12">
         
         {/* Section Heading */}
         <div className="mb-3.5 sm:mb-5 text-center md:text-left flex flex-col sm:flex-row sm:items-end justify-between gap-2">

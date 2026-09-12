@@ -254,7 +254,7 @@ function HeaderContent() {
         }`}
       >
         {/* DESKTOP HEADER (Untouched, Full Desktop Bar) */}
-        <div className="hidden lg:flex items-center justify-between px-6 xl:px-12 py-3.5 gap-6 text-white max-w-[1920px] mx-auto">
+        <div className="hidden lg:flex items-center justify-between px-6 xl:px-12 py-3 gap-6 text-white max-w-[1440px] mx-auto">
           {/* Logo */}
           <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2 shrink-0 group" aria-label="Ayaan Clothing Home">
             <BrandName className="font-black text-2xl xl:text-3xl tracking-widest text-white group-hover:text-white/90 transition-colors" />
