@@ -336,7 +336,7 @@ export default function AdminProductsPage() {
                         <img
                           src={p.images[0] || "/placeholder.jpg"}
                           alt={p.name}
-                          className="w-10 h-12 object-cover rounded-md bg-secondary shrink-0 border border-border/50"
+                          className="w-9 aspect-[3/4] object-cover object-center rounded-md bg-secondary shrink-0 border border-border/50"
                         />
                         <div className="min-w-0">
                           <span className="font-bold text-foreground block truncate max-w-[220px]">

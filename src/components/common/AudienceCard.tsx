@@ -1,140 +1,119 @@
 "use client";
 
-import React, { useState } from "react";
-import { Check } from "lucide-react";
+import React from "react";
+import { LayoutGrid, Check, LucideIcon } from "lucide-react";
+import {
+  IconMen,
+  IconWomen,
+  IconBoys,
+  IconGirls,
+  IconUnisex,
+  IconProps,
+} from "./AudienceIcons";
 
-export interface AudienceImageOption {
+export type AudienceIconComponent = React.ComponentType<IconProps> | LucideIcon;
+
+export interface AudienceOption {
   id: "MEN" | "WOMEN" | "BOYS" | "GIRLS" | "UNISEX" | string;
   name: "MEN" | "WOMEN" | "BOYS" | "GIRLS" | "UNISEX" | string;
-  slug: string;
-  image: string;
-  description: string;
+  icon: AudienceIconComponent;
 }
 
 /**
- * Authoritative 5 Core Audience groups with restored original photographic assets:
- * - MEN: High quality men's tailored essentials
- * - WOMEN: Elegant contemporary women's wear
- * - BOYS: Durable streetwear & knitwear for boys
- * - GIRLS: EXACT URL https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&q=80&w=800
- * - UNISEX: Modern gender-neutral apparel
+ * Authoritative 5 Core Audience groups with unified human line-style icon family:
+ * - MEN   -> IconMen (Adult male silhouette)
+ * - WOMEN -> IconWomen (Distinct adult female silhouette)
+ * - BOYS  -> IconBoys (Young male child line icon, paired with Girls)
+ * - GIRLS -> IconGirls (Young female child line icon, paired with Boys)
+ * - UNISEX-> IconUnisex (Dual-person line icon)
  */
-export const AUDIENCE_IMAGE_OPTIONS: AudienceImageOption[] = [
+export const AUDIENCE_OPTIONS: AudienceOption[] = [
   {
     id: "MEN",
     name: "MEN",
-    slug: "men",
-    image: "https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&q=80&w=800",
-    description: "Modern essentials and statement pieces for men.",
+    icon: IconMen,
   },
   {
     id: "WOMEN",
     name: "WOMEN",
-    slug: "women",
-    image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=800",
-    description: "Elegant and contemporary fashion for women.",
+    icon: IconWomen,
   },
   {
     id: "BOYS",
     name: "BOYS",
-    slug: "boys",
-    image: "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&q=80&w=800",
-    description: "Trendy and durable apparel crafted for boys.",
+    icon: IconBoys,
   },
   {
     id: "GIRLS",
     name: "GIRLS",
-    slug: "girls",
-    image: "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&q=80&w=800",
-    description: "Vibrant and stylish fashion collection for girls.",
+    icon: IconGirls,
   },
   {
     id: "UNISEX",
     name: "UNISEX",
-    slug: "unisex",
-    image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800",
-    description: "Gender-neutral fashion for everyone.",
+    icon: IconUnisex,
   },
 ];
 
-export interface AudienceCardProps {
-  audience: AudienceImageOption;
+export interface AudienceTileProps {
+  id: string;
+  name: string;
+  icon: AudienceIconComponent;
   isActive?: boolean;
   onClick?: () => void;
   className?: string;
 }
 
 /**
- * Editorial Image-Based Audience Card for the Landing Page / Homepage:
- * - Photographic background with object-cover
- * - Subtle gradient overlay to keep text legible without dimming the photo
- * - Clear Manrope typography with uppercase styling
- * - Active checkmark badge & ring indicator
- * - Smooth hover zoom without displacing neighboring cards
+ * Clean, compact, icon-based Audience Tile:
+ * - Surface: warm/neutral surface matching Trust tiles with subtle 1px border
+ * - Icon: prominent line-style UI icon (~36–40px mobile, ~42–46px tablet, ~46–50px desktop visual footprint)
+ * - Label: Manrope bold uppercase (13–15px) tightly paired with icon (5–8px gap)
+ * - Centering: Icon + label centered as one unified visual group
+ * - Active: subtle active border emphasis with checkmark badge
  */
-export function AudienceCard({
-  audience,
+export function AudienceTile({
+  name,
+  icon: Icon,
   isActive = false,
   onClick,
   className = "",
-}: AudienceCardProps) {
-  const [imgError, setImgError] = useState(false);
-
+}: AudienceTileProps) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={isActive}
-      aria-label={`Explore ${audience.name} collection`}
-      className={`group relative w-full aspect-[4/3] rounded-xl sm:rounded-2xl overflow-hidden bg-secondary text-left border transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+      aria-label={`Explore ${name} collection`}
+      className={`group relative flex flex-col items-center justify-center gap-[3px] sm:gap-1 px-2 py-1 sm:px-2.5 sm:py-1.5 lg:px-3 lg:py-1.5 rounded-2xl border transition-all duration-200 ease-out motion-reduce:transition-none cursor-pointer select-none text-center w-full min-h-[76px] sm:min-h-[80px] lg:min-h-[88px] xl:min-h-[92px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:translate-y-0 active:scale-[0.99] ${
         isActive
-          ? "border-primary ring-2 ring-primary ring-offset-2 ring-offset-background shadow-md"
-          : "border-border/60 hover:border-foreground/40 hover:shadow-md"
+          ? "border-primary ring-1.5 ring-primary/40 bg-primary/[0.06] dark:bg-primary/[0.12] text-primary shadow-xs font-bold hover:bg-primary/[0.10] hover:-translate-y-[2px] hover:shadow-[0_6px_16px_rgba(15,23,42,0.12)] dark:hover:shadow-[0_6px_16px_rgba(0,0,0,0.4)]"
+          : "border-slate-900/25 dark:border-white/25 bg-card/90 dark:bg-card/60 shadow-2xs hover:border-slate-900/70 dark:hover:border-white/70 hover:bg-secondary/60 dark:hover:bg-secondary/50 text-foreground/90 hover:text-foreground hover:shadow-[0_6px_16px_rgba(15,23,42,0.09)] dark:hover:shadow-[0_6px_16px_rgba(0,0,0,0.35)] hover:-translate-y-[2.5px]"
       } ${className}`}
     >
-      {/* Background Image */}
-      {!imgError ? (
-        <img
-          src={audience.image}
-          alt={`${audience.name} Fashion Collection`}
-          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-          onError={() => setImgError(true)}
-          loading="lazy"
-        />
-      ) : (
-        <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center p-4">
-          <span className="text-white/30 text-xl font-display font-bold uppercase tracking-wider text-center">
-            {audience.name}
-          </span>
-        </div>
-      )}
-
-      {/* Subtle Gradient Overlay */}
-      <div
-        className={`absolute inset-0 transition-opacity duration-300 pointer-events-none ${
+      {/* Icon (prominent line-style UI artwork ~48–64px, visually stable without scaling) */}
+      <Icon
+        className={`w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 shrink-0 transition-colors duration-150 ${
           isActive
-            ? "bg-gradient-to-t from-black/80 via-black/35 to-black/15"
-            : "bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/80 group-hover:via-black/30"
+            ? "text-primary"
+            : "text-foreground/85 group-hover:text-foreground"
         }`}
+        strokeWidth={1.4}
+        aria-hidden="true"
       />
 
-      {/* Content Overlay */}
-      <div className="absolute inset-0 flex flex-col justify-end p-3.5 sm:p-4 text-white pointer-events-none">
-        <h3 className="font-display font-bold text-sm sm:text-base lg:text-lg uppercase tracking-wider text-white drop-shadow-xs leading-tight">
-          {audience.name}
-        </h3>
-        <span className="text-[10px] sm:text-xs font-sans font-medium uppercase tracking-widest text-white/80 opacity-0 transform translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
-          {isActive ? "Selected ✓" : "Explore →"}
-        </span>
-      </div>
+      {/* Label (tight 3–5px gap beneath icon, bold uppercase, identical typography across all 6 tiles) */}
+      <span className="font-display font-bold text-[0.8125rem] sm:text-[0.875rem] lg:text-[0.875rem] xl:text-[0.9375rem] uppercase tracking-wider leading-tight text-center max-w-full px-0.5 text-foreground/85 group-hover:text-foreground transition-colors duration-150">
+        {name}
+      </span>
 
       {/* Active Checkmark Badge */}
       {isActive && (
         <span
-          className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold shadow-md ring-2 ring-background"
+          className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-4 h-4 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[8.5px] font-bold shadow-xs animate-in zoom-in-75"
           aria-hidden="true"
         >
-          <Check size={13} strokeWidth={3} />
+          <Check size={10} strokeWidth={3} />
         </span>
       )}
     </button>
@@ -144,43 +123,58 @@ export function AudienceCard({
 export interface AudienceTilesProps {
   selectedAudiences: string[];
   onToggle: (audienceName: string) => void;
+  isAllCategoriesOpen?: boolean;
+  onToggleAllCategories?: () => void;
   className?: string;
 }
 
 /**
- * Responsive Grid of 5 Image-Based Audience Cards:
- * - Desktop: 5 columns in ONE single row (MEN, WOMEN, BOYS, GIRLS, UNISEX)
- * - Tablet: 3 columns
- * - Mobile: 2 columns with 5th tile (UNISEX) centered / spanning 2 columns
+ * Unified Responsive 6-Tile Audience Grid:
+ * - Desktop (lg:): All 6 tiles in 1 single row (MEN, WOMEN, BOYS, GIRLS, UNISEX, ALL CATEGORIES)
+ * - Tablet (sm:): 3 cols x 2 rows (6 balanced tiles)
+ * - Mobile (<sm:): 2 cols x 3 rows (6 balanced tiles)
  */
 export function AudienceTiles({
   selectedAudiences,
   onToggle,
+  isAllCategoriesOpen = false,
+  onToggleAllCategories,
   className = "",
 }: AudienceTilesProps) {
   return (
     <div
-      className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 ${className}`}
+      className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 lg:gap-3 xl:gap-3.5 ${className}`}
       role="group"
-      aria-label="Audience collection options"
+      aria-label="Audience and Category navigation"
     >
-      {AUDIENCE_IMAGE_OPTIONS.map((audience, index) => {
+      {AUDIENCE_OPTIONS.map((audience) => {
         const isSelected = selectedAudiences.includes(audience.name.toUpperCase());
-        const isLastOnMobile = index === AUDIENCE_IMAGE_OPTIONS.length - 1;
-
         return (
-          <div
+          <AudienceTile
             key={audience.id}
-            className={isLastOnMobile ? "col-span-2 sm:col-span-1" : "col-span-1"}
-          >
-            <AudienceCard
-              audience={audience}
-              isActive={isSelected}
-              onClick={() => onToggle(audience.name)}
-            />
-          </div>
+            id={audience.id}
+            name={audience.name}
+            icon={audience.icon}
+            isActive={isSelected}
+            onClick={() => onToggle(audience.name)}
+          />
         );
       })}
+
+      {/* 6th Tile: ALL CATEGORIES (Exact same tile design, icon + centered label) */}
+      {onToggleAllCategories && (
+        <AudienceTile
+          id="ALL_CATEGORIES"
+          name="ALL CATEGORIES"
+          icon={LayoutGrid}
+          isActive={isAllCategoriesOpen}
+          onClick={onToggleAllCategories}
+          className={isAllCategoriesOpen ? "border-primary" : ""}
+        />
+      )}
     </div>
   );
 }
+
+// Retain AudienceCard export alias for backward compatibility
+export const AudienceCard = AudienceTile;

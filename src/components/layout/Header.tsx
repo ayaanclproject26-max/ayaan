@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { 
@@ -52,13 +52,17 @@ const PRODUCT_CATEGORY_MENU_ITEMS = [
   { label: "TOWELS", href: "/search?category=Towels" },
 ];
 
+type HeaderState = "expanded" | "compact";
+
 function HeaderContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const urlQuery = searchParams.get("query");
 
-  const [isScrolled, setIsScrolled] = useState(false);
+  // Single authoritative source of truth for header scroll state
+  const [headerState, setHeaderState] = useState<HeaderState>("expanded");
+  const isCompact = headerState === "compact";
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -71,34 +75,118 @@ function HeaderContent() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalView, setAuthModalView] = useState<"signin" | "signup">("signin");
 
+  // Search boundary refs for click-outside dismissal
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
+  const mobileCompactSearchRef = useRef<HTMLDivElement>(null);
+  const desktopSearchRef = useRef<HTMLFormElement>(null);
+
   // Contexts
   const { totalItems, setIsCartOpen } = useCart();
   const { totalWishlistItems } = useWishlist();
   const { preferences } = usePreferences();
   const { user, signOut } = useAuth();
 
+  // Optimized single-listener scroll detection with hysteresis and requestAnimationFrame
   useEffect(() => {
-    let ticking = false;
+    let rafId: number | null = null;
+    let lastKnownState: HeaderState = "expanded";
+
     const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const y = window.scrollY;
-          setIsScrolled((prev) => {
-            if (!prev && y > 45) return true;
-            if (prev && y < 20) return false;
-            return prev;
-          });
-          ticking = false;
-        });
-        ticking = true;
+      if (rafId !== null) return;
+
+      rafId = window.requestAnimationFrame(() => {
+        const y = window.scrollY || (typeof document !== "undefined" ? document.documentElement.scrollTop : 0) || 0;
+        
+        let nextState: HeaderState = lastKnownState;
+
+        // Enter compact threshold: y > 50px
+        if (lastKnownState === "expanded" && y > 50) {
+          nextState = "compact";
+        }
+        // Return to expanded threshold: y <= 8px (or at top)
+        else if (lastKnownState === "compact" && y <= 8) {
+          nextState = "expanded";
+        }
+
+        // Only trigger React state update if state actually changed
+        if (nextState !== lastKnownState) {
+          lastKnownState = nextState;
+          setHeaderState(nextState);
+        }
+
+        rafId = null;
+      });
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Run initial scroll check
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
       }
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
   }, [pathname]);
 
+  // Outside click & Escape key dismissal for active search state
+  useEffect(() => {
+    if (!isSearchOpen) return;
+
+    const handleOutsideInteraction = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+
+      // Do not dismiss if clicking inside mobile search form or desktop search form
+      if (
+        mobileSearchRef.current?.contains(target) ||
+        mobileCompactSearchRef.current?.contains(target) ||
+        desktopSearchRef.current?.contains(target)
+      ) {
+        return;
+      }
+
+      // Do not dismiss if clicking inside the search discovery overlay (suggestions / recent searches)
+      if (target.closest?.("[data-search-overlay]")) {
+        return;
+      }
+
+      // Outside click detected -> dismiss search active state
+      setIsSearchOpen(false);
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsSearchOpen(false);
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur();
+        }
+      }
+    };
+
+    // Close search dropdown when scrolling deeply
+    const handleScrollClose = () => {
+      if (window.scrollY > 120) {
+        setIsSearchOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideInteraction);
+    document.addEventListener("touchstart", handleOutsideInteraction, { passive: true });
+    document.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("scroll", handleScrollClose, { passive: true });
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideInteraction);
+      document.removeEventListener("touchstart", handleOutsideInteraction);
+      document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("scroll", handleScrollClose);
+    };
+  }, [isSearchOpen]);
+
   const handleLogoClick = (e: React.MouseEvent) => {
+    setIsSearchOpen(false);
     if (pathname === "/") {
       e.preventDefault();
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -109,6 +197,7 @@ function HeaderContent() {
   };
 
   const openSignIn = () => {
+    setIsSearchOpen(false);
     if (user) {
       router.push("/profile");
     } else {
@@ -145,15 +234,26 @@ function HeaderContent() {
 
   return (
     <>
+      {/* 
+        STABLE OUTER HEADER SHELL:
+        Reserves predictable document flow space so page content NEVER shifts/jumps vertically 
+        when the header transitions between Expanded (106px) and Compact (58px) states.
+      */}
+      <div className="w-full h-[106px] lg:h-[4.25rem] shrink-0 pointer-events-none select-none" aria-hidden="true" />
+
+      {/* 
+        FIXED HEADER:
+        Pinned at top: 0 with zero layout interference on page scroll.
+      */}
       <header 
         role="banner"
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          isScrolled 
+        className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-250 w-full ${
+          isCompact 
             ? "bg-[#0b1329]/95 backdrop-blur-md shadow-lg border-b border-white/10" 
             : "bg-[#0b1329] border-b border-white/5"
         }`}
       >
-        {/* DESKTOP HEADER */}
+        {/* DESKTOP HEADER (Untouched, Full Desktop Bar) */}
         <div className="hidden lg:flex items-center justify-between px-6 xl:px-12 py-3.5 gap-6 text-white max-w-[1920px] mx-auto">
           {/* Logo */}
           <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2 shrink-0 group" aria-label="Ayaan Clothing Home">
@@ -162,6 +262,7 @@ function HeaderContent() {
 
           {/* Search Bar */}
           <form 
+            ref={desktopSearchRef}
             onSubmit={handleSearchSubmit}
             className="flex-1 max-w-xl xl:max-w-2xl relative"
           >
@@ -198,6 +299,18 @@ function HeaderContent() {
                 </button>
               )}
             </div>
+
+            {/* Suggestions Overlay */}
+            <SearchOverlay 
+              isOpen={isSearchOpen}
+              onClose={() => setIsSearchOpen(false)}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              onSelectTerm={(term) => {
+                setSearchQuery(term);
+                handleExecuteSearch(term);
+              }}
+            />
           </form>
 
           {/* Desktop Utilities */}
@@ -232,7 +345,6 @@ function HeaderContent() {
               </span>
             </button>
 
-
             {/* Wishlist — only visible when authenticated */}
             {user && (
               <Link 
@@ -264,7 +376,7 @@ function HeaderContent() {
               )}
             </button>
 
-            {/* Account / Profile — direct navigation, no popup */}
+            {/* Account / Profile */}
             {user ? (
               <Link
                 href="/profile"
@@ -289,30 +401,33 @@ function HeaderContent() {
           </div>
         </div>
 
-        {/* MOBILE HEADER (lg:hidden) — Two-State Scroll Transformation */}
+        {/* MOBILE HEADER (lg:hidden) — Clean 3-Zone Flex Architecture */}
         <div
-          className={`lg:hidden flex flex-col w-full text-white transition-all duration-300 ease-out overflow-hidden relative ${
-            isScrolled ? "h-[52px] px-3 sm:px-4 py-1.5" : "h-[106px] px-4 sm:px-6 pt-3 pb-3.5"
+          className={`lg:hidden w-full text-white transition-all duration-250 ease-out motion-reduce:transition-none overflow-hidden relative ${
+            isCompact ? "h-[58px] px-3.5 sm:px-4" : "h-[106px] px-4 sm:px-6 pt-2.5 pb-2.5 flex flex-col justify-between"
           }`}
         >
-          {/* ROW 1: Action Strip */}
-          <div className="relative flex items-center justify-between w-full h-10 shrink-0">
+          {/* ROW 1: 3-Zone Flex Action Row */}
+          <div className={`flex items-center justify-between w-full shrink-0 ${isCompact ? "h-full" : "h-9 sm:h-10"}`}>
             
-            {/* Left Control Group */}
+            {/* ZONE 1: LOGO / LEFT MENU (shrink-0) */}
             <div className="flex items-center shrink-0 z-20">
               {/* Top-State Hamburger (Left) */}
               <div
-                className={`transition-all duration-300 ease-out flex items-center overflow-hidden ${
-                  isScrolled
+                className={`transition-all duration-250 ease-out motion-reduce:transition-none flex items-center overflow-hidden ${
+                  isCompact
                     ? "w-0 opacity-0 -translate-x-4 pointer-events-none"
-                    : "w-10 opacity-100 translate-x-0"
+                    : "w-10 opacity-100 translate-x-0 pointer-events-auto"
                 }`}
               >
                 <button
                   type="button"
                   className="flex items-center justify-center h-10 w-10 -ml-1 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none cursor-pointer"
                   aria-label="Open navigation menu"
-                  onClick={() => setIsMobileMenuOpen(true)}
+                  onClick={() => {
+                    setIsSearchOpen(false);
+                    setIsMobileMenuOpen(true);
+                  }}
                 >
                   <Menu size={22} strokeWidth={1.75} />
                 </button>
@@ -320,16 +435,16 @@ function HeaderContent() {
 
               {/* Scrolled-State Compact Logo: AYC (Left) */}
               <div
-                className={`transition-all duration-300 ease-out flex items-center overflow-hidden ${
-                  isScrolled
-                    ? "w-[46px] opacity-100 translate-x-0 pointer-events-auto"
+                className={`transition-all duration-250 ease-out motion-reduce:transition-none flex items-center overflow-hidden ${
+                  isCompact
+                    ? "w-11 sm:w-12 opacity-100 translate-x-0 pointer-events-auto"
                     : "w-0 opacity-0 -translate-x-4 pointer-events-none"
                 }`}
               >
                 <Link
                   href="/"
                   onClick={handleLogoClick}
-                  className="font-brand font-black text-[1.25rem] tracking-tight select-none text-white leading-none shrink-0 flex items-center hover:opacity-90 transition-opacity"
+                  className="font-brand font-black text-[1.2rem] sm:text-[1.25rem] tracking-tight select-none text-white leading-none shrink-0 flex items-center hover:opacity-90 transition-opacity"
                   aria-label="Ayaan Clothing Home"
                 >
                   <span className="text-[#EA580C]">A</span>
@@ -339,29 +454,82 @@ function HeaderContent() {
               </div>
             </div>
 
-            {/* Top-State Full Brand Wordmark: AYAAN CLOTHING (Center & Large) */}
-            <div
-              className={`absolute inset-x-0 flex items-center justify-center pointer-events-none z-10 transition-all duration-300 ease-out ${
-                isScrolled
-                  ? "opacity-0 scale-90 -translate-y-2 pointer-events-none"
-                  : "opacity-100 scale-100 translate-y-0"
-              }`}
-            >
-              <Link
-                href="/"
-                onClick={handleLogoClick}
-                className="pointer-events-auto flex items-center justify-center max-w-[70%]"
-                aria-label="Ayaan Clothing Home"
+            {/* ZONE 2: MIDDLE AREA (Brand Wordmark in Expanded / Flexible Inline Search in Compact) */}
+            <div className={`flex-1 min-w-0 flex items-center relative transition-all duration-250 ease-out motion-reduce:transition-none ${
+              isCompact ? "justify-start px-2 sm:px-2.5" : "justify-center"
+            }`}>
+              {/* Top-State Full Brand Wordmark: AYAAN CLOTHING */}
+              <div
+                className={`transition-all duration-250 ease-out motion-reduce:transition-none flex items-center justify-center ${
+                  isCompact
+                    ? "opacity-0 scale-90 pointer-events-none absolute"
+                    : "opacity-100 scale-100 pointer-events-auto relative max-w-[70%]"
+                }`}
               >
-                <BrandName className="font-black text-xl sm:text-2xl tracking-widest text-white leading-tight truncate" />
-              </Link>
+                <Link
+                  href="/"
+                  onClick={handleLogoClick}
+                  className="pointer-events-auto flex items-center justify-center"
+                  aria-label="Ayaan Clothing Home"
+                >
+                  <BrandName className="font-black text-xl sm:text-2xl tracking-widest text-white leading-tight truncate" />
+                </Link>
+              </div>
+
+              {/* Scrolled-State Compact Search Bar (Flex-1, constrained within Zone 2) */}
+              <div
+                ref={mobileCompactSearchRef}
+                className={`w-full transition-all duration-250 ease-out motion-reduce:transition-none ${
+                  isCompact
+                    ? "opacity-100 pointer-events-auto flex items-center"
+                    : "opacity-0 pointer-events-none absolute"
+                }`}
+              >
+                <form
+                  onSubmit={handleSearchSubmit}
+                  className={`flex w-full items-center rounded-full border transition-all duration-200 cursor-text min-w-0 h-[36px] text-xs ${
+                    isSearchOpen
+                      ? "bg-white border-white text-slate-900 shadow-[0_0_16px_rgba(255,255,255,0.3)] ring-1.5 ring-white/30 pl-3 pr-1"
+                      : "bg-white/[0.07] border-white/12 text-white hover:bg-white/[0.11] hover:border-white/25 pl-2.5 pr-2"
+                  }`}
+                >
+                  {!isSearchOpen && (
+                    <Search size={13} className="mr-1.5 shrink-0 text-white/45 transition-colors" />
+                  )}
+
+                  <input
+                    type="text"
+                    className={`bg-transparent border-none outline-none w-full min-w-0 focus:ring-0 transition-colors text-xs ${
+                      isSearchOpen
+                        ? "text-slate-900 placeholder:text-slate-400 font-medium pr-1"
+                        : "text-white placeholder:text-white/40"
+                    }`}
+                    placeholder={isSearchOpen ? "Search apparel, brand..." : "Search products..."}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setIsSearchOpen(true)}
+                  />
+
+                  {isSearchOpen && (
+                    <button
+                      type="submit"
+                      className="shrink-0 rounded-full bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold flex items-center justify-center shadow-sm transition-all duration-150 cursor-pointer animate-in fade-in zoom-in-90 h-6 px-2.5 text-[0.6875rem] gap-0.5"
+                      aria-label="Search"
+                      title="Search"
+                    >
+                      <Search size={11} className="text-white" strokeWidth={2.5} />
+                    </button>
+                  )}
+                </form>
+              </div>
             </div>
 
-            {/* Right Control Group: Wishlist + Cart + Scrolled-State Hamburger */}
-            <div className="flex items-center gap-1 shrink-0 z-20">
+            {/* ZONE 3: ACTIONS AREA (Wishlist + Cart + Scrolled-State Hamburger — shrink-0) */}
+            <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 z-20">
               {user && (
                 <Link
                   href="/profile"
+                  onClick={() => setIsSearchOpen(false)}
                   className="relative flex items-center justify-center h-9 w-9 text-white/85 hover:text-white press-feedback focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                   aria-label="Wishlist"
                 >
@@ -378,7 +546,10 @@ function HeaderContent() {
               <button
                 type="button"
                 className="relative flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 text-white/90 hover:text-white active:bg-white/10 rounded-full press-feedback focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none cursor-pointer"
-                onClick={() => setIsCartOpen(true)}
+                onClick={() => {
+                  setIsSearchOpen(false);
+                  setIsCartOpen(true);
+                }}
                 aria-label="Shopping Cart"
               >
                 <ShoppingCart size={19} strokeWidth={1.6} />
@@ -391,8 +562,8 @@ function HeaderContent() {
 
               {/* Scrolled-State Hamburger (Right-most) */}
               <div
-                className={`transition-all duration-300 ease-out flex items-center overflow-hidden ${
-                  isScrolled
+                className={`transition-all duration-250 ease-out motion-reduce:transition-none flex items-center overflow-hidden ${
+                  isCompact
                     ? "w-9 sm:w-10 opacity-100 translate-x-0 pointer-events-auto"
                     : "w-0 opacity-0 translate-x-4 pointer-events-none"
                 }`}
@@ -401,7 +572,10 @@ function HeaderContent() {
                   type="button"
                   className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none cursor-pointer"
                   aria-label="Open navigation menu"
-                  onClick={() => setIsMobileMenuOpen(true)}
+                  onClick={() => {
+                    setIsSearchOpen(false);
+                    setIsMobileMenuOpen(true);
+                  }}
                 >
                   <Menu size={20} strokeWidth={1.75} />
                 </button>
@@ -410,38 +584,31 @@ function HeaderContent() {
 
           </div>
 
-          {/* ROW 2: Mobile Search Bar with Upward Physical Glide into Row 1 */}
+          {/* ROW 2: Expanded-State Search Bar (Full width, only active in Expanded mode) */}
           <div
-            className={`w-full transition-all duration-300 ease-out ${
-              isScrolled
-                ? `-translate-y-[37px] pl-[54px] ${user ? "pr-[122px]" : "pr-[82px]"} h-[34px] pointer-events-auto z-30`
-                : "translate-y-0 mt-2.5 h-10 z-10"
+            ref={mobileSearchRef}
+            className={`w-full transition-all duration-250 ease-out motion-reduce:transition-none ${
+              isCompact ? "h-0 opacity-0 pointer-events-none overflow-hidden" : "h-10 opacity-100 pointer-events-auto relative z-10"
             }`}
           >
             <form
               onSubmit={handleSearchSubmit}
-              className={`flex w-full items-center rounded-full border transition-all duration-200 cursor-text ${
-                isScrolled ? "h-[34px] text-xs" : "h-10 text-sm"
-              } ${
+              className={`flex w-full items-center rounded-full border transition-all duration-200 cursor-text h-10 text-sm ${
                 isSearchOpen
                   ? "bg-white border-white text-slate-900 shadow-[0_0_16px_rgba(255,255,255,0.3)] ring-1.5 ring-white/30 pl-3 pr-1"
-                  : isScrolled
-                    ? "bg-white/[0.07] border-white/12 text-white hover:bg-white/[0.11] hover:border-white/25 pl-2.5 pr-2"
-                    : "bg-white/[0.08] border-white/15 text-white hover:bg-white/[0.12] hover:border-white/30 px-3.5"
+                  : "bg-white/[0.08] border-white/15 text-white hover:bg-white/[0.12] hover:border-white/30 px-3.5"
               }`}
             >
               {!isSearchOpen && (
-                <Search size={isScrolled ? 13 : 16} className={`${isScrolled ? "mr-1.5" : "mr-2"} shrink-0 text-white/45 transition-colors`} />
+                <Search size={16} className="mr-2 shrink-0 text-white/45 transition-colors" />
               )}
 
               <input
                 type="text"
-                className={`bg-transparent border-none outline-none w-full focus:ring-0 transition-colors ${
-                  isScrolled ? "text-xs placeholder:text-white/40" : "text-[0.8125rem] placeholder:text-white/50"
-                } ${
+                className={`bg-transparent border-none outline-none w-full focus:ring-0 transition-colors text-[0.8125rem] ${
                   isSearchOpen
                     ? "text-slate-900 placeholder:text-slate-400 font-medium pr-1"
-                    : "text-white"
+                    : "text-white placeholder:text-white/50"
                 }`}
                 placeholder={isSearchOpen ? "Search apparel, brand..." : "Search products..."}
                 value={searchQuery}
@@ -452,13 +619,11 @@ function HeaderContent() {
               {isSearchOpen && (
                 <button
                   type="submit"
-                  className={`shrink-0 rounded-full bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold flex items-center justify-center shadow-sm transition-all duration-150 cursor-pointer animate-in fade-in zoom-in-90 ${
-                    isScrolled ? "h-6 px-2.5 text-[0.6875rem] gap-0.5" : "h-7 px-3 text-xs gap-1"
-                  }`}
+                  className="shrink-0 rounded-full bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold flex items-center justify-center shadow-sm transition-all duration-150 cursor-pointer animate-in fade-in zoom-in-90 h-7 px-3 text-xs gap-1"
                   aria-label="Search"
                   title="Search"
                 >
-                  <Search size={isScrolled ? 11 : 13} className="text-white" strokeWidth={2.5} />
+                  <Search size={13} className="text-white" strokeWidth={2.5} />
                 </button>
               )}
             </form>
@@ -721,7 +886,7 @@ function HeaderContent() {
 export default function Header() {
   return (
     <Suspense fallback={
-      <header className="sticky top-0 z-50 w-full bg-[#0b1329] border-b border-white/10 h-16 sm:h-[4.25rem]" />
+      <div className="w-full h-[106px] lg:h-[4.25rem] bg-[#0b1329] border-b border-white/10 shrink-0" />
     }>
       <HeaderContent />
     </Suspense>

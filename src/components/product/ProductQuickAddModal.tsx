@@ -5,6 +5,7 @@ import Link from "next/link";
 import { X, Minus, Plus, ShoppingCart, Check } from "lucide-react";
 import { useProductModal } from "@/lib/ProductModalContext";
 import { useCart } from "@/lib/CartContext";
+import ProductGallery from "@/components/product/ProductGallery";
 import ProductBrandLogoOverlay from "@/components/common/ProductBrandLogoOverlay";
 import ProductPromotionBadges from "@/components/common/ProductPromotionBadges";
 import { Product } from "@/types";
@@ -23,7 +24,6 @@ export default function ProductQuickAddModal() {
   const product = rawProduct as ExtendedProduct | null;
   const { addToCart, setIsCartOpen } = useCart();
 
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(0);
   const [addedSuccess, setAddedSuccess] = useState(false);
 
@@ -68,7 +68,6 @@ export default function ProductQuickAddModal() {
   // Reset state when product changes
   useEffect(() => {
     if (product) {
-      setActiveImageIndex(0);
       setQuantity(moq);
       setAddedSuccess(false);
     }
@@ -152,47 +151,28 @@ export default function ProductQuickAddModal() {
           {/* ─── Body (Two-Column Layout: Media + Compact Ordering) ─── */}
           <div className="flex-1 overflow-y-auto no-scrollbar">
             <div className="flex flex-col md:flex-row items-stretch">
-              {/* ═══ LEFT: Product Media ═══ */}
+              {/* ═══ LEFT: Product Media (Shared ProductGallery with Full Experience) ═══ */}
               <div className="md:w-[44%] md:shrink-0 p-4 sm:p-5 flex flex-col items-center justify-start">
-                <div className="relative aspect-[3/4] w-full max-h-[290px] sm:max-h-[320px] bg-secondary/50 rounded-xl overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={product.images[activeImageIndex]}
-                    alt={product.name}
-                    className="w-full h-full object-cover object-center transition-opacity duration-300"
-                  />
-                  <ProductPromotionBadges product={product} variant="modal" />
-                  <ProductBrandLogoOverlay
-                    brandName={brandName}
-                    brandLogo={brandLogo}
-                    size="modal"
-                    className="top-2.5 right-2.5"
-                  />
-                </div>
-                {product.images && product.images.length > 1 && (
-                  <div className="flex gap-2 mt-2.5 w-full overflow-x-auto no-scrollbar">
-                    {product.images.map((img: string, i: number) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setActiveImageIndex(i)}
-                        className={`shrink-0 w-11 sm:w-12 aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all ${
-                          i === activeImageIndex
-                            ? "border-foreground/80 ring-1 ring-foreground/20"
-                            : "border-border/50 opacity-60 hover:opacity-100"
-                        }`}
-                        aria-label={`View image ${i + 1}`}
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={img}
-                          alt={`${product.name} thumbnail ${i + 1}`}
-                          className="w-full h-full object-cover object-center"
-                        />
-                      </button>
-                    ))}
-                  </div>
-                )}
+                <ProductGallery
+                  images={product.images && product.images.length > 0 ? product.images : ["/placeholder.jpg"]}
+                  productName={product.name}
+                  productSlug={product.slug}
+                  videoUrl={product.videoUrl || (product as any).video_url}
+                  youtubeVideoId={(product as any).youtubeVideoId}
+                  youtubeEmbedUrl={(product as any).youtubeEmbedUrl}
+                  variant="modal"
+                  overlayContent={
+                    <>
+                      <ProductPromotionBadges product={product} variant="modal" />
+                      <ProductBrandLogoOverlay
+                        brandName={brandName}
+                        brandLogo={brandLogo}
+                        size="modal"
+                        className="top-2.5 right-2.5"
+                      />
+                    </>
+                  }
+                />
               </div>
 
               {/* ═══ RIGHT: LEVEL 3, 4, 5 (Product Info + Quantity + Add to Cart) ═══ */}

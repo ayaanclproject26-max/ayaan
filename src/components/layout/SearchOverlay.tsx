@@ -102,7 +102,10 @@ export default function SearchOverlay({
       />
 
       {/* Overlay Panel positioned right below header */}
-      <div className="fixed top-[6.75rem] lg:top-[4.25rem] left-0 right-0 mx-auto w-full max-w-5xl z-[45] bg-white rounded-b-2xl lg:rounded-2xl lg:mt-4 shadow-2xl transition-transform duration-300 transform-gpu overflow-hidden max-h-[calc(100vh-7rem)] lg:max-h-[calc(100vh-6rem)] flex flex-col border border-border/40 animate-in zoom-in-95 duration-200">
+      <div 
+        data-search-overlay="true"
+        className="fixed top-[6.75rem] lg:top-[4.25rem] left-0 right-0 mx-auto w-full max-w-5xl z-[45] bg-white rounded-b-2xl lg:rounded-2xl lg:mt-4 shadow-2xl transition-transform duration-300 transform-gpu overflow-hidden max-h-[calc(100vh-7rem)] lg:max-h-[calc(100vh-6rem)] flex flex-col border border-border/40 animate-in zoom-in-95 duration-200"
+      >
         
         {/* Scrollable Content */}
         <div className="flex flex-col lg:flex-row h-full overflow-y-auto px-4 sm:px-8 py-6 sm:py-8 gap-8 lg:gap-12 pb-12 w-full">

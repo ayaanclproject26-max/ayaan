@@ -83,7 +83,7 @@ export default function MiniCart() {
                     <img 
                       src={item.product.images[0]} 
                       alt={item.product.name} 
-                      className="w-16 h-20 object-cover rounded-lg bg-secondary shrink-0"
+                      className="w-15 aspect-[3/4] object-cover object-center rounded-lg bg-secondary shrink-0"
                     />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-body font-semibold text-[15px] uppercase tracking-tight truncate text-foreground">{item.product.name}</h3>

@@ -213,12 +213,13 @@ class MockStore {
     const id = data.id || `br_${(data.name || "brand").toLowerCase().replace(/[^a-z0-9]+/g, "_")}`;
     const slug = data.slug || (data.name || "brand").toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
+    const logoVal = data.logo_url || data.logo || "";
     const brand: BrandModel = {
       id,
       name: data.name || "New Brand",
       slug,
-      logo_url: data.logo_url || data.logo || "/brands/generic.png",
-      logo: data.logo || data.logo_url || "/brands/generic.png",
+      logo_url: logoVal,
+      logo: logoVal,
       website: data.website || null,
       sort_order: data.sort_order ?? brands.length + 1,
       is_active: data.is_active ?? true,

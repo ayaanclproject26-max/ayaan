@@ -30,14 +30,12 @@ import { productService } from "@/services/product.service";
 import { brandService, BrandModel } from "@/services/brand.service";
 import { categoryService, CategoryModel } from "@/services/category.service";
 import { getBrandLogoUrl } from "@/lib/brand-logos";
+import BrandTile from "@/components/common/BrandTile";
 import {
   X,
   Filter,
   Sparkles,
   Search,
-  User,
-  Users,
-  Smile,
   SlidersHorizontal,
   Check,
   AlertCircle,
@@ -368,6 +366,7 @@ function SearchResultsContent() {
                 q:        query || undefined,
                 brand:    selectedBrands.join(",") || undefined,
                 audience: selectedAudiences.join(",") || undefined,
+                category: selectedCategories.join(",") || undefined,
                 sort,
                 page:     nextPage,
                 per_page: PER_PAGE,
@@ -527,48 +526,13 @@ function SearchResultsContent() {
               const logo = getBrandLogo(brandName);
 
               return (
-                <button
+                <BrandTile
                   key={brandName}
-                  type="button"
+                  brand={{ name: brandName, logo_url: logo || undefined }}
+                  isSelected={isSelected}
                   onClick={() => handleBrandToggle(brandName)}
-                  className={`relative flex flex-col items-center justify-center p-2 rounded-xl border transition-all duration-200 cursor-pointer h-[72px] text-center ${
-                    isSelected
-                      ? "border-primary bg-primary/[0.08] ring-1 ring-primary/30 shadow-xs"
-                      : "border-border/75 bg-card hover:bg-secondary/70 hover:border-foreground/30"
-                  }`}
-                  title={brandName}
-                >
-                  {isSelected && (
-                    <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-                      <Check size={9} strokeWidth={3} />
-                    </span>
-                  )}
-                  <div className="h-7 w-full flex items-center justify-center px-1 mb-1">
-                    {logo ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={logo}
-                        alt={`${brandName} logo`}
-                        className="max-h-7 max-w-[80px] w-auto object-contain"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <span className="text-xs font-extrabold text-muted-foreground select-none">
-                        {brandName.length <= 3
-                          ? brandName.toUpperCase()
-                          : brandName
-                              .split(/\s+/)
-                              .map((w) => w[0])
-                              .join("")
-                              .toUpperCase()
-                              .slice(0, 2)}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-xs font-semibold text-foreground/80 truncate max-w-full px-0.5">
-                    {brandName}
-                  </span>
-                </button>
+                  size="sm"
+                />
               );
             })}
           </div>
@@ -745,7 +709,7 @@ function SearchResultsContent() {
               <Sparkles size={18} className="text-primary hidden sm:inline-block" />
             </div>
             {query.trim() && (
-              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              <p className="section-subtitle mt-1 sm:mt-1.5">
                 Showing wholesale &amp; retail products matching{" "}
                 <span className="font-semibold text-foreground">&ldquo;{query}&rdquo;</span>
               </p>

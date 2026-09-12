@@ -8,6 +8,8 @@ import {
   PaginatedProductsResult
 } from "@/services/product.service";
 import { B2BProductInput } from "@/types/b2b";
+import { Product } from "@/types";
+import { INITIAL_MOCK_PRODUCTS } from "@/lib/mock-data/mock-products";
 
 export { normalizeToB2BProduct, toStorefrontProduct, generateProductSku };
 export type { ProductQueryParams, SearchSuggestionsResult, PaginatedProductsResult };
@@ -73,3 +75,81 @@ export async function getProductShippingSpecs(
 ): Promise<any> {
   return productService.getProductShippingSpecs(slugOrId, quantity, isFullStock);
 }
+
+/**
+ * Options for querying featured products with pagination and filters
+ */
+export interface FeaturedProductsOptions {
+  tab: "best-deals" | "new-arrivals";
+  offset?: number;
+  limit?: number;
+  brands?: string[];
+  audiences?: string[];
+  categories?: string[];
+}
+
+/**
+ * Fetch a batch of Featured Products for the landing page with offset/limit pagination and filters
+ */
+export async function getFeaturedProducts(
+  options: FeaturedProductsOptions
+): Promise<{ products: Product[]; total: number; hasMore: boolean }> {
+  const isDeals = options.tab === "best-deals";
+  const offset = options.offset ?? 0;
+  const limit = options.limit ?? 15;
+
+  const queryParams: ProductQueryParams = {
+    is_best_deal: isDeals ? true : undefined,
+    is_new: !isDeals ? true : undefined,
+    brand: options.brands && options.brands.length > 0 ? options.brands.join(",") : undefined,
+    audience: options.audiences && options.audiences.length > 0 ? options.audiences.join(",") : undefined,
+    category: options.categories && options.categories.length > 0 ? options.categories.join(",") : undefined,
+  };
+
+  const allFiltered = await productService.getProducts(queryParams);
+  const total = allFiltered.length;
+  const sliced = allFiltered.slice(offset, offset + limit).map(toStorefrontProduct);
+  const hasMore = offset + sliced.length < total;
+
+  return {
+    products: sliced,
+    total,
+    hasMore,
+  };
+}
+
+/**
+ * Synchronous initial fallback for Featured Products to ensure instant SSR with 0 layout jump
+ */
+export function getInitialFeaturedProducts(
+  tab: "best-deals" | "new-arrivals",
+  limit: number = 15,
+  brands?: string[],
+  audiences?: string[],
+  categories?: string[]
+): Product[] {
+  const isDeals = tab === "best-deals";
+  let filtered = INITIAL_MOCK_PRODUCTS.filter((p) =>
+    isDeals ? p.isBestDeal : p.isNew
+  );
+
+  if (brands && brands.length > 0) {
+    const bLower = brands.map((b) => b.toLowerCase());
+    filtered = filtered.filter((p) => bLower.includes(p.brand.toLowerCase()));
+  }
+  if (audiences && audiences.length > 0) {
+    const aUpper = audiences.map((a) => a.toUpperCase());
+    filtered = filtered.filter((p) => aUpper.includes(p.audience.toUpperCase()));
+  }
+  if (categories && categories.length > 0) {
+    const cLower = categories.map((c) => c.toLowerCase());
+    filtered = filtered.filter((p) => {
+      const pCat = (p.categoryName || p.categoryId || "").toLowerCase();
+      return cLower.some((c) => pCat.includes(c));
+    });
+  }
+
+  return filtered.slice(0, limit).map(toStorefrontProduct);
+}
+
+

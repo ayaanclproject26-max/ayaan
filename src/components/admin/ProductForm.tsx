@@ -6,6 +6,7 @@ import Link from "next/link";
 import { B2BProductInput, B2BProductVariant } from "@/types/b2b";
 import { ShippingPackageProfile } from "@/types";
 import { brandService, BrandModel } from "@/services/brand.service";
+import BrandModal from "@/components/admin/BrandModal";
 import { categoryService, CategoryModel } from "@/services/category.service";
 import { generateProductSku } from "@/lib/services/products";
 import { uploadProductImage } from "@/lib/services/storage";
@@ -85,13 +86,6 @@ export default function ProductForm({ initialData, isEdit, onSubmit }: ProductFo
 
   // Inline Brand Modal State
   const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
-  const [inlineBrandName, setInlineBrandName] = useState("");
-  const [inlineBrandSlug, setInlineBrandSlug] = useState("");
-  const [inlineBrandLogo, setInlineBrandLogo] = useState("");
-  const [inlineBrandWebsite, setInlineBrandWebsite] = useState("");
-  const [inlineBrandLoading, setInlineBrandLoading] = useState(false);
-  const [inlineBrandError, setInlineBrandError] = useState("");
-  const [inlineBrandUploading, setInlineBrandUploading] = useState(false);
 
   // Category State & Multi-Category Support
   const [categoryId, setCategoryId] = useState(initialData?.categoryId || "1");
@@ -253,35 +247,14 @@ export default function ProductForm({ initialData, isEdit, onSubmit }: ProductFo
     fetchEntities();
   }, []);
 
-  // Inline Brand Submit Handler (100% preserves existing product form state)
-  const handleInlineBrandSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inlineBrandName.trim()) return;
-    setInlineBrandLoading(true);
-    setInlineBrandError("");
-    try {
-      const created = await brandService.createBrand({
-        name: inlineBrandName.trim(),
-        slug: inlineBrandSlug.trim() || undefined,
-        logo_url: inlineBrandLogo.trim() || undefined,
-        website: inlineBrandWebsite.trim() || undefined,
-      });
-      setAvailableBrands(prev => {
-        if (prev.some(b => String(b.id) === String(created.id) || b.name === created.name)) return prev;
-        return [...prev, created];
-      });
-      setBrand(created.name);
-      setBrandId(created.id);
-      setInlineBrandName("");
-      setInlineBrandSlug("");
-      setInlineBrandLogo("");
-      setInlineBrandWebsite("");
-      setIsBrandModalOpen(false);
-    } catch (err: any) {
-      setInlineBrandError(err?.message || "Failed to create brand");
-    } finally {
-      setInlineBrandLoading(false);
-    }
+  // Use BrandModal handler
+  const handleBrandCreated = (brand: BrandModel) => {
+    setAvailableBrands(prev => {
+      if (prev.some(b => String(b.id) === String(brand.id) || b.name === brand.name)) return prev;
+      return [...prev, brand];
+    });
+    setBrand(brand.name);
+    setBrandId(brand.id);
   };
 
   // Inline Category Submit Handler (100% preserves existing product form state)
@@ -1805,9 +1778,9 @@ export default function ProductForm({ initialData, isEdit, onSubmit }: ProductFo
               </button>
             </div>
 
-            <label className="px-4 py-2.5 rounded-xl bg-foreground text-background text-xs font-bold uppercase hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-xs">
+            <label className="px-4 py-2.5 rounded-xl bg-foreground text-background text-xs font-bold uppercase hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-xs min-h-[44px]">
               <Upload size={14} />
-              <span>{isUploading ? "Uploading..." : "Upload File"}</span>
+              <span>{isUploading ? "Uploading..." : "Upload Product Image"}</span>
               <input
                 type="file"
                 multiple
@@ -1818,12 +1791,22 @@ export default function ProductForm({ initialData, isEdit, onSubmit }: ProductFo
             </label>
           </div>
 
+          {/* Canonical 3:4 Portrait Helper Notice */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-muted-foreground gap-1 px-1">
+            <p className="font-medium text-foreground/85">
+              Recommended format: 3:4 portrait
+            </p>
+            <p className="text-[11px] text-muted-foreground">
+              Direct phone camera photos accepted (presented safely in canonical 3:4 frame)
+            </p>
+          </div>
+
           {/* Images Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
             {images.map((img, idx) => (
               <div key={idx} className="relative aspect-[3/4] rounded-xl overflow-hidden border border-border bg-secondary group shadow-xs">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img} alt={`Product thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                <img src={img} alt={`Product thumbnail ${idx + 1}`} className="w-full h-full object-cover object-center" />
                 {idx === 0 && (
                   <span className="absolute top-1.5 left-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-primary-foreground px-2 py-0.5 rounded-full shadow-xs">
                     Primary
@@ -1981,142 +1964,19 @@ export default function ProductForm({ initialData, isEdit, onSubmit }: ProductFo
       </div>
 
       {/* INLINE BRAND CREATION MODAL */}
-      {isBrandModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-4 animate-in zoom-in-95">
-            <div className="flex items-center justify-between pb-3 border-b border-border">
-              <h3 className="font-bold text-sm uppercase text-foreground">
-                Add New Manufacturer Brand
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsBrandModalOpen(false)}
-                className="text-muted-foreground hover:text-foreground cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            {inlineBrandError && (
-              <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-bold">
-                {inlineBrandError}
-              </div>
-            )}
-
-            <div className="space-y-3 text-xs">
-              <div className="space-y-1">
-                <label className="font-bold uppercase tracking-wider text-muted-foreground">
-                  Brand Name <span className="text-destructive">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Loro Piana, Carhartt WIP"
-                  value={inlineBrandName}
-                  onChange={(e) => {
-                    setInlineBrandName(e.target.value);
-                    if (!inlineBrandSlug) {
-                      setInlineBrandSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-"));
-                    }
-                  }}
-                  className="w-full px-3.5 py-2 rounded-xl border border-border bg-secondary/30 text-foreground outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-bold uppercase tracking-wider text-muted-foreground">
-                  Slug / Identifier (Optional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="loro-piana"
-                  value={inlineBrandSlug}
-                  onChange={(e) => setInlineBrandSlug(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl border border-border bg-secondary/30 text-foreground font-mono outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="font-bold uppercase tracking-wider text-muted-foreground block">
-                  Brand Logo (Optional)
-                </label>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-10 rounded-lg bg-secondary border border-border overflow-hidden flex items-center justify-center shrink-0 p-1">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={inlineBrandLogo || "/brands/generic.png"}
-                      alt="Preview"
-                      className="max-w-full max-h-full object-contain"
-                    />
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <input
-                      type="text"
-                      placeholder="Logo URL or upload"
-                      value={inlineBrandLogo}
-                      onChange={(e) => setInlineBrandLogo(e.target.value)}
-                      className="w-full px-3 py-1.5 rounded-lg border border-border bg-secondary/30 text-foreground text-xs outline-none focus:ring-1 focus:ring-primary"
-                    />
-                    <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-border bg-secondary hover:bg-card text-[11px] font-bold cursor-pointer transition-colors">
-                      <Upload size={11} />
-                      <span>{inlineBrandUploading ? "Uploading..." : "Upload Logo"}</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          setInlineBrandUploading(true);
-                          try {
-                            const res = await uploadProductImage(file);
-                            if (res.url) setInlineBrandLogo(res.url);
-                          } catch (err) {
-                            console.error(err);
-                          } finally {
-                            setInlineBrandUploading(false);
-                          }
-                        }}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-bold uppercase tracking-wider text-muted-foreground">
-                  Official Website (Optional)
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://..."
-                  value={inlineBrandWebsite}
-                  onChange={(e) => setInlineBrandWebsite(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl border border-border bg-secondary/30 text-foreground outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-3 border-t border-border">
-                <button
-                  type="button"
-                  onClick={() => setIsBrandModalOpen(false)}
-                  className="px-4 py-2 rounded-full border border-border text-xs font-bold uppercase cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  disabled={inlineBrandLoading || !inlineBrandName.trim()}
-                  onClick={handleInlineBrandSubmit}
-                  className="px-6 py-2 rounded-full bg-foreground text-background text-xs font-bold uppercase hover:opacity-90 disabled:opacity-50 transition-opacity cursor-pointer"
-                >
-                  {inlineBrandLoading ? "Creating..." : "Create & Select Brand"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <BrandModal
+        isOpen={isBrandModalOpen}
+        onClose={() => setIsBrandModalOpen(false)}
+        onSuccess={(created) => {
+          setAvailableBrands((prev) => {
+            if (prev.some((b) => String(b.id) === String(created.id) || b.name === created.name)) return prev;
+            return [...prev, created];
+          });
+          setBrand(created.name);
+          setBrandId(created.id);
+        }}
+        defaultSortOrder={availableBrands.length + 1}
+      />
 
       {/* INLINE CATEGORY CREATION MODAL */}
       {isCategoryModalOpen && (

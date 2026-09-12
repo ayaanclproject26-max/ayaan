@@ -53,6 +53,7 @@
 }
 
 :root {
+  --product-image-ratio: 3 / 4;
   --radius: 0.75rem;
   --brand-orange: #EA580C;
   --background: oklch(0.985 0.008 85);
@@ -183,6 +184,15 @@
   line-height: 1.65;
 }
 
+@utility section-subtitle {
+  font-family: var(--font-sans);
+  font-size: clamp(0.8125rem, 0.78125rem + 0.25vw, 0.90625rem);
+  line-height: 1.45;
+  color: var(--color-muted-foreground);
+  font-weight: 400;
+}
+
+
 @keyframes ayc-rise {
   from { opacity: 0; transform: translate3d(0, 10px, 0); }
   to   { opacity: 1; transform: translate3d(0, 0, 0); }
@@ -207,3 +217,8 @@
   scrollbar-width: none;
   &::-webkit-scrollbar { display: none; }
 }
+
+@utility aspect-product {
+  aspect-ratio: var(--product-image-ratio, 3 / 4);
+}
+

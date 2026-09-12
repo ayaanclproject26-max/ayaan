@@ -33,24 +33,25 @@ export default function ProductBrandLogoOverlay({
     return null;
   }
 
-  // Dimension classes based on size variant — Compact rectangular/square container with clean rounded corners
-  let containerDimensions = "w-8 h-8 sm:w-9 sm:h-9 rounded-lg p-1 sm:p-1.5";
-  let imageDimensions = "max-w-[22px] max-h-[22px] sm:max-w-[26px] sm:max-h-[26px]";
+  // Dimension classes based on size variant — Strictly 1:1 TRUE SQUARE containers (aspect-ratio: 1 / 1)
+  let containerDimensions = "w-9 h-9 sm:w-10 sm:h-10 rounded-xl p-1.5";
+  let imageDimensions = "max-w-[85%] max-h-[85%]";
 
   if (size === "detail") {
-    containerDimensions = "w-12 h-12 sm:w-14 sm:h-14 rounded-xl p-2 sm:p-2.5";
-    imageDimensions = "max-w-[36px] max-h-[36px] sm:max-w-[44px] sm:max-h-[44px]";
+    containerDimensions = "w-12 h-12 sm:w-14 sm:h-14 rounded-2xl p-2 sm:p-2.5";
+    imageDimensions = "max-w-[85%] max-h-[85%]";
   } else if (size === "modal") {
     containerDimensions = "w-10 h-10 sm:w-11 sm:h-11 rounded-xl p-1.5 sm:p-2";
-    imageDimensions = "max-w-[28px] max-h-[28px] sm:max-w-[32px] sm:max-h-[32px]";
+    imageDimensions = "max-w-[85%] max-h-[85%]";
   } else if (size === "thumb") {
-    containerDimensions = "w-6 h-6 rounded-md p-1";
-    imageDimensions = "max-w-[16px] max-h-[16px]";
+    containerDimensions = "w-7 h-7 rounded-lg p-1";
+    imageDimensions = "max-w-[85%] max-h-[85%]";
   }
 
   return (
     <div
-      className={`absolute top-2.5 right-2.5 z-20 ${containerDimensions} bg-white/95 dark:bg-slate-900/90 backdrop-blur-md flex items-center justify-center shadow-xs border border-border/60 dark:border-white/15 overflow-hidden pointer-events-none transition-transform select-none ${className}`}
+      style={{ aspectRatio: "1 / 1" }}
+      className={`absolute top-2.5 right-2.5 z-20 aspect-square ${containerDimensions} bg-white/95 dark:bg-slate-900/90 backdrop-blur-md flex items-center justify-center shadow-xs border border-border/70 dark:border-white/15 overflow-hidden pointer-events-none transition-transform select-none ${className}`}
       title={brandName || "Brand logo"}
       aria-hidden="true"
     >

@@ -8,6 +8,8 @@ import { findMatchingShippingProfile, calculateTotalCbm } from "@/lib/services/s
 export interface ProductQueryParams {
   page?: number;
   per_page?: number;
+  offset?: number;
+  limit?: number;
   search?: string;
   q?: string;
   category?: string;
@@ -112,7 +114,15 @@ export function normalizeToB2BProduct(p: any): B2BProductInput {
   const isNew = Boolean(p.isNew || p.is_new || p.badge === "New");
   const isFeatured = Boolean(p.isFeatured || p.is_featured || p.featured);
   const isLimitedDeal = Boolean(p.isLimitedDeal || p.is_limited_deal || p.isLimitedTimeOffer);
-  const isBestDeal = Boolean(p.isBestDeal || p.is_best_deal);
+  const isBestDeal = Boolean(
+    p.isBestDeal ||
+    p.is_best_deal ||
+    p.isLimitedDeal ||
+    p.isLimitedTimeOffer ||
+    isFeatured ||
+    isHot ||
+    (msrpPrice > wholesalePrice)
+  );
 
   let status: "published" | "draft" | "unpublished" = "published";
   if (p.status === "draft") status = "draft";
@@ -300,7 +310,13 @@ export class ProductService {
     }
 
     const all = mockStore.getProducts();
-    return this.filterLocalProducts(all, params);
+    let result = this.filterLocalProducts(all, params);
+    if (params?.offset !== undefined || params?.limit !== undefined) {
+      const start = params?.offset ?? 0;
+      const end = params?.limit !== undefined ? start + params.limit : undefined;
+      result = result.slice(start, end);
+    }
+    return result;
   }
 
   /**
@@ -574,14 +590,17 @@ export class ProductService {
         return false;
       }
       if (options?.brand && options.brand !== "all") {
-        if (p.brand.toLowerCase() !== options.brand.toLowerCase()) return false;
+        const brands = options.brand.split(",").map((b) => b.trim().toLowerCase()).filter(Boolean);
+        if (brands.length > 0 && !brands.includes(p.brand.toLowerCase())) return false;
       }
       if (options?.audience && options.audience !== "all") {
-        if (p.audience.toUpperCase() !== options.audience.toUpperCase()) return false;
+        const audiences = options.audience.split(",").map((a) => a.trim().toUpperCase()).filter(Boolean);
+        if (audiences.length > 0 && !audiences.includes(p.audience.toUpperCase())) return false;
       }
       if (options?.category && options.category !== "all") {
+        const categories = options.category.split(",").map((c) => c.trim().toLowerCase()).filter(Boolean);
         const pCat = (p.categoryName || p.categoryId || "").toLowerCase();
-        if (!pCat.includes(options.category.toLowerCase())) return false;
+        if (categories.length > 0 && !categories.some((c) => pCat.includes(c))) return false;
       }
       if (options?.search || options?.q) {
         const q = (options.search || options.q || "").toLowerCase().trim();

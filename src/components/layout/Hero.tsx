@@ -52,7 +52,7 @@ export default function Hero({
 
   return (
     <section id="hero" className="w-full bg-background pt-4 sm:pt-5 pb-0">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+      <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8 2xl:px-12">
         {/* Hero Wrapper: Strict height control on desktop */}
         <div className="w-full lg:aspect-[3/1]">
           {/* Hero Grid */}

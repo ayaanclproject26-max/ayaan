@@ -11,7 +11,14 @@ import {
   filterProducts,
   getProductColor,
 } from "@/lib/filters";
-import { Sparkles, Check, X, Filter, RotateCcw, User, Users, Smile } from "lucide-react";
+import { Sparkles, Check, X, Filter, RotateCcw } from "lucide-react";
+import {
+  IconMen,
+  IconWomen,
+  IconBoys,
+  IconGirls,
+  IconUnisex,
+} from "@/components/common/AudienceIcons";
 
 type HotSalesCategory = "sweaters" | "towels" | null;
 
@@ -33,11 +40,11 @@ const hotSalesCategories = [
 ];
 
 const AUDIENCE_FILTERS = [
-  { id: "MEN", label: "MEN", categoryId: "c_men", icon: User },
-  { id: "WOMEN", label: "WOMEN", categoryId: "c_women", icon: User },
-  { id: "BOYS", label: "BOYS", categoryId: "c_boys", icon: Smile },
-  { id: "GIRLS", label: "GIRLS", categoryId: "c_girls", icon: Sparkles },
-  { id: "UNISEX", label: "UNISEX", categoryId: "c_unisex", icon: Users },
+  { id: "MEN", label: "MEN", categoryId: "c_men", icon: IconMen },
+  { id: "WOMEN", label: "WOMEN", categoryId: "c_women", icon: IconWomen },
+  { id: "BOYS", label: "BOYS", categoryId: "c_boys", icon: IconBoys },
+  { id: "GIRLS", label: "GIRLS", categoryId: "c_girls", icon: IconGirls },
+  { id: "UNISEX", label: "UNISEX", categoryId: "c_unisex", icon: IconUnisex },
 ];
 
 export default function HotSales() {
@@ -185,13 +192,13 @@ export default function HotSales() {
 
   return (
     <section id="hot-sales" className="pb-7 sm:pb-9 bg-background">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+      <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8 2xl:px-12">
         
         {/* Section Heading */}
         <div className="mb-3.5 sm:mb-5 text-center md:text-left flex flex-col sm:flex-row sm:items-end justify-between gap-2">
           <div>
             <h2 className="text-fluid-h2 font-display font-bold uppercase tracking-tight">HOT SALES</h2>
-            <p className="text-xs sm:text-sm font-sans text-muted-foreground mt-0.5 sm:mt-1">
+            <p className="section-subtitle mt-1 sm:mt-1.5">
               Limited-run deals on seasonal knitwear and luxury textiles
             </p>
           </div>
@@ -243,7 +250,7 @@ export default function HotSales() {
                   </h3>
                   <Sparkles size={16} className="text-primary hidden sm:inline-block" />
                 </div>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="section-subtitle mt-1 sm:mt-1.5">
                   {activeCategory === "sweaters"
                     ? "Cozy seasonal knitwear, cardigans, and pullovers"
                     : "Ultra-absorbent luxury cotton bath sheets, spa, and hand towels"}
@@ -285,7 +292,7 @@ export default function HotSales() {
                             }`}
                           >
                             <span>{aud.label}</span>
-                            <Icon size={15} className={`shrink-0 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
+                            <Icon size={17} strokeWidth={1.35} className={`shrink-0 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
                           </button>
                         );
                       })}

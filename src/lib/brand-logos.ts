@@ -84,10 +84,16 @@ export const BRAND_LOGO_MAP: Record<string, string> = {
 
 /**
  * Resolves the authentic brand logo asset path for a given brand name and explicit logo.
+ * Follows Rule 92: The admin-uploaded logo is authoritative.
  */
 export function getBrandLogoUrl(brandName?: string, explicitLogo?: string): string | null {
-  if (explicitLogo && explicitLogo.trim() !== "" && !explicitLogo.includes("placeholder")) {
-    return explicitLogo;
+  if (
+    explicitLogo &&
+    explicitLogo.trim() !== "" &&
+    !explicitLogo.includes("placeholder") &&
+    !explicitLogo.includes("/brands/generic.png")
+  ) {
+    return explicitLogo.trim();
   }
   if (!brandName) return null;
   const key = brandName.toLowerCase().trim();
@@ -100,3 +106,4 @@ export function getBrandLogoUrl(brandName?: string, explicitLogo?: string): stri
   }
   return null;
 }
+

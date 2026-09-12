@@ -170,14 +170,14 @@ export default function CategoryHighlights() {
   }, [allProducts, selectedAudiences, selectedCategories, isCollectionOpen]);
 
   return (
-    <section id="categories" className="py-5 sm:py-8 bg-background">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+    <section id="categories" className="pt-1.5 sm:pt-2 pb-4 sm:pb-5 bg-background">
+      <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8 2xl:px-12">
         
         {/* AUDIENCE Section Title */}
-        <div className="mb-3.5 sm:mb-5 text-center md:text-left flex flex-col sm:flex-row sm:items-end justify-between gap-1.5 sm:gap-2">
+        <div className="mb-2.5 sm:mb-3.5 text-center md:text-left flex flex-col sm:flex-row sm:items-end justify-between gap-1.5 sm:gap-2">
           <div>
             <h2 className="text-fluid-h2 font-display font-bold uppercase tracking-tight">AUDIENCE</h2>
-            <p className="text-xs sm:text-sm font-sans text-muted-foreground mt-0.5 sm:mt-1">
+            <p className="section-subtitle mt-1 sm:mt-1.5">
               Select one or multiple audiences to explore tailored collections
             </p>
           </div>
@@ -192,64 +192,54 @@ export default function CategoryHighlights() {
           )}
         </div>
 
-        {/* Restored 5 Image-Based Audience Tiles (MEN, WOMEN, BOYS, GIRLS, UNISEX) */}
+        {/* Clean Icon-Based Audience Tiles (+ ALL CATEGORIES 6th tile on mobile/tablet) */}
         <AudienceTiles
           selectedAudiences={selectedAudiences}
           onToggle={handleAudienceToggle}
+          isAllCategoriesOpen={isExpanded}
+          onToggleAllCategories={() => {
+            setIsExpanded(!isExpanded);
+            if (!isExpanded) {
+              setTimeout(() => {
+                const prodCat = document.getElementById("product-categories-grid");
+                prodCat?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+              }, 100);
+            }
+          }}
         />
 
-        {/* Separately: PRODUCT CATEGORY Section */}
-        <div className="mt-8 pt-6 border-t border-border/60">
-          <div className="flex items-center justify-between mb-3.5 sm:mb-4">
-            <div>
-              <h3 className="text-xs sm:text-sm font-display font-bold uppercase tracking-wider text-foreground">
-                PRODUCT CATEGORY
-              </h3>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Browse apparel categories and export styles
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="px-4 sm:px-5 py-2 border border-border text-foreground text-xs font-semibold uppercase tracking-wider rounded-full hover:bg-secondary transition-colors cursor-pointer"
-            >
-              {isExpanded ? "SHOW LESS" : "ALL CATEGORIES"}
-            </button>
-          </div>
+        {/* Expanded Detailed Categories Grid (toggled by clicking the 6th ALL CATEGORIES tile) */}
+        <div
+          id="product-categories-grid"
+          className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${
+            isExpanded ? "grid-rows-[1fr] opacity-100 mt-6 pt-5 border-t border-border/60" : "grid-rows-[0fr] opacity-0 mt-0"
+          }`}
+        >
+          <div className="overflow-hidden">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2.5 sm:gap-3.5">
+              {detailedCategories.map((category) => {
+                const isSelected =
+                  category.name === "ALL"
+                    ? selectedCategories.includes("ALL")
+                    : selectedCategories.some(
+                        (c) => c.toLowerCase() === category.name.toLowerCase()
+                      );
 
-          {/* Expanded Detailed Categories Grid */}
-          <div
-            className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${
-              isExpanded ? "grid-rows-[1fr] opacity-100 mt-2" : "grid-rows-[0fr] opacity-0 mt-0"
-            }`}
-          >
-            <div className="overflow-hidden">
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2.5 sm:gap-3.5">
-                {detailedCategories.map((category) => {
-                  const isSelected =
-                    category.name === "ALL"
-                      ? selectedCategories.includes("ALL")
-                      : selectedCategories.some(
-                          (c) => c.toLowerCase() === category.name.toLowerCase()
-                        );
-
-                  return (
-                    <CategoryCard 
-                      key={category.id} 
-                      category={{ 
-                        id: String(category.id),
-                        name: category.name,
-                        slug: category.slug || String(category.id),
-                        image: category.image_url || category.image || "/categories/default.jpg"
-                      }} 
-                      variant="compact"
-                      isActive={isSelected}
-                      onClick={() => handleCategoryClick(category.name)}
-                    />
-                  );
-                })}
-              </div>
+                return (
+                  <CategoryCard 
+                    key={category.id} 
+                    category={{ 
+                      id: String(category.id),
+                      name: category.name,
+                      slug: category.slug || String(category.id),
+                      image: category.image_url || category.image || "/categories/default.jpg"
+                    }} 
+                    variant="compact"
+                    isActive={isSelected}
+                    onClick={() => handleCategoryClick(category.name)}
+                  />
+                );
+              })}
             </div>
           </div>
         </div>
@@ -274,7 +264,7 @@ export default function CategoryHighlights() {
                   </h3>
                   <Sparkles size={16} className="text-primary hidden sm:inline-block" />
                 </div>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="section-subtitle mt-1 sm:mt-1.5">
                   {selectedAudiences.length > 0
                     ? `Curated styles crafted for ${selectedAudiences.join(" + ")}`
                     : "Exploring category collection"}

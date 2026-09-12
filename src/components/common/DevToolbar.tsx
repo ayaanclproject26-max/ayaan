@@ -68,11 +68,11 @@ export default function DevToolbar() {
       {!isOpen ? (
         <button
           onClick={() => setIsOpen(true)}
-          className="flex items-center gap-2 bg-slate-900/90 backdrop-blur-md text-slate-100 border border-slate-700/60 shadow-xl px-3.5 py-2 rounded-full hover:bg-slate-800 transition-all cursor-pointer font-medium"
+          className="flex items-center gap-1.5 bg-slate-900/75 hover:bg-slate-900 backdrop-blur-md text-slate-200 border border-slate-700/50 shadow-md px-3 py-1.5 rounded-full opacity-70 hover:opacity-100 transition-all cursor-pointer font-medium text-[11px]"
           title="Open Frontend-Only Dev Tools & Quick Roles"
         >
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <Wrench className="w-3.5 h-3.5 text-amber-400" />
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          <Wrench className="w-3 h-3 text-amber-400" />
           <span>Frontend Mode</span>
           <ChevronUp className="w-3 h-3 text-slate-400" />
         </button>

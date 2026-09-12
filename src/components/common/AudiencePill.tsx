@@ -1,28 +1,38 @@
 "use client";
 
 import React from "react";
-import { User, Users, Smile, Sparkles, LucideIcon } from "lucide-react";
+import {
+  IconMen,
+  IconWomen,
+  IconBoys,
+  IconGirls,
+  IconUnisex,
+  IconProps,
+} from "./AudienceIcons";
+import { LucideIcon } from "lucide-react";
+
+export type AudienceIconComponent = React.ComponentType<IconProps> | LucideIcon;
 
 export interface AudienceOption {
   id: "MEN" | "WOMEN" | "BOYS" | "GIRLS" | "UNISEX" | string;
   label: "MEN" | "WOMEN" | "BOYS" | "GIRLS" | "UNISEX" | string;
-  icon: LucideIcon;
+  icon: AudienceIconComponent;
 }
 
 /**
- * Authoritative 5 Core Audience groups and their fixed icons:
- * MEN   -> User
- * WOMEN -> User
- * BOYS  -> Smile
- * GIRLS -> Sparkles
- * UNISEX-> Users
+ * Authoritative 5 Core Audience groups and their cohesive line-style icons:
+ * MEN   -> IconMen
+ * WOMEN -> IconWomen
+ * BOYS  -> IconBoys
+ * GIRLS -> IconGirls
+ * UNISEX-> IconUnisex
  */
 export const AUDIENCE_OPTIONS: AudienceOption[] = [
-  { id: "MEN", label: "MEN", icon: User },
-  { id: "WOMEN", label: "WOMEN", icon: User },
-  { id: "BOYS", label: "BOYS", icon: Smile },
-  { id: "GIRLS", label: "GIRLS", icon: Sparkles },
-  { id: "UNISEX", label: "UNISEX", icon: Users },
+  { id: "MEN", label: "MEN", icon: IconMen },
+  { id: "WOMEN", label: "WOMEN", icon: IconWomen },
+  { id: "BOYS", label: "BOYS", icon: IconBoys },
+  { id: "GIRLS", label: "GIRLS", icon: IconGirls },
+  { id: "UNISEX", label: "UNISEX", icon: IconUnisex },
 ];
 
 export interface AudiencePillProps {
@@ -73,7 +83,8 @@ export function AudiencePill({
 
       {/* Icon on FAR RIGHT */}
       <Icon
-        size={isCompact ? 17 : 19}
+        size={isCompact ? 18 : 22}
+        strokeWidth={1.35}
         className={`shrink-0 transition-colors duration-200 ${
           isSelected
             ? "text-primary"

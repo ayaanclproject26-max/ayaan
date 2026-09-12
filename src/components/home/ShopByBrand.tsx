@@ -13,6 +13,8 @@ import { X, Check, Filter, Sparkles, RotateCcw } from "lucide-react";
 import { brandService, BrandModel } from "@/services/brand.service";
 import { categoryService, CategoryModel } from "@/services/category.service";
 import { getBrandLogoUrl } from "@/lib/brand-logos";
+import BrandTile from "@/components/common/BrandTile";
+import { Tag } from "lucide-react";
 
 export interface Brand {
   id: string;
@@ -154,23 +156,23 @@ export default function ShopByBrand() {
   const shouldShowCollection = hasInteracted || selectedBrandIds.length > 0 || !selectedCategories.includes("ALL");
 
   return (
-    <section id="brands" className="py-12 sm:py-16 bg-[#FAF8F5] border-t border-stone-200/60">
-      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+    <section id="brands" className="py-12 sm:py-16 bg-background border-t border-border/60 scroll-mt-20">
+      <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8 2xl:px-12">
         
-        {/* Section Heading matching reference screenshot */}
-        <div className="mb-8 md:mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+        {/* Section Heading & Subtitle */}
+        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-stone-900 tracking-tight uppercase">
+            <h2 className="text-fluid-h2 font-display font-bold uppercase tracking-tight text-foreground">
               SHOP BY BRAND
             </h2>
-            <p className="text-xs sm:text-sm font-sans text-stone-500 mt-1.5 font-normal">
+            <p className="text-sm sm:text-base text-muted-foreground font-sans mt-1.5 sm:mt-2">
               Select one or multiple brands to explore authentic wholesale &amp; retail apparel
             </p>
           </div>
           {hasActiveFilters && (
             <button
               onClick={handleClearAll}
-              className="inline-flex items-center gap-1.5 text-xs font-sans font-semibold uppercase tracking-wider text-stone-600 hover:text-stone-900 transition-colors self-start sm:self-auto bg-white border border-stone-200 px-3.5 py-1.5 rounded-full shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs font-sans font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors self-start sm:self-auto bg-card border border-border/80 px-3.5 py-1.5 rounded-full shadow-xs cursor-pointer"
             >
               <RotateCcw size={13} />
               Reset Filters
@@ -178,45 +180,19 @@ export default function ShopByBrand() {
           )}
         </div>
 
-        {/* Brand Grid matching reference screenshot: 10-column grid of white rounded cards with centered logo + small uppercase name */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2.5 sm:gap-3.5 transition-all duration-300">
+        {/* Brand Grid: True 1:1 Squares with consistent responsive columns */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-3 sm:gap-4 lg:gap-4.5">
           {brandList.map((brand) => {
             const isSelected = selectedBrandIds.includes(brand.id) || selectedBrandIds.includes(brand.slug);
 
             return (
-              <button
+              <BrandTile
                 key={brand.id}
-                type="button"
+                brand={brand}
+                isSelected={isSelected}
                 onClick={() => handleBrandClick(brand)}
-                aria-pressed={isSelected}
-                className={`group relative flex flex-col items-center justify-center p-2.5 sm:p-3 bg-white border rounded-2xl sm:rounded-3xl transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 w-full min-h-[84px] sm:min-h-[96px] aspect-[4/3] ${
-                  isSelected
-                    ? "border-stone-900 ring-2 ring-stone-900 bg-stone-50 shadow-md scale-[1.02]"
-                    : "border-stone-200/90 shadow-xs hover:border-stone-400/80"
-                }`}
-              >
-                {/* Centered Brand Logo Area */}
-                <div className="w-full flex-1 flex items-center justify-center overflow-hidden px-1 max-h-7">
-                  <BrandLogo brand={brand} />
-                </div>
-
-                {/* Brand Name (rendered once, centered underneath) */}
-                <span
-                  className={`text-xs sm:text-xs font-sans font-semibold uppercase tracking-wider truncate w-full text-center mt-1.5 transition-colors ${
-                    isSelected ? "text-stone-900 font-bold" : "text-stone-600 group-hover:text-stone-900"
-                  }`}
-                  title={brand.name}
-                >
-                  {brand.name}
-                </span>
-
-                {/* Active Indicator Badge */}
-                {isSelected && (
-                  <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full bg-stone-900 text-white flex items-center justify-center text-[8px] shadow-xs">
-                    <Check size={8} strokeWidth={3} />
-                  </span>
-                )}
-              </button>
+                size="md"
+              />
             );
           })}
         </div>
@@ -244,7 +220,8 @@ export default function ShopByBrand() {
                   {selectedBrands.slice(0, 4).map((b) => (
                     <div
                       key={b.id}
-                      className="inline-block h-9 w-14 bg-card border border-border rounded-lg p-1 shadow-sm overflow-hidden flex items-center justify-center"
+                      className="inline-block h-9 w-9 aspect-square bg-card border border-border rounded-lg p-1 shadow-sm overflow-hidden flex items-center justify-center"
+                      style={{ aspectRatio: "1 / 1" }}
                       title={b.name}
                     >
                       <BrandLogo brand={b} />
@@ -258,7 +235,7 @@ export default function ShopByBrand() {
                     </h3>
                     <Sparkles size={16} className="text-primary hidden sm:inline-block" />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p className="section-subtitle mt-1 sm:mt-1.5">
                     {selectedBrands.length > 0
                       ? `Curated catalog matching ${selectedBrands.map((b) => b.name).join(" + ")}`
                       : "Browsing all global manufacturer brands"}
@@ -401,16 +378,13 @@ export default function ShopByBrand() {
 
 function BrandLogo({ brand }: { brand: Brand }) {
   const [imgError, setImgError] = useState(false);
-  const logoSrc = getBrandLogoUrl(brand.name, brand.logo) || `/brands/${brand.slug}.png`;
+  const logoSrc = getBrandLogoUrl(brand.name, brand.logo) || brand.logo;
 
-  if (imgError) {
-    const initials = brand.name.length <= 3 
-      ? brand.name.toUpperCase() 
-      : brand.name.split(/\s+/).map((w) => w[0]).join("").toUpperCase().slice(0, 2);
-
+  if (imgError || !logoSrc) {
+    // Rule 19: Strictly no initials like A, N, B, L
     return (
-      <span className="text-xs font-extrabold text-stone-400 select-none tracking-tight">
-        {initials}
+      <span className="text-stone-300 dark:text-stone-600" aria-hidden="true">
+        <Tag size={13} strokeWidth={1.5} />
       </span>
     );
   }
