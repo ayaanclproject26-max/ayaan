@@ -1,16 +1,26 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { X, Minus, Plus, ShoppingCart, ShoppingBag, Check, Share2, Copy, MessageCircle, Phone, Globe2, FileText } from "lucide-react";
+import { X, Minus, Plus, ShoppingCart, Check } from "lucide-react";
 import { useProductModal } from "@/lib/ProductModalContext";
 import { useCart } from "@/lib/CartContext";
-import BUSINESS_PROFILE, { getWhatsAppUrl } from "@/config/business-profile";
 import ProductBrandLogoOverlay from "@/components/common/ProductBrandLogoOverlay";
 import ProductPromotionBadges from "@/components/common/ProductPromotionBadges";
+import { Product } from "@/types";
+
+type ExtendedProduct = Product & {
+  stock?: number;
+  colorName?: string;
+  colors?: string[];
+  brand_logo?: string;
+  color_name?: string;
+  size?: string;
+};
 
 export default function ProductQuickAddModal() {
-  const { selectedProduct: product, closeProductModal } = useProductModal();
+  const { selectedProduct: rawProduct, closeProductModal } = useProductModal();
+  const product = rawProduct as ExtendedProduct | null;
   const { addToCart, setIsCartOpen } = useCart();
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -19,7 +29,41 @@ export default function ProductQuickAddModal() {
 
   const moq = product?.moq ?? 1;
   const step = product?.quantityStep ?? moq;
-  const stock = product?.availableStock ?? 9999;
+  const stock = product?.availableStock ?? product?.stock ?? 9999;
+
+  // Derive Brand information
+  const brandName = useMemo(() => {
+    if (!product) return "";
+    return typeof product.brand === "string"
+      ? product.brand
+      : "";
+  }, [product]);
+
+  const brandLogo = useMemo(() => {
+    if (!product) return undefined;
+    return product.brandLogo || product.brand_logo;
+  }, [product]);
+
+  // Derive Display Size (customer-facing value, never raw count)
+  const displaySize = useMemo(() => {
+    if (!product) return "One Size";
+    if (Array.isArray(product.sizes) && product.sizes.length > 0) {
+      return product.sizes.join(", ");
+    }
+    return product.size || "One Size";
+  }, [product]);
+
+  // Derive Display Color (customer-facing name, never raw count)
+  const displayColor = useMemo(() => {
+    if (!product) return "Standard";
+    if (product.colorName) return product.colorName;
+    if (product.color) return product.color;
+    if (product.color_name) return product.color_name;
+    if (Array.isArray(product.colors) && product.colors.length > 0) {
+      return product.colors.join(", ");
+    }
+    return "Standard";
+  }, [product]);
 
   // Reset state when product changes
   useEffect(() => {
@@ -51,7 +95,6 @@ export default function ProductQuickAddModal() {
 
   const handleAddToCart = useCallback(() => {
     if (!product) return;
-    // Use first available size
     const size = product.sizes?.[0] ?? "One Size";
     addToCart(product, size, quantity);
     setAddedSuccess(true);
@@ -61,39 +104,6 @@ export default function ProductQuickAddModal() {
     }, 800);
   }, [product, quantity, addToCart, closeProductModal, setIsCartOpen]);
 
-  const productUrl = typeof window !== "undefined" && product
-    ? `${window.location.origin}/product/${product.slug}`
-    : "";
-
-  const handleShareWhatsApp = useCallback(() => {
-    if (!product) return;
-    const text = `Check out ${product.name} — ${productUrl}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-  }, [product, productUrl]);
-
-  const handleCopyLink = useCallback(async () => {
-    if (!productUrl) return;
-    try {
-      await navigator.clipboard.writeText(productUrl);
-      alert("Link copied to clipboard!");
-    } catch {
-      // Fallback
-      const input = document.createElement("input");
-      input.value = productUrl;
-      document.body.appendChild(input);
-      input.select();
-      document.execCommand("copy");
-      document.body.removeChild(input);
-      alert("Link copied to clipboard!");
-    }
-  }, [productUrl]);
-
-  const handleSendToAYC = useCallback(() => {
-    if (!product) return;
-    const text = `Hello ${BUSINESS_PROFILE.name},\n\nI am interested in:\nProduct: ${product.name}\nSKU: ${product.sku ?? "N/A"}\nQuantity: ${quantity} pcs\nLink: ${productUrl}`;
-    window.open(getWhatsAppUrl(text), "_blank");
-  }, [product, quantity, productUrl]);
-
   if (!product) return null;
 
   const isVisible = !!product;
@@ -102,48 +112,50 @@ export default function ProductQuickAddModal() {
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-ink/60 backdrop-blur-sm z-[200] transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-ink/60 backdrop-blur-xs z-[200] transition-opacity duration-300 ${
           isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={closeProductModal}
       />
 
-      {/* Modal */}
+      {/* Modal Container */}
       <div
-        className={`fixed inset-0 z-[210] flex items-center justify-center p-3 sm:p-6 transition-all duration-300 ${
+        className={`fixed inset-0 z-[210] flex items-center justify-center p-3 sm:p-4 transition-all duration-300 ${
           isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
         }`}
         onClick={closeProductModal}
       >
         <div
-          className="bg-background w-full max-w-4xl max-h-[95vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+          className="bg-background w-full max-w-[680px] max-h-[92vh] sm:max-h-[88vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-border/70"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* ─── Header ─── */}
-          <div className="flex items-start justify-between px-5 sm:px-8 pt-5 sm:pt-6 pb-3 sm:pb-4 border-b border-border/60">
-            <div className="min-w-0 mr-4">
-              <h2 className="text-lg sm:text-xl font-display font-semibold text-foreground tracking-tight truncate">
+          {/* ─── LEVEL 1 & 2: Header (Product Name + Brand/SKU Metadata) ─── */}
+          <div className="flex items-start justify-between px-5 sm:px-6 pt-4 sm:pt-5 pb-3 sm:pb-3.5 border-b border-border/60">
+            <div className="min-w-0 mr-3">
+              <h2 className="text-base sm:text-lg font-display font-semibold text-foreground tracking-tight truncate">
                 {product.name}
               </h2>
-              <p className="text-xs sm:text-sm text-muted-foreground font-sans font-medium mt-0.5">
-                {product.sku ?? "—"}
+              <p className="text-xs text-muted-foreground font-sans font-medium mt-0.5 tracking-normal">
+                {brandName ? `${brandName.toUpperCase()} · ` : ""}SKU: {product.sku ?? "—"}
               </p>
             </div>
             <button
+              type="button"
               onClick={closeProductModal}
-              className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+              className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
               aria-label="Close product modal"
             >
-              <X size={20} strokeWidth={1.5} />
+              <X size={18} strokeWidth={1.75} />
             </button>
           </div>
 
-          {/* ─── Scrollable Content ─── */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar">
-            <div className="flex flex-col md:flex-row">
-              {/* ═══ LEFT: Image Gallery ═══ */}
-              <div className="md:w-[45%] md:shrink-0 p-4 sm:p-6">
-                <div className="relative aspect-[3/4] bg-secondary rounded-xl overflow-hidden mb-3">
+          {/* ─── Body (Two-Column Layout: Media + Compact Ordering) ─── */}
+          <div className="flex-1 overflow-y-auto no-scrollbar">
+            <div className="flex flex-col md:flex-row items-stretch">
+              {/* ═══ LEFT: Product Media ═══ */}
+              <div className="md:w-[44%] md:shrink-0 p-4 sm:p-5 flex flex-col items-center justify-start">
+                <div className="relative aspect-[3/4] w-full max-h-[290px] sm:max-h-[320px] bg-secondary/50 rounded-xl overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={product.images[activeImageIndex]}
                     alt={product.name}
@@ -151,162 +163,129 @@ export default function ProductQuickAddModal() {
                   />
                   <ProductPromotionBadges product={product} variant="modal" />
                   <ProductBrandLogoOverlay
-                    brandName={product.brand}
-                    brandLogo={product.brandLogo}
+                    brandName={brandName}
+                    brandLogo={brandLogo}
                     size="modal"
-                    className="top-3 right-3"
+                    className="top-2.5 right-2.5"
                   />
                 </div>
-                {product.images.length > 1 && (
-                  <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                    {product.images.map((img, i) => (
+                {product.images && product.images.length > 1 && (
+                  <div className="flex gap-2 mt-2.5 w-full overflow-x-auto no-scrollbar">
+                    {product.images.map((img: string, i: number) => (
                       <button
                         key={i}
+                        type="button"
                         onClick={() => setActiveImageIndex(i)}
-                        className={`shrink-0 w-14 sm:w-16 aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all ${
+                        className={`shrink-0 w-11 sm:w-12 aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all ${
                           i === activeImageIndex
                             ? "border-foreground/80 ring-1 ring-foreground/20"
                             : "border-border/50 opacity-60 hover:opacity-100"
                         }`}
+                        aria-label={`View image ${i + 1}`}
                       >
-                        <img src={img} alt={`${product.name} view ${i + 1}`} className="w-full h-full object-cover object-center" />
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={img}
+                          alt={`${product.name} thumbnail ${i + 1}`}
+                          className="w-full h-full object-cover object-center"
+                        />
                       </button>
                     ))}
                   </div>
                 )}
               </div>
 
-              {/* ═══ RIGHT: Product Info + Order Config ═══ */}
-              <div className="md:w-[55%] p-4 sm:p-6 md:pl-0 flex flex-col gap-5">
-                <div className="grid grid-cols-2 gap-x-4 gap-y-3 p-4 sm:p-5 bg-secondary/50 rounded-xl border border-border/40 font-sans">
-                  <InfoItem label="SKU" value={product.sku ?? "—"} />
-                  <InfoItem label="MOQ" value={`${moq} pcs`} />
-                  <InfoItem label="Available Stock" value={`${stock} pcs`} />
-                  <InfoItem label="Brand" value={product.brand ?? "—"} />
-                  <InfoItem label="Colours" value={`${product.colours ?? 1}`} />
-                  <InfoItem label="Sizes" value={product.sizes?.join(", ") ?? "—"} />
+              {/* ═══ RIGHT: LEVEL 3, 4, 5 (Product Info + Quantity + Add to Cart) ═══ */}
+              <div className="md:w-[56%] p-4 sm:p-5 md:pl-1 flex flex-col justify-between gap-4">
+                {/* LEVEL 3: Product Facts (Clean, non-duplicated) */}
+                <div>
+                  <h3 className="text-[11px] font-sans font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                    Product Information
+                  </h3>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 p-3 sm:p-3.5 bg-secondary/40 rounded-xl border border-border/40 font-sans">
+                    <InfoItem label="Brand" value={brandName || "—"} />
+                    <InfoItem label="Stock" value={`${stock.toLocaleString()} pcs`} />
+                    <InfoItem label="Size" value={displaySize} />
+                    <InfoItem label="Color" value={displayColor} />
+                  </div>
                 </div>
 
-                {/* ─── Order Configuration Card ─── */}
-                <div className="bg-background border border-border/60 rounded-xl p-4 sm:p-5 shadow-sm font-sans">
-                  <h3 className="text-xs font-display font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-                    Order Configuration
-                  </h3>
-
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="text-xs text-muted-foreground font-sans">
-                      <span className="block font-semibold text-foreground text-sm tabular-nums">{moq} pcs</span>
-                      Min. Order Qty
-                    </div>
-                    <div className="text-xs text-muted-foreground font-sans">
-                      <span className="block font-semibold text-foreground text-sm tabular-nums">{stock} pcs</span>
-                      Available Stock
-                    </div>
-                    <div className="text-xs text-muted-foreground font-sans">
-                      <span className="block font-semibold text-foreground text-sm">{product.sizes?.join(", ") ?? "—"}</span>
-                      Sizes
-                    </div>
-                    <div className="text-xs text-muted-foreground font-sans">
-                      <span className="block font-semibold text-foreground text-sm">{product.colours ?? 1}</span>
-                      Colours
-                    </div>
-                  </div>
-
-                  {/* Quantity Selector */}
-                  <div className="mb-2">
-                    <label className="text-xs font-sans font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">
-                      Requested Quantity
+                {/* LEVEL 4 & 5: Order Quantity & Add to Cart */}
+                <div className="space-y-3 pt-1">
+                  <div>
+                    <label className="text-[11px] font-sans font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">
+                      Order Quantity
                     </label>
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center border border-border rounded-xl h-12 bg-secondary/30">
+                      <div className="inline-flex items-center border border-border rounded-xl h-11 bg-secondary/20">
                         <button
+                          type="button"
                           onClick={decreaseQty}
                           disabled={quantity <= moq}
-                          className="w-12 h-full flex items-center justify-center hover:bg-secondary rounded-l-xl transition-colors disabled:opacity-30"
+                          className="w-10 sm:w-11 h-full flex items-center justify-center hover:bg-secondary rounded-l-xl transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
+                          aria-label="Decrease quantity"
                         >
-                          <Minus size={16} strokeWidth={2} />
+                          <Minus size={15} strokeWidth={2} />
                         </button>
-                        <span className="w-16 text-center text-base font-bold tabular-nums font-sans">
+                        <span className="w-12 sm:w-14 text-center text-sm sm:text-base font-bold tabular-nums font-sans select-none">
                           {quantity}
                         </span>
                         <button
+                          type="button"
                           onClick={increaseQty}
                           disabled={quantity >= stock}
-                          className="w-12 h-full flex items-center justify-center hover:bg-secondary rounded-r-xl transition-colors disabled:opacity-30"
+                          className="w-10 sm:w-11 h-full flex items-center justify-center hover:bg-secondary rounded-r-xl transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
+                          aria-label="Increase quantity"
                         >
-                          <Plus size={16} strokeWidth={2} />
+                          <Plus size={15} strokeWidth={2} />
                         </button>
                       </div>
-                      <span className="text-sm font-medium text-muted-foreground">pcs</span>
+                      <span className="text-xs sm:text-sm font-medium text-muted-foreground font-sans">pcs</span>
                     </div>
-                    <p className="text-[0.6875rem] text-muted-foreground mt-2 font-sans">
-                      Quantity changes in multiples of {step}
+                    <p className="text-[11px] text-muted-foreground mt-1.5 font-sans">
+                      {step === moq
+                        ? `Multiples of ${step} pcs`
+                        : `Minimum order: ${moq} pcs · Multiples of ${step} pcs`}
                     </p>
                   </div>
 
-                  {/* Add to Cart Button */}
+                  {/* LEVEL 5: Add to Cart (Dominant Primary Action) */}
                   <button
+                    type="button"
                     onClick={handleAddToCart}
                     disabled={addedSuccess}
-                    className={`w-full mt-4 h-12 sm:h-[3.25rem] rounded-xl text-sm font-sans font-semibold uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all ${
+                    className={`w-full h-11 sm:h-12 rounded-xl text-xs sm:text-sm font-sans font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-xs ${
                       addedSuccess
                         ? "bg-emerald-600 text-white cursor-default"
-                        : "bg-primary text-primary-foreground hover:bg-primary/90"
+                        : "bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.99]"
                     }`}
                   >
                     {addedSuccess ? (
                       <>
-                        <Check size={18} strokeWidth={2.5} />
-                        Added to Cart
+                        <Check size={16} strokeWidth={2.5} />
+                        <span>Added to Cart</span>
                       </>
                     ) : (
                       <>
-                        <ShoppingCart size={18} />
-                        Add to Cart
+                        <ShoppingCart size={16} strokeWidth={2} />
+                        <span>Add to Cart</span>
                       </>
                     )}
                   </button>
-                </div>
-
-                {/* ─── Export Inquiries Strip ─── */}
-                <div className="p-4 sm:p-5 rounded-xl bg-secondary/40 border border-border/40 font-sans">
-                  <h3 className="text-xs font-display font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-                    <Globe2 size={15} />
-                    <span>Global Wholesale & Custom OEM</span>
-                  </h3>
-                  <div className="flex flex-wrap gap-2.5">
-                    <a
-                      href={getWhatsAppUrl(`Hi ${BUSINESS_PROFILE.name}, I have an inquiry regarding wholesale apparel.`)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366]/10 text-[#25D366] text-xs font-sans font-semibold uppercase tracking-wider hover:bg-[#25D366]/20 transition-colors"
-                    >
-                      <MessageCircle size={15} />
-                      WhatsApp Desk
-                    </a>
-                    <Link
-                      href="/rfq"
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary text-foreground text-xs font-sans font-semibold uppercase tracking-wider hover:bg-secondary/80 transition-colors"
-                    >
-                      <FileText size={15} />
-                      Request Commercial Quote
-                    </Link>
-                  </div>
-                  <p className="text-[0.6875rem] text-muted-foreground mt-2.5 font-sans break-all">
-                    Direct manufacturer pricing for B2B container and pallet shipments.
-                  </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ─── Footer: View Details Link ─── */}
-          <div className="p-4 sm:p-5 bg-secondary/30 border-t border-border/60 flex justify-end">
+          {/* ─── LEVEL 6: Footer (Secondary Action: View Full Specifications) ─── */}
+          <div className="px-5 sm:px-6 py-2.5 sm:py-3 bg-secondary/30 border-t border-border/50 flex items-center justify-center">
             <Link
               href={`/products/${product.slug}`}
-              className="w-full py-3 rounded-xl border border-border text-sm font-sans font-semibold uppercase tracking-wider text-muted-foreground hover:bg-secondary transition-colors text-center"
+              onClick={closeProductModal}
+              className="inline-flex items-center justify-center gap-1.5 py-1 px-3 text-xs font-sans font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
-              View Full Product Specifications →
+              <span>View Full Product Specifications</span>
+              <span aria-hidden="true">→</span>
             </Link>
           </div>
         </div>
@@ -318,8 +297,12 @@ export default function ProductQuickAddModal() {
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[0.6875rem] text-muted-foreground uppercase tracking-wider font-sans font-medium">{label}</dt>
-      <dd className="text-sm font-sans font-semibold text-foreground mt-0.5">{value}</dd>
+      <dt className="text-[10px] text-muted-foreground uppercase tracking-wider font-sans font-medium">
+        {label}
+      </dt>
+      <dd className="text-xs sm:text-sm font-sans font-semibold text-foreground mt-0.5 truncate" title={value}>
+        {value}
+      </dd>
     </div>
   );
 }
