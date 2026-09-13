@@ -100,20 +100,8 @@ export default function MiniCart() {
                         </span>
                       </div>
 
-                      {/* Package Breakdown Summary (Informational Only) */}
-                      {item.packageBreakdown && item.packageBreakdown.length > 0 && (
-                        <div className="mt-1.5 p-1.5 bg-secondary/40 rounded-lg text-xs text-muted-foreground border border-border/40 font-sans">
-                          <span className="font-semibold text-foreground block mb-0.5 text-xs uppercase tracking-wider">Package Allocation:</span>
-                          <div className="flex flex-wrap gap-x-2 gap-y-0.5">
-                            {item.packageBreakdown.map((bd: any, idx: number) => (
-                              <span key={idx} className="tabular-nums">
-                                {bd.color ? `${bd.color} ` : ""}{bd.size ? `(${bd.size})` : ""}: <strong className="text-foreground">{bd.quantity}</strong>
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
                       
+
                       <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-border/40 font-sans">
                         <div className="flex items-center border border-border rounded-lg h-7 bg-background">
                           <button 

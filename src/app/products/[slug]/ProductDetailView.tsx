@@ -458,19 +458,19 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
           </div>
 
           {/* RIGHT: WHOLESALE PURCHASE HIERARCHY (7 Cols — Sticky on Desktop) */}
-          <div className="lg:col-span-7 space-y-2.5 sm:space-y-3 lg:sticky lg:top-[80px] lg:self-start max-w-xl xl:max-w-2xl w-full">
+          <div className="lg:col-span-7 lg:sticky lg:top-[80px] lg:self-start max-w-xl xl:max-w-2xl w-full flex flex-col">
             
             {/* ========================================================= */}
             {/* 1. PRODUCT IDENTITY & METADATA HIERARCHY */}
             {/* ========================================================= */}
-            <div className="space-y-1.5 pb-2.5 border-b border-border/60">
+            <div className="space-y-1.5 pb-4 border-b border-border/60">
               
               {/* Structured Metadata (Brand prominent, SKU · Audience · Category secondary) */}
               <div className="space-y-0.5">
-                <div className="text-xs font-bold uppercase tracking-wider text-primary">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-primary">
                   {product.brand}
                 </div>
-                <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-sans text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-sans text-muted-foreground">
                   <span>SKU: <span className="font-mono text-foreground/90 font-medium">{product.sku}</span></span>
                   <span className="text-border/80">·</span>
                   <span className="uppercase font-medium">{product.audience}</span>
@@ -497,7 +497,7 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
                 </div>
 
                 {/* Compact Secondary MOQ & Stock Facts */}
-                <div className="flex items-center gap-1.5 text-xs font-sans text-muted-foreground">
+                <div className="flex items-center gap-1.5 text-[11px] font-sans text-muted-foreground">
                   <span>MOQ: <strong className="text-foreground font-semibold tabular-nums">{moq} pcs</strong></span>
                   <span className="text-border/80">·</span>
                   <span>Stock: <strong className="text-foreground font-semibold tabular-nums">{totalStock.toLocaleString()} pcs</strong></span>
@@ -509,9 +509,9 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
             {/* ========================================================= */}
             {/* 2. BUY MORE, SAVE MORE TIER TABLE */}
             {/* ========================================================= */}
-            <div className="space-y-3">
+            <div className="space-y-3 pt-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-display font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
+                <h3 className="text-[11px] font-display font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
                   <TrendingDown size={14} className="text-primary" />
                   <span>Buy More, Save More</span>
                 </h3>
@@ -548,7 +548,7 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
                   >
                     <div className="flex items-center gap-2">
                       <span className={`w-1.5 h-1.5 rounded-full transition-all shrink-0 ${isStandard ? "bg-foreground scale-125" : "bg-muted-foreground/40"}`} />
-                      <span className={`uppercase tracking-wider text-xs ${isStandard ? "font-bold text-foreground" : "font-medium text-muted-foreground"}`}>Standard</span>
+                      <span className={`uppercase tracking-wider text-[11px] ${isStandard ? "font-bold text-foreground" : "font-medium text-muted-foreground"}`}>Standard</span>
                     </div>
                     <div className="font-normal tabular-nums text-xs">
                       <span className={isStandard ? "text-foreground" : "text-muted-foreground"}>
@@ -582,7 +582,7 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
                   >
                     <div className="flex items-center gap-2">
                       <span className={`w-1.5 h-1.5 rounded-full transition-all shrink-0 ${isBulk ? "bg-foreground scale-125" : "bg-muted-foreground/40"}`} />
-                      <span className={`uppercase tracking-wider text-xs ${isBulk ? "font-bold text-foreground" : "font-medium text-muted-foreground"}`}>Bulk</span>
+                      <span className={`uppercase tracking-wider text-[11px] ${isBulk ? "font-bold text-foreground" : "font-medium text-muted-foreground"}`}>Bulk</span>
                     </div>
                     <div className="font-normal tabular-nums text-xs">
                       <span className={isBulk ? "text-foreground" : "text-muted-foreground"}>
@@ -624,7 +624,7 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
                     >
                       <div className="flex items-center gap-2">
                         <span className={`w-1.5 h-1.5 rounded-full transition-all shrink-0 ${isFullStock ? "bg-foreground scale-125" : "bg-muted-foreground/40"}`} />
-                        <span className={`uppercase tracking-wider text-xs ${isFullStock ? "font-bold text-foreground" : "font-medium text-muted-foreground"}`}>Full Stock</span>
+                        <span className={`uppercase tracking-wider text-[11px] ${isFullStock ? "font-bold text-foreground" : "font-medium text-muted-foreground"}`}>Full Stock</span>
                       </div>
                       <div className="font-normal tabular-nums text-xs">
                         <span className={isFullStock ? "text-foreground" : "text-muted-foreground"}>
@@ -652,7 +652,7 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
             {/* ========================================================= */}
             {/* 3. UNIFIED ORDER QUANTITY & ESTIMATED TOTAL DECISION BLOCK */}
             {/* ========================================================= */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 sm:gap-6 font-sans">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 sm:gap-6 font-sans pt-5">
               
               {/* Left side: Order Quantity */}
               <div className="space-y-2">
@@ -685,7 +685,7 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
                       +
                     </button>
                   </div>
-                  <span className="text-xs text-muted-foreground font-medium">pcs</span>
+                  <span className="text-[11px] text-muted-foreground font-medium">pcs</span>
                 </div>
                 <div className="text-[10px] text-muted-foreground/80 leading-none">
                   Multiples of {moq} pcs
@@ -693,11 +693,11 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
               </div>
 
               {/* Right side: Estimated Total */}
-              <div className="space-y-2 sm:text-right">
+              <div className="space-y-1.5 sm:text-right">
                 <span className="text-[10px] font-display font-bold uppercase tracking-wider text-muted-foreground block">
                   Est. Total
                 </span>
-                <div className="text-2xl font-bold text-foreground font-sans tabular-nums leading-none">
+                <div className="text-xl sm:text-2xl font-bold text-foreground font-sans tabular-nums leading-none">
                   {formatPrice(currentPrice * quantity)}
                 </div>
                 <div className="text-[10px] text-muted-foreground tabular-nums leading-none">
@@ -709,11 +709,11 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
             {/* ========================================================= */}
             {/* 4. WHOLESALE PACKAGE / ASSORTMENT INFORMATION */}
             {/* ========================================================= */}
-            <div className="flex flex-col p-2 sm:p-2.5 rounded-lg border border-border/60 bg-card/60 font-sans gap-2">
+            <div className="flex flex-col p-2.5 rounded-lg border border-border/50 bg-secondary/10 font-sans gap-2 mt-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <Package size={14} className="text-primary" />
-                  <h3 className="text-xs font-display font-bold uppercase tracking-wider text-foreground">
+                  <Package size={13} className="text-primary" />
+                  <h3 className="text-[11px] font-display font-bold uppercase tracking-wider text-foreground">
                     Package Assortment
                   </h3>
                 </div>
@@ -729,29 +729,29 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
 
               {/* Package Breakdown Matrix Table (if available) */}
               {matrixData && (
-                <div className="space-y-1 mt-0.5">
-                  <div className="flex items-center justify-between text-[10px]">
-                    <span className="font-display font-semibold uppercase tracking-wider text-foreground">
-                      {isFullStock ? "Full Stock Breakdown Matrix" : "Assortment Ratio Matrix"}
+                <div className="space-y-1 mt-1">
+                  <div className="flex items-center justify-between text-[9px] mb-1">
+                    <span className="font-display font-semibold uppercase tracking-wider text-foreground/80">
+                      {isFullStock ? "Full Stock Matrix" : "Ratio Matrix"}
                     </span>
-                    <span className="text-[9px] text-muted-foreground">Units per package</span>
+                    <span className="text-muted-foreground">Units per package</span>
                   </div>
 
-                  <div className="overflow-x-auto border border-border/60 rounded-md bg-background">
+                  <div className="overflow-x-auto border border-border/50 rounded-md bg-background shadow-2xs">
                     <table className="w-full text-xs text-left min-w-[220px] font-sans">
-                      <thead className="bg-secondary/40 text-[9px] uppercase tracking-wider text-muted-foreground border-b border-border/60">
+                      <thead className="bg-secondary/30 text-[9px] uppercase tracking-wider text-muted-foreground border-b border-border/50">
                         <tr>
-                          <th className="px-1.5 py-1 font-semibold">Color</th>
+                          <th className="px-2 py-1.5 font-semibold">Color</th>
                           {matrixData.sizes.map((s) => (
-                            <th key={s} className="px-1.5 py-1 font-semibold text-center">{s}</th>
+                            <th key={s} className="px-1.5 py-1.5 font-semibold text-center">{s}</th>
                           ))}
-                          <th className="px-1.5 py-1 font-bold text-right text-foreground">Total</th>
+                          <th className="px-2 py-1.5 font-bold text-right text-foreground">Total</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-border/40 text-[10px]">
+                      <tbody className="divide-y divide-border/30 text-[10px]">
                         {matrixData.colors.map((color) => (
-                          <tr key={color} className="hover:bg-secondary/20">
-                            <td className="px-1.5 py-0.5 font-medium text-foreground flex items-center gap-1">
+                          <tr key={color} className="hover:bg-secondary/10">
+                            <td className="px-2 py-1 font-medium text-foreground flex items-center gap-1.5">
                               <span
                                 className="w-1.5 h-1.5 rounded-full border border-black/10 shrink-0"
                                 style={{ backgroundColor: getColorHex(color) }}
@@ -759,25 +759,25 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
                               <span>{color}</span>
                             </td>
                             {matrixData.sizes.map((size) => (
-                              <td key={size} className="px-1.5 py-0.5 text-center text-muted-foreground tabular-nums">
+                              <td key={size} className="px-1.5 py-1 text-center text-muted-foreground tabular-nums">
                                 {matrixData.cellMap[color]?.[size] || 0}
                               </td>
                             ))}
-                            <td className="px-1.5 py-0.5 font-bold text-right text-foreground tabular-nums">
+                            <td className="px-2 py-1 font-bold text-right text-foreground tabular-nums">
                               {matrixData.rowTotals[color] || 0}
                             </td>
                           </tr>
                         ))}
                       </tbody>
-                      <tfoot className="bg-secondary/30 border-t border-border font-bold text-foreground text-[10px]">
+                      <tfoot className="bg-secondary/20 border-t border-border/50 font-bold text-foreground text-[10px]">
                         <tr>
-                          <td className="px-1.5 py-1 uppercase text-[9px]">TOTAL</td>
+                          <td className="px-2 py-1.5 uppercase text-[9px]">TOTAL</td>
                           {matrixData.sizes.map((size) => (
-                            <td key={size} className="px-1.5 py-1 text-center tabular-nums">
+                            <td key={size} className="px-1.5 py-1.5 text-center tabular-nums">
                               {matrixData.colTotals[size] || 0}
                             </td>
                           ))}
-                          <td className="px-1.5 py-1 text-right text-foreground font-bold tabular-nums">
+                          <td className="px-2 py-1.5 text-right text-foreground font-bold tabular-nums">
                             {matrixData.grandTotal.toLocaleString()}
                           </td>
                         </tr>
@@ -791,12 +791,12 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
             {/* ========================================================= */}
             {/* 5. PRIMARY ACTION: ADD TO CART (+ WISHLIST & SECONDARY CTAS) */}
             {/* ========================================================= */}
-            <div className="space-y-2 pt-0.5 font-sans">
-              <div className="flex items-center gap-2">
+            <div className="space-y-3 pt-6 font-sans">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  className="w-full flex-1 h-10 sm:h-11 px-5 rounded-lg bg-foreground text-background font-sans font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all duration-150 cursor-pointer shadow-xs active:scale-[0.99] flex items-center justify-center gap-2"
+                  className="w-full flex-1 h-11 sm:h-12 px-5 rounded-lg bg-foreground text-background font-sans font-bold text-[11px] sm:text-xs uppercase tracking-wider hover:bg-foreground/90 transition-all duration-150 cursor-pointer shadow-md active:scale-[0.99] flex items-center justify-center gap-2"
                 >
                   <ShoppingCart size={15} />
                   <span>Add to Cart</span>
@@ -809,10 +809,10 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
                       toggleWishlist(toStorefrontProduct(product));
                     }
                   }}
-                  className={`h-10 sm:h-11 w-10 sm:w-11 rounded-lg border transition-all cursor-pointer flex items-center justify-center shrink-0 ${
+                  className={`h-11 sm:h-12 w-11 sm:w-12 rounded-lg border transition-all cursor-pointer flex items-center justify-center shrink-0 ${
                     product && isInWishlist(product.id)
                       ? "bg-rose-50 border-rose-200 text-rose-600 dark:bg-rose-950/30 dark:border-rose-800"
-                      : "border-border/80 text-foreground hover:bg-secondary"
+                      : "border-border/70 text-muted-foreground hover:text-foreground hover:bg-secondary/50 hover:border-border"
                   }`}
                   title={product && isInWishlist(product.id) ? "Remove from wishlist" : "Add to wishlist"}
                   aria-label="Toggle wishlist"
@@ -827,9 +827,9 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
                   href={getWhatsAppUrl(`Hello ${BUSINESS_PROFILE.name},\n\nI am interested in:\nProduct: ${product.name}\nSKU: ${product.sku}\nQuantity: ${quantity} pcs`)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full h-9 sm:h-9.5 px-3 rounded-lg bg-[#25D366]/10 hover:bg-[#25D366]/15 border border-[#25D366]/30 text-[#25D366] font-sans font-semibold text-[11px] uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.99]"
+                  className="w-full h-9 px-3 rounded-md bg-transparent hover:bg-secondary/30 border border-border/50 text-muted-foreground hover:text-[#25D366] font-sans font-semibold text-[10px] uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.99]"
                 >
-                  <MessageCircle size={14} />
+                  <MessageCircle size={13} className="opacity-70 group-hover:opacity-100" />
                   <span>Inquire on WhatsApp</span>
                 </a>
               )}
