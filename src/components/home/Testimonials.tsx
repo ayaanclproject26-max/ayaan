@@ -1,4 +1,5 @@
 import { Star } from "lucide-react";
+import HorizontalCarousel from "@/components/common/HorizontalCarousel";
 
 interface Testimonial {
   id: number;
@@ -48,29 +49,26 @@ export default function Testimonials() {
           <p className="section-subtitle mt-1 sm:mt-1.5">Real experiences from our community</p>
         </div>
         
-        {/* Mobile: Swipeable | Desktop: Grid */}
-        <div className="w-full overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 font-sans">
-          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 min-w-max md:min-w-0 pb-4 md:pb-0">
-            {testimonials.map((testimonial) => (
-              <div 
-                key={testimonial.id} 
-                className="flex flex-col w-[80vw] sm:w-[320px] md:w-auto shrink-0 snap-center bg-background p-5 md:p-6 rounded-xl transition-all duration-300 hover:-translate-y-1" 
-                style={{ boxShadow: "var(--shadow-soft)" }}
-              >
-                <div className="flex gap-0.5 text-brass-ink mb-3">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} size={14} fill="currentColor" />
-                  ))}
-                </div>
-                <p className="text-sm font-sans text-foreground/90 italic flex-grow mb-4 leading-relaxed">&ldquo;{testimonial.content}&rdquo;</p>
-                <div className="mt-auto pt-3 border-t border-border/40">
-                  <p className="text-sm font-sans font-semibold text-foreground">{testimonial.name}</p>
-                  <p className="text-xs font-sans text-muted-foreground mt-0.5">{testimonial.role}</p>
-                </div>
+        <HorizontalCarousel trackClassName="gap-3 md:gap-4 pb-4 font-sans pt-1">
+          {testimonials.map((testimonial) => (
+            <div 
+              key={testimonial.id} 
+              className="flex flex-col w-[85vw] sm:w-[calc(50%-8px)] lg:w-[calc(25%-12px)] shrink-0 snap-start bg-background p-5 md:p-6 rounded-xl transition-all duration-300 hover:-translate-y-1" 
+              style={{ boxShadow: "var(--shadow-soft)" }}
+            >
+              <div className="flex gap-0.5 text-brass-ink mb-3">
+                {[...Array(testimonial.rating)].map((_, i) => (
+                  <Star key={i} size={14} fill="currentColor" />
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+              <p className="text-sm font-sans text-foreground/90 italic flex-grow mb-4 leading-relaxed">&ldquo;{testimonial.content}&rdquo;</p>
+              <div className="mt-auto pt-3 border-t border-border/40">
+                <p className="text-sm font-sans font-semibold text-foreground">{testimonial.name}</p>
+                <p className="text-xs font-sans text-muted-foreground mt-0.5">{testimonial.role}</p>
+              </div>
+            </div>
+          ))}
+        </HorizontalCarousel>
       </div>
     </section>
   );

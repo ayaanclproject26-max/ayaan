@@ -12,6 +12,7 @@ import {
   getProductColor,
 } from "@/lib/filters";
 import { Sparkles, Check, X, Filter, RotateCcw } from "lucide-react";
+import HorizontalCarousel from "@/components/common/HorizontalCarousel";
 import {
   IconMen,
   IconWomen,
@@ -216,20 +217,18 @@ export default function HotSales() {
         {/* 
           Hot Sales Tiles (exact compact category tile geometry matching expanded category grid)
         */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2.5 sm:gap-3.5">
-          <CategoryCard
-            category={hotSalesCategories[0]}
-            variant="compact"
-            isActive={activeCategory === "sweaters"}
-            onClick={() => handleTileClick("sweaters")}
-          />
-          <CategoryCard
-            category={hotSalesCategories[1]}
-            variant="compact"
-            isActive={activeCategory === "towels"}
-            onClick={() => handleTileClick("towels")}
-          />
-        </div>
+        <HorizontalCarousel trackClassName="gap-2.5 sm:gap-3.5 pb-2 pt-1">
+          {hotSalesCategories.map((category) => (
+            <div key={category.id} className="w-[calc(50%-5px)] sm:w-[calc(25%-9px)] md:w-[calc(16.666%-10px)] lg:w-[calc(12.5%-11px)] shrink-0 snap-start">
+              <CategoryCard
+                category={category}
+                variant="compact"
+                isActive={activeCategory === category.slug}
+                onClick={() => handleTileClick(category.slug as any)}
+              />
+            </div>
+          ))}
+        </HorizontalCarousel>
 
         {/* 
           HOT SALES COLLECTION SHOWCASE & CONTEXTUAL FILTERS

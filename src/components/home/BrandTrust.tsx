@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import HorizontalCarousel from "@/components/common/HorizontalCarousel";
 
 interface Certificate {
   id: string;
@@ -64,11 +65,11 @@ export default function BrandTrust() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 font-sans">
+        <HorizontalCarousel trackClassName="gap-3 sm:gap-4 pb-4 pt-1 font-sans">
           {certificates.map((cert) => (
             <div 
               key={cert.id} 
-              className="group flex flex-col bg-background cursor-pointer rounded-xl border border-border/60 p-3.5 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+              className="w-[85vw] sm:w-[calc(50%-8px)] lg:w-[calc(25%-12px)] shrink-0 snap-start group flex flex-col bg-background cursor-pointer rounded-xl border border-border/60 p-3.5 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
               onClick={() => openLightbox(cert)}
             >
               <div className="relative aspect-[3/4] w-full rounded-lg border border-border/40 overflow-hidden bg-white mb-3 flex items-center justify-center p-2">
@@ -81,7 +82,7 @@ export default function BrandTrust() {
               <h3 className="text-sm font-display font-semibold text-foreground px-0.5 pb-0.5 line-clamp-2">{cert.title}</h3>
             </div>
           ))}
-        </div>
+        </HorizontalCarousel>
       </div>
 
       {/* Lightbox */}

@@ -7,6 +7,7 @@ import { brandService, BrandModel } from "@/services/brand.service";
 import BrandTile from "@/components/common/BrandTile";
 import { Tag } from "lucide-react";
 import { getBrandLogoUrl } from "@/lib/brand-logos";
+import HorizontalCarousel from "@/components/common/HorizontalCarousel";
 
 export interface Brand {
   id: string;
@@ -63,17 +64,18 @@ export default function ShopByBrand() {
         </div>
 
         {/* Brand Grid: True 1:1 Squares with consistent responsive columns */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-3 sm:gap-4 lg:gap-4.5">
+        <HorizontalCarousel trackClassName="gap-3 sm:gap-4 lg:gap-4.5 pb-4 pt-1">
           {brandList.map((brand) => (
-            <BrandTile
-              key={brand.id}
-              brand={brand}
-              isSelected={false}
-              onClick={() => handleBrandClick(brand)}
-              size="md"
-            />
+            <div key={brand.id} className="w-[calc(50%-6px)] sm:w-[calc(33.33%-11px)] md:w-[calc(25%-12px)] lg:w-[calc(16.666%-15px)] xl:w-[calc(12.5%-16px)] 2xl:w-[calc(10%-17px)] shrink-0 snap-start">
+              <BrandTile
+                brand={brand}
+                isSelected={false}
+                onClick={() => handleBrandClick(brand)}
+                size="md"
+              />
+            </div>
           ))}
-        </div>
+        </HorizontalCarousel>
       </div>
     </section>
   );
