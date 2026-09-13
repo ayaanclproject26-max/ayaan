@@ -435,13 +435,13 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         className="fixed inset-0 bg-ink/60 backdrop-blur-xs z-[220] animate-in fade-in"
         onClick={onClose}
       />
-      <div className="fixed inset-0 z-[230] flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div className="fixed inset-0 z-[230] flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
         <div
           className="bg-card border border-border/80 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden my-auto animate-in zoom-in-95 duration-200"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <div>
               <h2 className="text-lg font-bold font-display text-foreground uppercase tracking-wide">
                 Confirm Commercial Order
@@ -458,9 +458,9 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             </button>
           </div>
 
-          <form onSubmit={handlePlaceOrder} className="p-5 space-y-5 max-h-[85vh] overflow-y-auto">
+          <form onSubmit={handlePlaceOrder} className="p-4 space-y-4 max-h-[85vh] overflow-y-auto">
             {error && (
-              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-[11px] font-medium flex items-start gap-2">
+              <div className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-[11px] font-medium flex items-start gap-2">
                 <AlertCircle size={14} className="shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
@@ -468,11 +468,11 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
             {/* 1. Shipping Destination */}
             <div>
-              <h3 className="text-xs font-display font-bold uppercase tracking-wider text-foreground mb-2.5 flex items-center gap-1.5">
+              <h3 className="text-xs font-display font-bold uppercase tracking-wider text-foreground mb-2 flex items-center gap-1.5">
                 <Truck size={14} className="text-primary" />
                 <span>1. Destination Details</span>
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-2.5 font-sans">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-2 font-sans">
                 <div>
                   <label className="block text-[10px] uppercase font-semibold text-muted-foreground mb-1">
                     Contact / Company Name *
@@ -483,7 +483,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     value={shippingName}
                     onChange={(e) => setShippingName(e.target.value)}
                     placeholder="John Doe / Global Retail Ltd"
-                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
                   />
                 </div>
 
@@ -497,7 +497,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="buyer@example.com"
-                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
                   />
                 </div>
 
@@ -511,7 +511,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+1 555 0192"
-                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
                   />
                 </div>
 
@@ -522,7 +522,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                   <select
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground font-semibold focus:ring-1 focus:ring-primary outline-none"
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground font-semibold focus:ring-1 focus:ring-primary outline-none"
                   >
                     <option value="US">United States (US)</option>
                     <option value="GB">United Kingdom (GB)</option>
@@ -547,7 +547,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="123 Fashion Ave, Suite 400"
-                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
                   />
                 </div>
 
@@ -561,7 +561,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     placeholder="New York"
-                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
                   />
                 </div>
 
@@ -575,7 +575,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     value={postalCode}
                     onChange={(e) => setPostalCode(e.target.value)}
                     placeholder="10001"
-                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground font-mono focus:ring-1 focus:ring-primary outline-none"
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground font-mono focus:ring-1 focus:ring-primary outline-none"
                   />
                 </div>
               </div>
@@ -583,7 +583,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
             {/* 2. Shipping Selection — Two explicit paths */}
             <div>
-              <h3 className="text-xs font-display font-bold uppercase tracking-wider text-foreground mb-2.5 flex items-center gap-1.5">
+              <h3 className="text-xs font-display font-bold uppercase tracking-wider text-foreground mb-2 flex items-center gap-1.5">
                 <Truck size={14} className="text-primary" />
                 <span>2. Shipping Arrangement</span>
               </h3>
@@ -593,39 +593,37 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 <button
                   type="button"
                   onClick={() => setShippingMode("aramex")}
-                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer relative group flex flex-col justify-between ${
+                  className={`p-2.5 rounded-lg border text-left transition-all cursor-pointer relative group flex flex-col justify-between ${
                     shippingMode === "aramex"
-                      ? "border-foreground bg-secondary/50 text-foreground ring-1 ring-foreground"
-                      : "border-border/80 bg-card hover:border-foreground/30 hover:bg-secondary/20 text-muted-foreground"
+                      ? "border-foreground bg-secondary/30 text-foreground ring-1 ring-foreground"
+                      : "border-border/80 bg-card hover:border-foreground/30 hover:bg-secondary/10 text-muted-foreground"
                   }`}
                 >
-                  <div>
-                    <div className="flex items-center justify-between">
+                  <div className="w-full space-y-1">
+                    <div className="flex items-center justify-between w-full">
                       <span className="font-bold text-xs uppercase tracking-wide">
                         ✈ Air — Aramex
                       </span>
                       {shippingMode === "aramex" && <CheckCircle2 size={14} className="text-foreground shrink-0" />}
                     </div>
-                    <span className="text-[10px] font-medium opacity-80 block mt-0.5">
+                    <span className="text-[10px] font-medium opacity-80 block leading-snug">
                       Priority Air Express · 3–5 business days
                     </span>
                   </div>
-                  <div className="mt-2.5 pt-2 border-t border-border/50">
+                  
+                  <div className="flex justify-end w-full mt-1.5">
                     {shippingMode === "aramex" && aramexLoading ? (
                       <span className="text-[10px] text-foreground font-semibold flex items-center gap-1">
                         <RefreshCw size={10} className="animate-spin" /> Calculating...
                       </span>
                     ) : shippingMode === "aramex" && aramexError ? (
-                      <span className="text-[10px] text-destructive">Error quoting. <span onClick={(e) => { e.stopPropagation(); fetchAramexQuote(); }} className="underline cursor-pointer">Retry</span></span>
+                      <span className="text-[10px] text-destructive text-right">Error quoting. <span onClick={(e) => { e.stopPropagation(); fetchAramexQuote(); }} className="underline cursor-pointer">Retry</span></span>
                     ) : aramexQuote ? (
-                      <div className="flex justify-between items-baseline">
-                        <span className="text-[10px] opacity-70">{aramexQuote.is_provisional ? "Estimated" : "Quoted"}</span>
-                        <span className="font-black text-xs text-foreground">
-                          ${(aramexQuote.amount || 0).toFixed(2)}
-                        </span>
-                      </div>
+                      <span className="font-black text-xs text-foreground">
+                        ${(aramexQuote.amount || 0).toFixed(2)}
+                      </span>
                     ) : (
-                      <span className="text-[10px] text-muted-foreground">Select to quote</span>
+                      <span className="text-[10px] text-muted-foreground text-right">Select to quote</span>
                     )}
                   </div>
                 </button>
@@ -634,44 +632,44 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 <button
                   type="button"
                   onClick={() => setShippingMode("manual")}
-                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer relative group flex flex-col justify-between ${
+                  className={`p-2.5 rounded-lg border text-left transition-all cursor-pointer relative group flex flex-col justify-between ${
                     shippingMode === "manual"
-                      ? "border-foreground bg-secondary/50 text-foreground ring-1 ring-foreground"
-                      : "border-border/80 bg-card hover:border-foreground/30 hover:bg-secondary/20 text-muted-foreground"
+                      ? "border-foreground bg-secondary/30 text-foreground ring-1 ring-foreground"
+                      : "border-border/80 bg-card hover:border-foreground/30 hover:bg-secondary/10 text-muted-foreground"
                   }`}
                 >
-                  <div>
-                    <div className="flex items-center justify-between">
+                  <div className="w-full space-y-1">
+                    <div className="flex items-center justify-between w-full">
                       <span className="font-bold text-xs uppercase tracking-wide">
                         💬 Discuss Directly
                       </span>
                       {shippingMode === "manual" && <CheckCircle2 size={14} className="text-foreground shrink-0" />}
                     </div>
-                    <span className="text-[10px] font-medium opacity-80 block mt-0.5 leading-snug">
+                    <span className="text-[10px] font-medium opacity-80 block leading-snug">
                       Shipping cost confirmed separately with our export team.
                     </span>
                   </div>
-                  {shippingMode === "manual" && (
-                    <div className="mt-2 pt-2 border-t border-border/50 flex justify-end">
+                  <div className="flex justify-end w-full mt-1.5 h-4 flex-none items-center">
+                    {shippingMode === "manual" && (
                       <a
                         href={getWhatsAppUrl(manualShippingWhatsAppMsg)}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded bg-[#25D366]/10 text-[#25D366] text-[9px] font-bold uppercase tracking-wider hover:bg-[#25D366]/20 transition-colors"
+                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#25D366]/10 text-[#25D366] text-[9px] font-bold uppercase tracking-wider hover:bg-[#25D366]/20 transition-colors"
                       >
                         <MessageCircle size={10} />
                         Inquire on WhatsApp
                       </a>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </button>
               </div>
 
               {/* Shipment specs summary badge */}
               {shippingMode === "aramex" && shipmentSpecs && (
-                <div className="py-2.5 px-3 rounded-lg bg-secondary/30 border border-border/60 font-sans">
-                  <div className="flex items-center justify-between text-[11px]">
+                <div className="py-2 px-2.5 rounded-lg border border-border/50 bg-secondary/10 font-sans mt-2">
+                  <div className="flex items-center justify-between text-[10px]">
                     <div className="text-foreground font-medium">
                       📦 {totalItemQuantity} pcs · {shipmentSpecs.carton_count} cartons · {shipmentSpecs.gross_weight} kg · {shipmentSpecs.total_cbm} CBM
                     </div>
@@ -680,11 +678,11 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       onClick={() => setShowSpecsDetails(!showSpecsDetails)}
                       className="text-foreground hover:underline font-bold cursor-pointer shrink-0 ml-2 flex items-center gap-0.5"
                     >
-                      {showSpecsDetails ? "Hide" : "Details"}
+                      {showSpecsDetails ? "Hide" : "Details →"}
                     </button>
                   </div>
                   {showSpecsDetails && (
-                    <div className="mt-2 pt-2 border-t border-border/50 grid grid-cols-2 gap-2 text-[10px] text-muted-foreground">
+                    <div className="mt-1.5 pt-1.5 border-t border-border/50 grid grid-cols-2 gap-2 text-[9px] text-muted-foreground">
                       <div>Dimensions: <strong className="text-foreground">{shipmentSpecs.carton_dimensions.length}×{shipmentSpecs.carton_dimensions.width}×{shipmentSpecs.carton_dimensions.height} {shipmentSpecs.carton_dimensions.unit}</strong></div>
                       <div>Origin: <strong className="text-foreground">Dhaka EPZ, Bangladesh</strong></div>
                     </div>
@@ -694,15 +692,14 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             </div>
 
             {/* Order Summary — zero tax, clear export pricing */}
-            {/* Order Summary — zero tax, clear export pricing */}
-            <div className="pt-3 pb-1 border-t border-border/60 space-y-1.5 text-xs font-sans">
-              <div className="flex justify-between text-muted-foreground font-semibold">
-                <span className="uppercase">Merchandise Total</span>
-                <span className="text-foreground">{formatPrice(subtotal)}</span>
+            <div className="pt-2 pb-0.5 space-y-1 text-xs font-sans border-t border-border/60">
+              <div className="flex justify-between text-muted-foreground font-medium">
+                <span className="uppercase tracking-wide text-[10px]">Merchandise Total</span>
+                <span className="text-foreground font-semibold">{formatPrice(subtotal)}</span>
               </div>
-              <div className="flex justify-between text-muted-foreground font-semibold">
-                <span className="uppercase">Shipping</span>
-                <span className="text-foreground">
+              <div className="flex justify-between text-muted-foreground font-medium">
+                <span className="uppercase tracking-wide text-[10px]">Shipping</span>
+                <span className="text-foreground font-semibold">
                   {shippingMode === "manual" ? (
                     <span className="text-amber-600 dark:text-amber-400">TO BE CONFIRMED</span>
                   ) : aramexLoading ? (
@@ -714,20 +711,20 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                   )}
                 </span>
               </div>
-              <div className="flex justify-between items-end pt-2 mt-1.5 border-t border-border font-bold">
-                <span className="uppercase tracking-wider text-sm text-foreground">Order Total</span>
+              <div className="flex justify-between items-end pt-1.5 mt-1 border-t border-border">
+                <span className="font-bold text-foreground text-xs uppercase tracking-wide">Order Total</span>
                 <div className="text-right">
-                  <span className="text-base tracking-tight text-foreground">{formatPrice(shippingMode === "manual" ? subtotal : total)}</span>
+                  <span className="font-black text-sm text-foreground">{formatPrice(shippingMode === "manual" ? subtotal : total)}</span>
                   {shippingMode === "manual" && (
-                    <span className="block text-[9px] text-muted-foreground uppercase mt-0.5">
-                      + Shipping to be confirmed
+                    <span className="block text-[9px] text-muted-foreground font-medium mt-0.5">
+                      + shipping to be confirmed
                     </span>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="text-[10px] text-muted-foreground font-semibold flex items-center justify-center gap-1.5 pt-1">
+            <div className="text-[10px] text-muted-foreground font-medium flex items-center justify-center gap-1.5 pt-1">
               <ShieldCheck size={12} className="text-foreground opacity-70 shrink-0" />
               <span>✓ Commercial order · Proforma Invoice</span>
             </div>
@@ -736,10 +733,10 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             <button
               type="submit"
               disabled={loading || (shippingMode === "aramex" && !aramexQuote)}
-              className="w-full h-11 bg-foreground text-background font-bold rounded-lg text-[11px] uppercase tracking-wider shadow-md hover:bg-foreground/90 transition-all flex items-center justify-center gap-2 disabled:opacity-40 cursor-pointer"
+              className="w-full h-10 bg-primary text-primary-foreground font-bold rounded-lg text-[11px] uppercase tracking-wider shadow-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-40 cursor-pointer"
             >
               {loading ? (
-                <div className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
               ) : (
                 <>
                   <span>Confirm Order &amp; Generate Proforma</span>

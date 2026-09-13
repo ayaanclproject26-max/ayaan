@@ -63,17 +63,17 @@ export default function ShopByBrand() {
           </div>
         </div>
 
-        {/* Brand Grid: True 1:1 Squares with consistent responsive columns */}
+        {/* Brand Grid: True 1:1 Squares with fixed compact dimensions */}
         <HorizontalCarousel trackClassName="gap-3 sm:gap-4 lg:gap-4.5 pb-4 pt-1">
           {brandList.map((brand) => (
-            <div key={brand.id} className="w-[calc(50%-6px)] sm:w-[calc(33.33%-11px)] md:w-[calc(25%-12px)] lg:w-[calc(16.666%-15px)] xl:w-[calc(12.5%-16px)] 2xl:w-[calc(10%-17px)] shrink-0 snap-start">
-              <BrandTile
-                brand={brand}
-                isSelected={false}
-                onClick={() => handleBrandClick(brand)}
-                size="md"
-              />
-            </div>
+            <BrandTile
+              key={brand.id}
+              brand={brand}
+              isSelected={false}
+              onClick={() => handleBrandClick(brand)}
+              size="md"
+              className="flex-none w-[104px] sm:w-[120px] lg:w-[132px] snap-start"
+            />
           ))}
         </HorizontalCarousel>
       </div>
