@@ -509,7 +509,7 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
             {/* ========================================================= */}
             {/* 2. BUY MORE, SAVE MORE TIER TABLE */}
             {/* ========================================================= */}
-            <div className="space-y-1">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-display font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
                   <TrendingDown size={14} className="text-primary" />
@@ -518,141 +518,134 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
                 <span className="text-[10px] text-muted-foreground/70">Select a tier to set order volume</span>
               </div>
 
-              <div className="overflow-x-auto border border-border/70 rounded-lg bg-card/60 shadow-2xs">
-                <table className="w-full text-xs text-left font-sans min-w-[280px]">
-                  <thead className="bg-secondary/40 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border/60">
-                    <tr>
-                      <th className="w-[32%] px-3 py-1 font-semibold text-foreground">Tier</th>
-                      <th className="w-[34%] px-3 py-1 font-semibold text-foreground">Quantity</th>
-                      <th className="w-[34%] px-3 py-1 font-bold text-right text-foreground">Unit Price</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/40" role="radiogroup" aria-label="Pricing Tiers">
-                    {/* STANDARD */}
-                    <tr
-                      role="radio"
-                      aria-checked={isStandard}
-                      tabIndex={0}
-                      onClick={handleSelectStandard}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          handleSelectStandard();
-                        }
-                      }}
-                      className={`cursor-pointer transition-all duration-200 relative focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:-outline-offset-2 ${
-                        isStandard
-                          ? "bg-secondary/60 text-foreground font-medium outline outline-2 outline-foreground -outline-offset-2 z-10"
-                          : "text-muted-foreground hover:bg-secondary/30 hover:text-foreground hover:outline hover:outline-1 hover:outline-border hover:-outline-offset-1 z-0"
-                      }`}
-                    >
-                      <td className="px-3 py-1.5">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full transition-all shrink-0 ${isStandard ? "bg-foreground scale-110" : "bg-muted-foreground/30"}`} />
-                          <span className={`uppercase tracking-wider text-xs ${isStandard ? "font-bold text-foreground" : "font-semibold text-muted-foreground"}`}>Standard</span>
-                        </div>
-                      </td>
-                      <td className="px-3 py-1.5 font-normal tabular-nums text-xs">
-                        <span className={isStandard ? "text-foreground" : "text-muted-foreground"}>
-                          {moq}–{bulkThreshold - 1} pcs
-                        </span>
-                      </td>
-                      <td className="px-3 py-1.5 text-right tabular-nums whitespace-nowrap">
-                        <span className={`tabular-nums text-xs sm:text-sm ${isStandard ? "font-bold text-foreground" : "font-semibold text-foreground/80"}`}>
-                          {formatPrice(standardPrice)}
-                        </span>
-                      </td>
-                    </tr>
+              <div className="text-xs font-sans min-w-[280px]">
+                {/* Header Row */}
+                <div className="grid grid-cols-[30%_35%_35%] px-3 pb-2 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border/60">
+                  <div className="font-semibold text-foreground">Tier</div>
+                  <div className="font-semibold text-foreground">Quantity</div>
+                  <div className="font-bold text-right text-foreground">Unit Price</div>
+                </div>
 
-                    {/* BULK */}
-                    <tr
+                {/* Rows Container */}
+                <div className="pt-2.5 space-y-1.5" role="radiogroup" aria-label="Pricing Tiers">
+                  {/* STANDARD */}
+                  <div
+                    role="radio"
+                    aria-checked={isStandard}
+                    tabIndex={0}
+                    onClick={handleSelectStandard}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleSelectStandard();
+                      }
+                    }}
+                    className={`grid grid-cols-[30%_35%_35%] items-center px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:-outline-offset-2 ${
+                      isStandard
+                        ? "bg-secondary/30 ring-2 ring-inset ring-foreground shadow-sm"
+                        : "bg-card ring-1 ring-inset ring-border/70 hover:ring-border hover:bg-secondary/20 hover:shadow-xs text-muted-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`w-1.5 h-1.5 rounded-full transition-all shrink-0 ${isStandard ? "bg-foreground scale-125" : "bg-muted-foreground/40"}`} />
+                      <span className={`uppercase tracking-wider text-xs ${isStandard ? "font-bold text-foreground" : "font-medium text-muted-foreground"}`}>Standard</span>
+                    </div>
+                    <div className="font-normal tabular-nums text-xs">
+                      <span className={isStandard ? "text-foreground" : "text-muted-foreground"}>
+                        {moq}–{bulkThreshold - 1} pcs
+                      </span>
+                    </div>
+                    <div className="text-right tabular-nums whitespace-nowrap">
+                      <span className={`tabular-nums text-xs sm:text-sm ${isStandard ? "font-bold text-foreground" : "font-medium text-foreground/80"}`}>
+                        {formatPrice(standardPrice)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* BULK */}
+                  <div
+                    role="radio"
+                    aria-checked={isBulk}
+                    tabIndex={0}
+                    onClick={handleSelectBulk}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleSelectBulk();
+                      }
+                    }}
+                    className={`grid grid-cols-[30%_35%_35%] items-center px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:-outline-offset-2 ${
+                      isBulk
+                        ? "bg-secondary/30 ring-2 ring-inset ring-foreground shadow-sm"
+                        : "bg-card ring-1 ring-inset ring-border/70 hover:ring-border hover:bg-secondary/20 hover:shadow-xs text-muted-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`w-1.5 h-1.5 rounded-full transition-all shrink-0 ${isBulk ? "bg-foreground scale-125" : "bg-muted-foreground/40"}`} />
+                      <span className={`uppercase tracking-wider text-xs ${isBulk ? "font-bold text-foreground" : "font-medium text-muted-foreground"}`}>Bulk</span>
+                    </div>
+                    <div className="font-normal tabular-nums text-xs">
+                      <span className={isBulk ? "text-foreground" : "text-muted-foreground"}>
+                        {bulkThreshold}+ pcs
+                      </span>
+                    </div>
+                    <div className="text-right tabular-nums whitespace-nowrap">
+                      <div className="flex items-center justify-end gap-1.5">
+                        {bulkSavingsPercent > 0 && (
+                          <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 tabular-nums">
+                            {bulkSavingsPercent}% OFF
+                          </span>
+                        )}
+                        <span className={`tabular-nums text-xs sm:text-sm ${isBulk ? "font-bold text-foreground" : "font-medium text-foreground/80"}`}>
+                          {formatPrice(bulkPrice)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* FULL STOCK */}
+                  {totalStock > moq && (
+                    <div
                       role="radio"
-                      aria-checked={isBulk}
+                      aria-checked={isFullStock}
                       tabIndex={0}
-                      onClick={handleSelectBulk}
+                      onClick={handleSelectFullStock}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
-                          handleSelectBulk();
+                          handleSelectFullStock();
                         }
                       }}
-                      className={`cursor-pointer transition-all duration-200 relative focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:-outline-offset-2 ${
-                        isBulk
-                          ? "bg-secondary/60 text-foreground font-medium outline outline-2 outline-foreground -outline-offset-2 z-10"
-                          : "text-muted-foreground hover:bg-secondary/30 hover:text-foreground hover:outline hover:outline-1 hover:outline-border hover:-outline-offset-1 z-0"
+                      className={`grid grid-cols-[30%_35%_35%] items-center px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:-outline-offset-2 ${
+                        isFullStock
+                          ? "bg-secondary/30 ring-2 ring-inset ring-foreground shadow-sm"
+                          : "bg-card ring-1 ring-inset ring-border/70 hover:ring-border hover:bg-secondary/20 hover:shadow-xs text-muted-foreground"
                       }`}
                     >
-                      <td className="px-3 py-1.5">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full transition-all shrink-0 ${isBulk ? "bg-foreground scale-110" : "bg-muted-foreground/30"}`} />
-                          <span className={`uppercase tracking-wider text-xs ${isBulk ? "font-bold text-foreground" : "font-semibold text-muted-foreground"}`}>Bulk</span>
-                        </div>
-                      </td>
-                      <td className="px-3 py-1.5 font-normal tabular-nums text-xs">
-                        <span className={isBulk ? "text-foreground" : "text-muted-foreground"}>
-                          {bulkThreshold}+ pcs
+                      <div className="flex items-center gap-2">
+                        <span className={`w-1.5 h-1.5 rounded-full transition-all shrink-0 ${isFullStock ? "bg-foreground scale-125" : "bg-muted-foreground/40"}`} />
+                        <span className={`uppercase tracking-wider text-xs ${isFullStock ? "font-bold text-foreground" : "font-medium text-muted-foreground"}`}>Full Stock</span>
+                      </div>
+                      <div className="font-normal tabular-nums text-xs">
+                        <span className={isFullStock ? "text-foreground" : "text-muted-foreground"}>
+                          {totalStock.toLocaleString()} pcs
                         </span>
-                      </td>
-                      <td className="px-3 py-1.5 text-right tabular-nums whitespace-nowrap">
+                      </div>
+                      <div className="text-right tabular-nums whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1.5">
-                          {bulkSavingsPercent > 0 && (
-                            <span className="text-[9px] uppercase font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 tabular-nums">
-                              {bulkSavingsPercent}% OFF
+                          {fullStockSavingsPercent > 0 && (
+                            <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 tabular-nums">
+                              {fullStockSavingsPercent}% OFF
                             </span>
                           )}
-                          <span className={`tabular-nums text-xs sm:text-sm ${isBulk ? "font-bold text-foreground" : "font-semibold text-foreground/80"}`}>
-                            {formatPrice(bulkPrice)}
+                          <span className={`tabular-nums text-xs sm:text-sm ${isFullStock ? "font-bold text-foreground" : "font-medium text-foreground/80"}`}>
+                            {formatPrice(resolvedFullStockPrice)}
                           </span>
                         </div>
-                      </td>
-                    </tr>
-
-                    {/* FULL STOCK */}
-                    {totalStock > moq && (
-                      <tr
-                        role="radio"
-                        aria-checked={isFullStock}
-                        tabIndex={0}
-                        onClick={handleSelectFullStock}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            handleSelectFullStock();
-                          }
-                        }}
-                        className={`cursor-pointer transition-all duration-200 relative focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:-outline-offset-2 ${
-                          isFullStock
-                            ? "bg-secondary/60 text-foreground font-medium outline outline-2 outline-foreground -outline-offset-2 z-10"
-                            : "text-muted-foreground hover:bg-secondary/30 hover:text-foreground hover:outline hover:outline-1 hover:outline-border hover:-outline-offset-1 z-0"
-                        }`}
-                      >
-                        <td className="px-3 py-1.5">
-                          <div className="flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full transition-all shrink-0 ${isFullStock ? "bg-emerald-600 scale-110" : "bg-muted-foreground/30"}`} />
-                            <span className={`uppercase tracking-wider text-xs ${isFullStock ? "font-bold text-foreground" : "font-semibold text-muted-foreground"}`}>Full Stock</span>
-                          </div>
-                        </td>
-                        <td className="px-3 py-1.5 font-normal tabular-nums text-xs">
-                          <span className={isFullStock ? "text-foreground" : "text-muted-foreground"}>
-                            {totalStock.toLocaleString()} pcs
-                          </span>
-                        </td>
-                        <td className="px-3 py-1.5 text-right tabular-nums whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-1.5">
-                            {fullStockSavingsPercent > 0 && (
-                              <span className="text-[9px] uppercase font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 tabular-nums">
-                                {fullStockSavingsPercent}% OFF
-                              </span>
-                            )}
-                            <span className={`tabular-nums text-xs sm:text-sm ${isFullStock ? "font-bold text-foreground" : "font-semibold text-foreground/80"}`}>
-                              {formatPrice(resolvedFullStockPrice)}
-                            </span>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
