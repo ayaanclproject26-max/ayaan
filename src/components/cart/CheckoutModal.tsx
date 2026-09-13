@@ -435,46 +435,46 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         className="fixed inset-0 bg-ink/60 backdrop-blur-xs z-[220] animate-in fade-in"
         onClick={onClose}
       />
-      <div className="fixed inset-0 z-[230] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+      <div className="fixed inset-0 z-[230] flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
         <div
-          className="bg-card border border-border/80 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden my-auto animate-in zoom-in-95 duration-200"
+          className="bg-card border border-border/80 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden my-auto animate-in zoom-in-95 duration-200"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
             <div>
-              <h2 className="text-xl font-bold font-display text-foreground">
-                Commercial Order Confirmation
+              <h2 className="text-lg font-bold font-display text-foreground uppercase tracking-wide">
+                Confirm Commercial Order
               </h2>
-              <p className="text-xs text-muted-foreground">
-                Destination details, shipping arrangement &amp; Proforma Invoice generation
+              <p className="text-[11px] font-medium text-muted-foreground mt-0.5">
+                Confirm destination, shipping and order total
               </p>
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              className="p-1.5 rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
           </div>
 
-          <form onSubmit={handlePlaceOrder} className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+          <form onSubmit={handlePlaceOrder} className="p-5 space-y-5 max-h-[85vh] overflow-y-auto">
             {error && (
-              <div className="p-3.5 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-start gap-2.5">
-                <AlertCircle size={16} className="shrink-0 mt-0.5" />
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-[11px] font-medium flex items-start gap-2">
+                <AlertCircle size={14} className="shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
 
             {/* 1. Shipping Destination */}
             <div>
-              <h3 className="text-sm font-display font-bold uppercase tracking-wider text-foreground mb-3 flex items-center gap-2">
-                <Truck size={16} className="text-primary" />
+              <h3 className="text-xs font-display font-bold uppercase tracking-wider text-foreground mb-2.5 flex items-center gap-1.5">
+                <Truck size={14} className="text-primary" />
                 <span>1. Destination Details</span>
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-body">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-2.5 font-sans">
                 <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  <label className="block text-[10px] uppercase font-semibold text-muted-foreground mb-1">
                     Contact / Company Name *
                   </label>
                   <input
@@ -483,12 +483,12 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     value={shippingName}
                     onChange={(e) => setShippingName(e.target.value)}
                     placeholder="John Doe / Global Retail Ltd"
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
+                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  <label className="block text-[10px] uppercase font-semibold text-muted-foreground mb-1">
                     Email Address *
                   </label>
                   <input
@@ -497,12 +497,12 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="buyer@example.com"
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
+                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  <label className="block text-[10px] uppercase font-semibold text-muted-foreground mb-1">
                     Phone / Mobile *
                   </label>
                   <input
@@ -511,18 +511,18 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+1 555 0192"
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
+                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  <label className="block text-[10px] uppercase font-semibold text-muted-foreground mb-1">
                     Destination Country *
                   </label>
                   <select
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-border bg-secondary/30 text-foreground font-bold focus:ring-1 focus:ring-primary outline-none"
+                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground font-semibold focus:ring-1 focus:ring-primary outline-none"
                   >
                     <option value="US">United States (US)</option>
                     <option value="GB">United Kingdom (GB)</option>
@@ -538,7 +538,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  <label className="block text-[10px] uppercase font-semibold text-muted-foreground mb-1">
                     Street Address *
                   </label>
                   <input
@@ -547,12 +547,12 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="123 Fashion Ave, Suite 400"
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
+                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  <label className="block text-[10px] uppercase font-semibold text-muted-foreground mb-1">
                     City *
                   </label>
                   <input
@@ -561,12 +561,12 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     placeholder="New York"
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
+                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground focus:ring-1 focus:ring-primary outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  <label className="block text-[10px] uppercase font-semibold text-muted-foreground mb-1">
                     Postal / Zip Code *
                   </label>
                   <input
@@ -575,7 +575,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     value={postalCode}
                     onChange={(e) => setPostalCode(e.target.value)}
                     placeholder="10001"
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-border bg-secondary/30 text-foreground font-mono focus:ring-1 focus:ring-primary outline-none"
+                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-secondary/30 text-foreground font-mono focus:ring-1 focus:ring-primary outline-none"
                   />
                 </div>
               </div>
@@ -583,74 +583,49 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
             {/* 2. Shipping Selection — Two explicit paths */}
             <div>
-              <h3 className="text-sm font-display font-bold uppercase tracking-wider text-foreground mb-3 flex items-center gap-2">
-                <Truck size={16} className="text-primary" />
+              <h3 className="text-xs font-display font-bold uppercase tracking-wider text-foreground mb-2.5 flex items-center gap-1.5">
+                <Truck size={14} className="text-primary" />
                 <span>2. Shipping Arrangement</span>
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-sans">
                 {/* ── OPTION A: AIR — ARAMEX ─────────────────────────────── */}
                 <button
                   type="button"
                   onClick={() => setShippingMode("aramex")}
-                  className={`p-4 rounded-2xl border text-left flex flex-col gap-3 transition-all cursor-pointer relative ${
+                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer relative group flex flex-col justify-between ${
                     shippingMode === "aramex"
-                      ? "border-primary bg-primary/5 text-foreground shadow-xs ring-1 ring-primary"
-                      : "border-border bg-card hover:border-primary/50 text-muted-foreground"
+                      ? "border-foreground bg-secondary/50 text-foreground ring-1 ring-foreground"
+                      : "border-border/80 bg-card hover:border-foreground/30 hover:bg-secondary/20 text-muted-foreground"
                   }`}
                 >
-                  {/* Header row */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className={`p-2 rounded-xl ${shippingMode === "aramex" ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" : "bg-secondary text-muted-foreground"}`}>
-                        <Plane size={16} />
-                      </div>
-                      <div>
-                        <span className="font-bold text-xs text-foreground uppercase block tracking-wide">
-                          ✈ Air — Aramex
-                        </span>
-                        <span className="text-[10px] text-muted-foreground block font-medium">
-                          Priority Air Express · 3–5 business days
-                        </span>
-                      </div>
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-xs uppercase tracking-wide">
+                        ✈ Air — Aramex
+                      </span>
+                      {shippingMode === "aramex" && <CheckCircle2 size={14} className="text-foreground shrink-0" />}
                     </div>
-                    {shippingMode === "aramex" && <CheckCircle2 size={16} className="text-primary shrink-0" />}
+                    <span className="text-[10px] font-medium opacity-80 block mt-0.5">
+                      Priority Air Express · 3–5 business days
+                    </span>
                   </div>
-
-                  {/* Aramex quote display */}
-                  <div className="pt-2 border-t border-border/50">
+                  <div className="mt-2.5 pt-2 border-t border-border/50">
                     {shippingMode === "aramex" && aramexLoading ? (
-                      <div className="flex items-center gap-1.5 text-[11px] text-primary font-semibold">
-                        <RefreshCw size={12} className="animate-spin" />
-                        <span>Calculating Aramex shipping…</span>
-                      </div>
+                      <span className="text-[10px] text-foreground font-semibold flex items-center gap-1">
+                        <RefreshCw size={10} className="animate-spin" /> Calculating...
+                      </span>
                     ) : shippingMode === "aramex" && aramexError ? (
-                      <div className="space-y-1.5">
-                        <p className="text-[11px] text-destructive flex items-center gap-1">
-                          <AlertCircle size={11} className="shrink-0" />
-                          <span>Unable to calculate Aramex shipping right now.</span>
-                        </p>
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); fetchAramexQuote(); }}
-                          className="text-[10px] text-primary underline font-semibold cursor-pointer"
-                        >
-                          Retry Quote
-                        </button>
-                      </div>
+                      <span className="text-[10px] text-destructive">Error quoting. <span onClick={(e) => { e.stopPropagation(); fetchAramexQuote(); }} className="underline cursor-pointer">Retry</span></span>
                     ) : aramexQuote ? (
-                      <div className="flex items-baseline justify-between">
-                        <span className="text-[10px] text-muted-foreground">
-                          {aramexQuote.is_provisional ? "Estimated Freight" : "Carrier Quoted"}
-                        </span>
-                        <span className="font-black text-sm text-foreground">
-                          ${(aramexQuote.amount || 0).toFixed(2)} USD
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-[10px] opacity-70">{aramexQuote.is_provisional ? "Estimated" : "Quoted"}</span>
+                        <span className="font-black text-xs text-foreground">
+                          ${(aramexQuote.amount || 0).toFixed(2)}
                         </span>
                       </div>
                     ) : (
-                      <p className="text-[11px] text-muted-foreground">
-                        Enter city and postal code to calculate rate.
-                      </p>
+                      <span className="text-[10px] text-muted-foreground">Select to quote</span>
                     )}
                   </div>
                 </button>
@@ -659,80 +634,59 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 <button
                   type="button"
                   onClick={() => setShippingMode("manual")}
-                  className={`p-4 rounded-2xl border text-left flex flex-col gap-3 transition-all cursor-pointer relative ${
+                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer relative group flex flex-col justify-between ${
                     shippingMode === "manual"
-                      ? "border-primary bg-primary/5 text-foreground shadow-xs ring-1 ring-primary"
-                      : "border-border bg-card hover:border-primary/50 text-muted-foreground"
+                      ? "border-foreground bg-secondary/50 text-foreground ring-1 ring-foreground"
+                      : "border-border/80 bg-card hover:border-foreground/30 hover:bg-secondary/20 text-muted-foreground"
                   }`}
                 >
-                  {/* Header row */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className={`p-2 rounded-xl ${shippingMode === "manual" ? "bg-amber-500/10 text-amber-600 dark:text-amber-400" : "bg-secondary text-muted-foreground"}`}>
-                        <MessageCircle size={16} />
-                      </div>
-                      <div>
-                        <span className="font-bold text-xs text-foreground uppercase block tracking-wide">
-                          Discuss Shipping Directly
-                        </span>
-                        <span className="text-[10px] text-muted-foreground block font-medium">
-                          Shipping confirmed separately with our team
-                        </span>
-                      </div>
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-xs uppercase tracking-wide">
+                        💬 Discuss Directly
+                      </span>
+                      {shippingMode === "manual" && <CheckCircle2 size={14} className="text-foreground shrink-0" />}
                     </div>
-                    {shippingMode === "manual" && <CheckCircle2 size={16} className="text-primary shrink-0" />}
+                    <span className="text-[10px] font-medium opacity-80 block mt-0.5 leading-snug">
+                      Shipping cost confirmed separately with our export team.
+                    </span>
                   </div>
-
-                  {/* Manual shipping info — no quote, no fake price */}
-                  <div className="pt-2 border-t border-border/50 space-y-2">
-                    <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      Shipping charges are not included in your order total. Our export team will confirm shipping arrangements with you directly.
-                    </p>
-                    {shippingMode === "manual" && (
+                  {shippingMode === "manual" && (
+                    <div className="mt-2 pt-2 border-t border-border/50 flex justify-end">
                       <a
                         href={getWhatsAppUrl(manualShippingWhatsAppMsg)}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#25D366]/10 text-[#25D366] text-[10px] font-bold uppercase tracking-wider hover:bg-[#25D366]/20 transition-colors"
-                        aria-label="Inquire about shipping on WhatsApp"
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded bg-[#25D366]/10 text-[#25D366] text-[9px] font-bold uppercase tracking-wider hover:bg-[#25D366]/20 transition-colors"
                       >
-                        <MessageCircle size={12} />
+                        <MessageCircle size={10} />
                         Inquire on WhatsApp
                       </a>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </button>
               </div>
 
-              {/* Shipment specs summary badge (shown when Aramex quote is available) */}
+              {/* Shipment specs summary badge */}
               {shippingMode === "aramex" && shipmentSpecs && (
-                <div className="mt-3 p-3 rounded-2xl bg-secondary/40 border border-border text-xs">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-foreground font-medium flex-wrap">
-                      <Box size={14} className="text-primary shrink-0" />
-                      <span><strong>{totalItemQuantity}</strong> pcs</span>
-                      <span>•</span>
-                      <span><strong>{shipmentSpecs.carton_count}</strong> cartons</span>
-                      <span>•</span>
-                      <span><strong>{shipmentSpecs.gross_weight}</strong> kg</span>
-                      <span>•</span>
-                      <span><strong>{shipmentSpecs.total_cbm}</strong> CBM</span>
+                <div className="py-2.5 px-3 rounded-lg bg-secondary/30 border border-border/60 font-sans">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <div className="text-foreground font-medium">
+                      📦 {totalItemQuantity} pcs · {shipmentSpecs.carton_count} cartons · {shipmentSpecs.gross_weight} kg · {shipmentSpecs.total_cbm} CBM
                     </div>
                     <button
                       type="button"
                       onClick={() => setShowSpecsDetails(!showSpecsDetails)}
-                      className="text-[11px] text-primary hover:underline flex items-center gap-0.5 font-bold cursor-pointer shrink-0 ml-2"
+                      className="text-foreground hover:underline font-bold cursor-pointer shrink-0 ml-2 flex items-center gap-0.5"
                     >
-                      <span>{showSpecsDetails ? "Hide" : "Details"}</span>
-                      {showSpecsDetails ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                      {showSpecsDetails ? "Hide" : "Details"}
                     </button>
                   </div>
                   {showSpecsDetails && (
-                    <div className="mt-2.5 pt-2.5 border-t border-border/60 grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px] text-muted-foreground">
+                    <div className="mt-2 pt-2 border-t border-border/50 grid grid-cols-2 gap-2 text-[10px] text-muted-foreground">
                       <div>Dimensions: <strong className="text-foreground">{shipmentSpecs.carton_dimensions.length}×{shipmentSpecs.carton_dimensions.width}×{shipmentSpecs.carton_dimensions.height} {shipmentSpecs.carton_dimensions.unit}</strong></div>
                       <div>Origin: <strong className="text-foreground">Dhaka EPZ, Bangladesh</strong></div>
-                      <div>Destination: <strong className="text-foreground">{country} ({city || postalCode})</strong></div>
                     </div>
                   )}
                 </div>
@@ -740,64 +694,56 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             </div>
 
             {/* Order Summary — zero tax, clear export pricing */}
-            <div className="p-4 rounded-2xl bg-secondary/30 border border-border/80 space-y-2 text-sm font-body">
-              <div className="flex justify-between text-muted-foreground">
-                <span>Goods Value ({totalItemQuantity} pcs):</span>
-                <span className="font-bold text-foreground">{formatPrice(subtotal)}</span>
+            {/* Order Summary — zero tax, clear export pricing */}
+            <div className="pt-3 pb-1 border-t border-border/60 space-y-1.5 text-xs font-sans">
+              <div className="flex justify-between text-muted-foreground font-semibold">
+                <span className="uppercase">Merchandise Total</span>
+                <span className="text-foreground">{formatPrice(subtotal)}</span>
               </div>
-              <div className="flex justify-between text-muted-foreground">
-                <span className="flex items-center gap-1.5">
-                  <span>Shipping:</span>
-                  {shippingMode === "aramex" && (
-                    <span className="text-[10px] uppercase font-bold text-blue-600 bg-blue-500/10 px-1.5 py-0.5 rounded">
-                      Aramex Air
-                    </span>
-                  )}
-                </span>
-                <span className="font-bold text-foreground">
+              <div className="flex justify-between text-muted-foreground font-semibold">
+                <span className="uppercase">Shipping</span>
+                <span className="text-foreground">
                   {shippingMode === "manual" ? (
-                    <span className="text-amber-600 dark:text-amber-400 text-xs">To be confirmed separately</span>
+                    <span className="text-amber-600 dark:text-amber-400">TO BE CONFIRMED</span>
                   ) : aramexLoading ? (
-                    <span className="text-muted-foreground text-xs">Calculating…</span>
+                    <span>CALCULATING...</span>
                   ) : aramexQuote ? (
                     formatPrice(aramexShippingCost)
                   ) : (
-                    <span className="text-muted-foreground">—</span>
+                    <span>—</span>
                   )}
                 </span>
               </div>
-              <div className="flex justify-between text-base font-bold text-foreground pt-2.5 border-t border-border">
-                <span>
-                  {shippingMode === "manual" ? "Merchandise Total (USD):" : "Grand Total (USD):"}
-                </span>
-                <span className="text-primary font-black">
-                  {formatPrice(total)}
+              <div className="flex justify-between items-end pt-2 mt-1.5 border-t border-border font-bold">
+                <span className="uppercase tracking-wider text-sm text-foreground">Order Total</span>
+                <div className="text-right">
+                  <span className="text-base tracking-tight text-foreground">{formatPrice(shippingMode === "manual" ? subtotal : total)}</span>
                   {shippingMode === "manual" && (
-                    <span className="block text-[10px] text-amber-600 dark:text-amber-400 font-semibold text-right">
-                      + shipping (to be confirmed)
+                    <span className="block text-[9px] text-muted-foreground uppercase mt-0.5">
+                      + Shipping to be confirmed
                     </span>
                   )}
-                </span>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <ShieldCheck size={16} className="text-emerald-500 shrink-0" />
-              <span>Commercial orders backed by AYAAN CLOTHING export standard &amp; Proforma Invoice</span>
+            <div className="text-[10px] text-muted-foreground font-semibold flex items-center justify-center gap-1.5 pt-1">
+              <ShieldCheck size={12} className="text-foreground opacity-70 shrink-0" />
+              <span>✓ Commercial order · Proforma Invoice</span>
             </div>
 
             {/* Submit — No payment step */}
             <button
               type="submit"
               disabled={loading || (shippingMode === "aramex" && !aramexQuote)}
-              className="w-full py-4 px-4 bg-primary text-primary-foreground font-bold rounded-2xl text-xs uppercase tracking-wider shadow-md hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-40 cursor-pointer"
+              className="w-full h-11 bg-foreground text-background font-bold rounded-lg text-[11px] uppercase tracking-wider shadow-md hover:bg-foreground/90 transition-all flex items-center justify-center gap-2 disabled:opacity-40 cursor-pointer"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
               ) : (
                 <>
-                  <span>Confirm Order &amp; Generate Proforma Invoice</span>
-                  <ArrowRight size={16} />
+                  <span>Confirm Order &amp; Generate Proforma</span>
+                  <ArrowRight size={14} />
                 </>
               )}
             </button>
