@@ -15,7 +15,6 @@ import ProductPromotionBadges from "@/components/common/ProductPromotionBadges";
 import { 
   ShoppingCart, 
   Check, 
-  AlertCircle, 
   Package, 
   Heart, 
   TrendingDown, 
@@ -93,7 +92,6 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
   }, [slug, initialProduct]);
 
   const moq = Math.max(1, product?.moq || 10);
-  const isBelowMoq = quantity < moq;
 
   // 1. Standard Base Price
   const standardPrice = product?.standardPrice ?? product?.wholesalePrice ?? 28.0;
@@ -654,34 +652,33 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
             {/* ========================================================= */}
             {/* 3. UNIFIED ORDER QUANTITY & ESTIMATED TOTAL DECISION BLOCK */}
             {/* ========================================================= */}
-            <div className="p-2.5 sm:p-3 rounded-lg border border-border/60 bg-secondary/15 space-y-2 font-sans">
-              <div className="flex items-center justify-between text-[11px] font-display font-bold uppercase tracking-wider">
-                <span className="text-foreground">Order Quantity</span>
-                <span className="text-muted-foreground">Est. Total</span>
-              </div>
-
-              <div className="flex items-center justify-between gap-3">
-                {/* Quantity Stepper */}
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 sm:gap-6 font-sans">
+              
+              {/* Left side: Order Quantity */}
+              <div className="space-y-2">
+                <span className="text-[10px] font-display font-bold uppercase tracking-wider text-foreground block">
+                  Order Quantity
+                </span>
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center border border-border rounded-lg bg-card shadow-2xs h-8 sm:h-8.5">
+                  <div className="flex items-center border border-border/80 rounded-md bg-card shadow-2xs h-8">
                     <button 
                       type="button" 
                       onClick={handleDecrement}
                       disabled={quantity <= moq && !isFullStock}
-                      className="w-8 h-full flex items-center justify-center text-foreground font-bold text-sm hover:bg-secondary rounded-l-lg cursor-pointer transition-colors select-none disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="w-8 h-full flex items-center justify-center text-foreground font-bold text-sm hover:bg-secondary/60 rounded-l-md cursor-pointer transition-colors select-none disabled:opacity-30 disabled:cursor-not-allowed"
                       aria-label="Decrease quantity"
                       title={quantity <= moq ? `Minimum order quantity is ${moq} pcs` : undefined}
                     >
                       −
                     </button>
-                    <div className="w-16 sm:w-18 text-center font-bold text-xs sm:text-sm select-none tabular-nums font-sans">
+                    <div className="w-16 text-center font-bold text-xs select-none tabular-nums font-sans">
                       {quantity.toLocaleString()}
                     </div>
                     <button 
                       type="button" 
                       onClick={handleIncrement}
                       disabled={isFullStock || (totalStock > 0 && quantity >= totalStock)}
-                      className="w-8 h-full flex items-center justify-center text-foreground font-bold text-sm hover:bg-secondary rounded-r-lg cursor-pointer transition-colors select-none disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="w-8 h-full flex items-center justify-center text-foreground font-bold text-sm hover:bg-secondary/60 rounded-r-md cursor-pointer transition-colors select-none disabled:opacity-30 disabled:cursor-not-allowed"
                       aria-label="Increase quantity"
                       title={isFullStock || (totalStock > 0 && quantity >= totalStock) ? `Maximum available stock is ${totalStock.toLocaleString()} pcs` : undefined}
                     >
@@ -690,25 +687,22 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
                   </div>
                   <span className="text-xs text-muted-foreground font-medium">pcs</span>
                 </div>
-
-                {/* Estimated Total */}
-                <div className="text-right">
-                  <span className="text-xl sm:text-2xl font-bold text-foreground font-sans tabular-nums block leading-tight">
-                    {formatPrice(currentPrice * quantity)}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground block tabular-nums">
-                    ({quantity.toLocaleString()} pcs × {formatPrice(currentPrice)} / pc)
-                  </span>
+                <div className="text-[10px] text-muted-foreground/80 leading-none">
+                  Multiples of {moq} pcs
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-[10px] font-sans text-muted-foreground pt-1 border-t border-border/40">
-                <span>Multiples of {moq} pcs</span>
-                {isBelowMoq && (
-                  <span className="font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                    <AlertCircle size={11} /> Minimum order quantity is {moq} pcs
-                  </span>
-                )}
+              {/* Right side: Estimated Total */}
+              <div className="space-y-2 sm:text-right">
+                <span className="text-[10px] font-display font-bold uppercase tracking-wider text-muted-foreground block">
+                  Est. Total
+                </span>
+                <div className="text-2xl font-bold text-foreground font-sans tabular-nums leading-none">
+                  {formatPrice(currentPrice * quantity)}
+                </div>
+                <div className="text-[10px] text-muted-foreground tabular-nums leading-none">
+                  {quantity.toLocaleString()} pcs × {formatPrice(currentPrice)} / pc
+                </div>
               </div>
             </div>
 
