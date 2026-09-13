@@ -410,43 +410,50 @@ export default function ProductDetailView({ initialProduct, slug }: ProductDetai
             />
 
             {/* Specifications Section — positioned underneath thumbnail rail with clean, compact spacing */}
-            <div className="pt-4 mt-4 border-t border-border/60 space-y-2 font-sans">
-              <h2 className="text-xs font-display font-bold uppercase tracking-wider text-foreground">
+            <div className="pt-4 mt-4 border-t border-border/60 font-sans">
+              <h2 className="text-[11px] font-display font-bold uppercase tracking-wider text-foreground mb-2">
                 Specifications
               </h2>
               
               {product.description && (
-                <p className="font-sans text-muted-foreground leading-relaxed text-xs">
+                <p className="font-sans text-muted-foreground leading-relaxed text-xs mb-4 max-w-prose">
                   {product.description}
                 </p>
               )}
 
-              <div className="grid grid-cols-2 gap-2 pt-0.5 text-xs font-sans">
-                <div className="p-2 rounded-lg bg-secondary/30 border border-border/40">
-                  <span className="text-[10px] text-muted-foreground block uppercase font-semibold tracking-wider">Material</span>
-                  <span className="font-semibold text-foreground text-xs mt-0.5 block leading-snug break-words">
-                    {product.material || "100% Combed Cotton"}
-                  </span>
+              {/* Compact structured metadata grid, fields rendered dynamically based on existence */}
+              {(product.material || product.weightGrams || product.collectionSeason) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 pt-4 border-t border-border/40 text-xs font-sans">
+                  {product.material && (
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] text-muted-foreground block uppercase font-bold tracking-wider">Material</span>
+                      <span className="font-medium text-foreground block leading-snug break-words">
+                        {product.material}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {product.weightGrams && (
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] text-muted-foreground block uppercase font-bold tracking-wider">Weight</span>
+                      <span className="font-medium text-foreground block leading-snug break-words">
+                        {product.weightGrams} g/m²
+                      </span>
+                    </div>
+                  )}
+                  
+                  {product.collectionSeason && (
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] text-muted-foreground block uppercase font-bold tracking-wider">Season</span>
+                      <span className="font-medium text-foreground block leading-snug break-words">
+                        {product.collectionSeason}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {/* Note: product.audience intentionally omitted here to prevent redundancy with Product Header */}
                 </div>
-                <div className="p-2 rounded-lg bg-secondary/30 border border-border/40">
-                  <span className="text-[10px] text-muted-foreground block uppercase font-semibold tracking-wider">Weight</span>
-                  <span className="font-semibold text-foreground text-xs mt-0.5 block leading-snug">
-                    {product.weightGrams ? `${product.weightGrams} g/m²` : "240 g/m²"}
-                  </span>
-                </div>
-                <div className="p-2 rounded-lg bg-secondary/30 border border-border/40">
-                  <span className="text-[10px] text-muted-foreground block uppercase font-semibold tracking-wider">Season</span>
-                  <span className="font-semibold text-foreground text-xs mt-0.5 block leading-snug">
-                    {product.collectionSeason || "2026 Core Line"}
-                  </span>
-                </div>
-                <div className="p-2 rounded-lg bg-secondary/30 border border-border/40">
-                  <span className="text-[10px] text-muted-foreground block uppercase font-semibold tracking-wider">Audience</span>
-                  <span className="font-semibold text-foreground text-xs mt-0.5 block leading-snug">
-                    {product.audience || "UNISEX"}
-                  </span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
