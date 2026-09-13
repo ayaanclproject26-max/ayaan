@@ -226,6 +226,81 @@ export default function ProductGallery({
     () => setLightboxIndex((p) => Math.max(0, p - 1))
   );
 
+  // ── Thumbnail Drag to Scroll ─────────────────────────────────────────────
+  const [isThumbDragging, setIsThumbDragging] = useState(false);
+  const thumbDragRef = useRef({ isDown: false, startX: 0, scrollLeft: 0 });
+
+  const onThumbPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!thumbContainerRef.current) return;
+    thumbDragRef.current = {
+      isDown: true,
+      startX: e.pageX - thumbContainerRef.current.offsetLeft,
+      scrollLeft: thumbContainerRef.current.scrollLeft
+    };
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch { /* ignore */ }
+  }, []);
+
+  const onThumbPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!thumbDragRef.current.isDown || !thumbContainerRef.current) return;
+    const x = e.pageX - thumbContainerRef.current.offsetLeft;
+    const walk = (x - thumbDragRef.current.startX) * 1.5; // Drag speed
+    
+    if (Math.abs(walk) > 5 && !isThumbDragging) {
+      setIsThumbDragging(true);
+    }
+    
+    thumbContainerRef.current.scrollLeft = thumbDragRef.current.scrollLeft - walk;
+  }, [isThumbDragging]);
+
+  const onThumbPointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    thumbDragRef.current.isDown = false;
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch { /* ignore */ }
+    setTimeout(() => {
+      setIsThumbDragging(false);
+    }, 50);
+  }, []);
+
+  // ── Thumbnail Navigation Arrows ──────────────────────────────────────────
+  const [showThumbArrows, setShowThumbArrows] = useState(false);
+  const [thumbScrollLeft, setThumbScrollLeft] = useState(0);
+  const [thumbMaxScroll, setThumbMaxScroll] = useState(0);
+
+  useEffect(() => {
+    const el = thumbContainerRef.current;
+    if (!el) return;
+    
+    const updateScroll = () => {
+      setThumbScrollLeft(el.scrollLeft);
+      const maxScroll = Math.ceil(el.scrollWidth - el.clientWidth);
+      setThumbMaxScroll(maxScroll);
+      setShowThumbArrows(maxScroll > 0);
+    };
+    
+    updateScroll();
+    const ro = new ResizeObserver(updateScroll);
+    ro.observe(el);
+    el.addEventListener("scroll", updateScroll, { passive: true });
+    
+    return () => {
+      ro.disconnect();
+      el.removeEventListener("scroll", updateScroll);
+    };
+  }, [images.length, resolvedYoutubeEmbedUrl]);
+
+  const scrollThumbRail = useCallback((direction: "left" | "right") => {
+    if (!thumbContainerRef.current) return;
+    const clientWidth = thumbContainerRef.current.clientWidth;
+    const scrollAmount = clientWidth * 0.75;
+    thumbContainerRef.current.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+  }, []);
+
   // ── Thumbnail Auto-Scroll ──────────────────────────────────────────────
   const thumbContainerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -340,10 +415,35 @@ export default function ProductGallery({
 
         {/* ── THUMBNAIL RAIL ── */}
         {hasMediaRail && (
-          <div className="relative w-full">
+          <div className="relative w-full group/rail">
+            {showThumbArrows && thumbScrollLeft > 0 && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); scrollThumbRail("left"); }}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1.5 sm:-translate-x-3 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-background/95 border border-border/80 shadow-md flex items-center justify-center text-foreground cursor-pointer z-10 opacity-0 group-hover/rail:opacity-100 transition-opacity disabled:opacity-0 hidden sm:flex"
+                aria-label="Scroll thumbnails left"
+              >
+                <ChevronLeft size={14} />
+              </button>
+            )}
+            {showThumbArrows && thumbScrollLeft < thumbMaxScroll - 1 && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); scrollThumbRail("right"); }}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1.5 sm:translate-x-3 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-background/95 border border-border/80 shadow-md flex items-center justify-center text-foreground cursor-pointer z-10 opacity-0 group-hover/rail:opacity-100 transition-opacity disabled:opacity-0 hidden sm:flex"
+                aria-label="Scroll thumbnails right"
+              >
+                <ChevronRight size={14} />
+              </button>
+            )}
+
             <div
               ref={thumbContainerRef}
-              className="flex items-center gap-2 overflow-x-auto pb-0.5 no-scrollbar"
+              className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-0.5 no-scrollbar select-none touch-pan-x"
+              onPointerDown={onThumbPointerDown}
+              onPointerMove={onThumbPointerMove}
+              onPointerUp={onThumbPointerUp}
+              onPointerCancel={onThumbPointerUp}
             >
               {images.map((img, idx) => {
                 const isActive = mediaMode === "image" && idx === currentIndex;
@@ -351,7 +451,12 @@ export default function ProductGallery({
                   <button
                     key={idx}
                     type="button"
-                    onClick={() => {
+                    onClick={(e) => {
+                      if (isThumbDragging) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return;
+                      }
                       setMediaMode("image");
                       setIndex(idx);
                     }}
@@ -382,7 +487,14 @@ export default function ProductGallery({
               ) : resolvedYoutubeEmbedUrl ? (
                 <button
                   type="button"
-                  onClick={() => setMediaMode("video")}
+                  onClick={(e) => {
+                    if (isThumbDragging) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      return;
+                    }
+                    setMediaMode("video");
+                  }}
                   className={`relative aspect-product ${thumbSizeClass} overflow-hidden border-2 shrink-0 transition-all cursor-pointer bg-black/90 flex flex-col items-center justify-center group ${
                     mediaMode === "video"
                       ? "border-primary ring-2 ring-primary/20 opacity-100"
